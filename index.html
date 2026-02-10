@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Offline Income Tracker</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
+
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    input, button, textarea { outline: none; }
+  </style>
+</head>
+
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+<header class="px-4 py-3 border-b border-gray-800 text-center font-semibold">
+  Income Tracker
+</header>
+
+<main id="app" class="flex-1 overflow-y-auto pb-32"></main>
+
+<!-- Monthly Total Banner -->
+<div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3 hidden">
+  <button id="monthlyBannerButton" class="w-full flex justify-between text-sm">
+    <span class="uppercase text-gray-400">Visible Month Total</span>
+    <span id="monthlyBannerValue" class="font-semibold">$0.00</span>
+  </button>
+</div>
+
+<!-- Tabs -->
+<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex">
+  <button data-tab="add" class="tab flex-1 py-3 text-center text-sm font-medium">Add</button>
+  <button data-tab="history" class="tab flex-1 py-3 text-center text-sm text-gray-400">History</button>
+  <button data-tab="settings" class="tab flex-1 py-3 text-center text-sm text-gray-400">Settings</button>
+</nav>
+
+<!-- Slide Sheet -->
+<div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
+<div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden"></div>
+
+<script>
+/* ============================
+   STORAGE CONSTANTS
+============================ */
+const DATA_KEY = "income_data";
+const META_KEY = "income_meta";
+
+/* ============================
+   INITIALIZATION
+============================ */
+function initStorage() {
+  if (!localStorage.getItem(DATA_KEY)) {
+    localStorage.setItem(DATA_KEY, JSON.stringify({ records: [] }));
+  }
+  if (!localStorage.getItem(META_KEY)) {
+    localStorage.setItem(META_KEY, JSON.stringify({
+      userId: "user1",
+      nextId: 1
+    }));
+  }
+}
+initStorage();
+
+/* ============================
+   HELPERS
+============================ */
+const $ = id => document.getElementById(id);
+
+function loadData() {
+  return JSON.parse(localStorage.getItem(DATA_KEY));
+}
+function saveData(data) {
+  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+}
+function loadMeta() {
+  return JSON.parse(localStorage.getItem(META_KEY));
+}
+function saveMeta(meta) {
+  localStorage.setItem(META_KEY, JSON.stringify(meta));
+}
+
+function generateId() {
+  const meta = loadMeta();
+  const id = `income_${meta.userId}_${meta.nextId}`;
+  meta.nextId += 1;
+  saveMeta(meta);
+  return id;
+}
+
+function todayISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function money(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+/* ============================
+   TAB SYSTEM
+============================ */
+let activeTab = "add";
+
+document.querySelectorAll(".tab").forEach(btn => {
+  btn.onclick = () => switchTab(btn.dataset.tab);
+});
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(b => {
+    b.classList.toggle("text-gray-100", b.dataset.tab === tab);
+    b.classList.toggle("text-gray-400", b.dataset.tab !== tab);
+  });
+
+  $("monthlyBanner").classList.toggle("hidden", tab !== "history");
+
+  if (tab === "add") renderAdd();
+  if (tab === "history") renderHistory();
+  if (tab === "settings") renderSettings();
+}
+
+/* ============================
+   ADD / EDIT FORM
+============================ */
+function renderAdd(existing = null) {
+  const r = existing || { date: todayISO(), hours: "", rate: "", tips: "", location: "" };
+
+  $("app").innerHTML = `
+    <form id="incomeForm" class="p-4 space-y-4">
+      <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded">
+
+      <input type="number" step="0.1" name="hours" placeholder="Hours Worked"
+        value="${r.hours}" class="w-full p-3 bg-gray-800 rounded">
+
+      <input type="number" step="0.01" name="rate" placeholder="Hourly Rate"
+        value="${r.rate}" class="w-full p-3 bg-gray-800 rounded">
+
+      <input type="number" step="0.01" name="tips" placeholder="Tips"
+        value="${r.tips}" class="w-full p-3 bg-gray-800 rounded">
+
+      <input type="text" name="location" placeholder="Location"
+        value="${r.location}" class="w-full p-3 bg-gray-800 rounded">
+
+      <button class="w-full bg-indigo-600 py-3 rounded font-semibold">
+        ${existing ? "Update Entry" : "Add Entry"}
+      </button>
+    </form>
+  `;
+
+  $("incomeForm").onsubmit = e => {
+    e.preventDefault();
+    saveIncome(new FormData(e.target), existing);
+  };
+}
+
+function saveIncome(form, existing) {
+  const data = loadData();
+  const now = Date.now();
+
+  if (existing) {
+    Object.assign(existing, {
+      date: form.get("date"),
+      hours: Number(form.get("hours")),
+      rate: Number(form.get("rate")),
+      tips: Number(form.get("tips")),
+      location: form.get("location"),
+      updatedAt: now
+    });
+  } else {
+    data.records.push({
+      id: generateId(),
+      date: form.get("date"),
+      hours: Number(form.get("hours")),
+      rate: Number(form.get("rate")),
+      tips: Number(form.get("tips")),
+      location: form.get("location"),
+      deleted: false,
+      createdAt: now,
+      updatedAt: now
+    });
+  }
+
+  saveData(data);
+  closeSheet();
+  switchTab("history");
+}
+
+/* ============================
+   HISTORY VIEW
+============================ */
+function renderHistory() {
+  const records = loadData().records.filter(r => !r.deleted);
+
+  const grouped = {};
+  records.forEach(r => {
+    grouped[r.date] ||= [];
+    grouped[r.date].push(r);
+  });
+
+  const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+  $("app").innerHTML = `
+    <div class="p-4 space-y-6">
+      ${dates.map(date => `
+        <div>
+          <div class="text-xs uppercase text-gray-400 mb-2">
+            ${new Date(date).toDateString()}
+          </div>
+          ${grouped[date].map(r => `
+            <div class="bg-gray-800 rounded p-3 mb-2" onclick="openEdit('${r.id}')">
+              <div class="font-semibold">
+                ${money(r.hours * r.rate + r.tips)}
+              </div>
+              <div class="text-xs text-gray-400">
+                ${r.hours}h @ ${money(r.rate)} • Tips ${money(r.tips)}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `).join("")}
+    </div>
+  `;
+
+  updateMonthlyTotal(records);
+}
+
+function updateMonthlyTotal(records) {
+  const month = todayISO().slice(0, 7);
+  const total = records
+    .filter(r => r.date.startsWith(month))
+    .reduce((sum, r) => sum + r.hours * r.rate + r.tips, 0);
+
+  $("monthlyBannerValue").textContent = money(total);
+}
+
+/* ============================
+   SLIDE SHEET
+============================ */
+function openEdit(id) {
+  const record = loadData().records.find(r => r.id === id);
+  $("overlay").classList.remove("hidden");
+  $("sheet").classList.remove("hidden");
+  $("sheet").innerHTML = `
+    <div class="flex justify-between mb-4">
+      <div class="font-semibold">Edit Entry</div>
+      <button onclick="closeSheet()">Close</button>
+    </div>
+  `;
+  renderAdd(record);
+}
+
+function closeSheet() {
+  $("overlay").classList.add("hidden");
+  $("sheet").classList.add("hidden");
+}
+
+/* ============================
+   SETTINGS
+============================ */
+function renderSettings() {
+  const data = loadData();
+  $("app").innerHTML = `
+    <div class="p-4 space-y-4">
+      <button onclick="exportData()" class="w-full bg-gray-800 p-3 rounded">
+        Export to Notes / Copy JSON
+      </button>
+
+      <textarea readonly class="w-full h-48 bg-gray-900 p-3 rounded text-xs">
+${JSON.stringify(data, null, 2)}
+      </textarea>
+    </div>
+  `;
+}
+
+function exportData() {
+  const text = JSON.stringify(loadData(), null, 2);
+  if (navigator.share) {
+    navigator.share({ text });
+  } else {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard");
+  }
+}
+
+/* ============================
+   SERVICE WORKER
+============================ */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+
+/* ============================
+   START
+============================ */
+switchTab("add");
+</script>
+
+</body>
+</html>
