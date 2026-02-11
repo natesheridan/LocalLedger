@@ -1,64 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Offline Income Tracker</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Income Tracker</title>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#111827" />
-
-  <style>
-    body { -webkit-tap-highlight-color: transparent; }
-    input, button, textarea { outline: none; }
-  </style>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#111827" />
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
 
 <header class="px-4 py-3 border-b border-gray-800 text-center font-semibold">
-  Income Tracker
+Income Tracker
 </header>
 
 <main id="app" class="flex-1 overflow-y-auto pb-32"></main>
 
-<!-- Monthly Total Banner -->
+<!-- Monthly Banner -->
 <div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3 hidden">
-  <button id="monthlyBannerButton" class="w-full flex justify-between text-sm">
-    <span class="uppercase text-gray-400">Visible Month Total</span>
-    <span id="monthlyBannerValue" class="font-semibold">$0.00</span>
-  </button>
+<button id="monthlyBannerButton" class="w-full flex justify-between text-sm">
+<span class="uppercase text-gray-400">Visible Month Total</span>
+<span id="monthlyBannerValue" class="font-semibold">$0.00</span>
+</button>
 </div>
 
-<!-- Tabs -->
-<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex">
-  <button data-tab="add" class="tab flex-1 py-3 text-center text-sm font-medium">Add</button>
-  <button data-tab="history" class="tab flex-1 py-3 text-center text-sm text-gray-400">History</button>
-  <button data-tab="settings" class="tab flex-1 py-3 text-center text-sm text-gray-400">Settings</button>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs">
+<button data-tab="add" class="tab flex-1 py-2 text-center text-gray-400">
+<div class="flex flex-col items-center gap-1">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 5v14M5 12h14"/>
+</svg>
+<span>Add</span>
+</div>
+</button>
+
+<button data-tab="history" class="tab flex-1 py-2 text-center text-gray-400">
+<div class="flex flex-col items-center gap-1">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 12h18M12 3v18"/>
+</svg>
+<span>History</span>
+</div>
+</button>
+
+<button data-tab="settings" class="tab flex-1 py-2 text-center text-gray-400">
+<div class="flex flex-col items-center gap-1">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+<path d="M2 12h2M20 12h2M12 2v2M12 20v2"/>
+</svg>
+<span>Settings</span>
+</div>
+</button>
 </nav>
 
-<!-- Slide Sheet -->
 <div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
 <div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden"></div>
 
 <script>
-/* ============================
-   STORAGE CONSTANTS
-============================ */
+/* ================================
+   STORAGE STRUCTURE
+================================= */
 const DATA_KEY = "income_data";
 const META_KEY = "income_meta";
 
-/* ============================
-   INITIALIZATION
-============================ */
+/*
+income_data = {
+  records: [],
+  locations: {
+    "Downtown Bar": { lastRate: 25 }
+  }
+}
+*/
+
 function initStorage() {
   if (!localStorage.getItem(DATA_KEY)) {
-    localStorage.setItem(DATA_KEY, JSON.stringify({ records: [] }));
+    localStorage.setItem(DATA_KEY, JSON.stringify({
+      records: [],
+      locations: {}
+    }));
   }
+
   if (!localStorage.getItem(META_KEY)) {
     localStorage.setItem(META_KEY, JSON.stringify({
       userId: "user1",
@@ -68,43 +93,42 @@ function initStorage() {
 }
 initStorage();
 
-/* ============================
+/* ================================
    HELPERS
-============================ */
+================================= */
 const $ = id => document.getElementById(id);
 
 function loadData() {
   return JSON.parse(localStorage.getItem(DATA_KEY));
 }
-function saveData(data) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+function saveData(d) {
+  localStorage.setItem(DATA_KEY, JSON.stringify(d));
 }
 function loadMeta() {
   return JSON.parse(localStorage.getItem(META_KEY));
 }
-function saveMeta(meta) {
-  localStorage.setItem(META_KEY, JSON.stringify(meta));
+function saveMeta(m) {
+  localStorage.setItem(META_KEY, JSON.stringify(m));
 }
 
 function generateId() {
-  const meta = loadMeta();
-  const id = `income_${meta.userId}_${meta.nextId}`;
-  meta.nextId += 1;
-  saveMeta(meta);
+  const m = loadMeta();
+  const id = `income_${m.userId}_${m.nextId}`;
+  m.nextId++;
+  saveMeta(m);
   return id;
 }
 
 function todayISO() {
   return new Date().toISOString().split("T")[0];
 }
-
-function money(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
+function money(v) {
+  return `$${Number(v || 0).toFixed(2)}`;
 }
 
-/* ============================
-   TAB SYSTEM
-============================ */
+/* ================================
+   TAB CONTROL
+================================= */
 let activeTab = "add";
 
 document.querySelectorAll(".tab").forEach(btn => {
@@ -117,7 +141,6 @@ function switchTab(tab) {
     b.classList.toggle("text-gray-100", b.dataset.tab === tab);
     b.classList.toggle("text-gray-400", b.dataset.tab !== tab);
   });
-
   $("monthlyBanner").classList.toggle("hidden", tab !== "history");
 
   if (tab === "add") renderAdd();
@@ -125,33 +148,41 @@ function switchTab(tab) {
   if (tab === "settings") renderSettings();
 }
 
-/* ============================
-   ADD / EDIT FORM
-============================ */
+/* ================================
+   ADD FORM WITH LOCATION INTELLIGENCE
+================================= */
 function renderAdd(existing = null) {
+  const data = loadData();
   const r = existing || { date: todayISO(), hours: "", rate: "", tips: "", location: "" };
 
   $("app").innerHTML = `
-    <form id="incomeForm" class="p-4 space-y-4">
-      <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded">
+  <form id="incomeForm" class="p-4 space-y-4 relative">
+    <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded">
 
-      <input type="number" step="0.1" name="hours" placeholder="Hours Worked"
-        value="${r.hours}" class="w-full p-3 bg-gray-800 rounded">
+    <input type="number" step="0.1" name="hours" placeholder="Hours Worked"
+      value="${r.hours}" class="w-full p-3 bg-gray-800 rounded">
 
-      <input type="number" step="0.01" name="rate" placeholder="Hourly Rate"
-        value="${r.rate}" class="w-full p-3 bg-gray-800 rounded">
-
-      <input type="number" step="0.01" name="tips" placeholder="Tips"
-        value="${r.tips}" class="w-full p-3 bg-gray-800 rounded">
-
-      <input type="text" name="location" placeholder="Location"
+    <div class="relative">
+      <input type="text" id="locationInput" name="location" placeholder="Location"
         value="${r.location}" class="w-full p-3 bg-gray-800 rounded">
+      <div id="locationDropdown" class="absolute bg-gray-800 w-full mt-1 rounded hidden max-h-40 overflow-y-auto"></div>
+    </div>
 
-      <button class="w-full bg-indigo-600 py-3 rounded font-semibold">
-        ${existing ? "Update Entry" : "Add Entry"}
-      </button>
-    </form>
+    <input type="number" step="0.01" name="rate" id="rateInput"
+      placeholder="Hourly Rate" value="${r.rate}"
+      class="w-full p-3 bg-gray-800 rounded">
+
+    <input type="number" step="0.01" name="tips"
+      placeholder="Tips" value="${r.tips}"
+      class="w-full p-3 bg-gray-800 rounded">
+
+    <button class="w-full bg-indigo-600 py-3 rounded font-semibold">
+      ${existing ? "Update Entry" : "Add Entry"}
+    </button>
+  </form>
   `;
+
+  setupLocationAutocomplete();
 
   $("incomeForm").onsubmit = e => {
     e.preventDefault();
@@ -159,17 +190,68 @@ function renderAdd(existing = null) {
   };
 }
 
+/* Location Autocomplete */
+function setupLocationAutocomplete() {
+  const data = loadData();
+  const input = $("locationInput");
+  const dropdown = $("locationDropdown");
+
+  input.oninput = () => {
+    const value = input.value.toLowerCase();
+    const matches = Object.keys(data.locations)
+      .filter(loc => loc.toLowerCase().includes(value));
+
+    if (!value || matches.length === 0) {
+      dropdown.classList.add("hidden");
+      return;
+    }
+
+    dropdown.innerHTML = matches.map(m =>
+      `<div class="p-2 hover:bg-gray-700 cursor-pointer">${m}</div>`
+    ).join("");
+
+    dropdown.classList.remove("hidden");
+
+    dropdown.querySelectorAll("div").forEach(div => {
+      div.onclick = () => {
+        input.value = div.textContent;
+        autoFillRate(div.textContent);
+        dropdown.classList.add("hidden");
+      };
+    });
+  };
+
+  input.onblur = () => setTimeout(() => dropdown.classList.add("hidden"), 200);
+}
+
+/* Auto-fill rate based on last saved location rate */
+function autoFillRate(location) {
+  const data = loadData();
+  if (data.locations[location]) {
+    $("rateInput").value = data.locations[location].lastRate;
+  }
+}
+
 function saveIncome(form, existing) {
   const data = loadData();
   const now = Date.now();
+
+  const location = form.get("location");
+  const rate = Number(form.get("rate"));
+
+  if (!data.locations[location]) {
+    data.locations[location] = { lastRate: rate };
+  } else {
+    data.locations[location].lastRate = rate;
+  }
 
   if (existing) {
     Object.assign(existing, {
       date: form.get("date"),
       hours: Number(form.get("hours")),
-      rate: Number(form.get("rate")),
+      rate,
       tips: Number(form.get("tips")),
-      location: form.get("location"),
+      location,
       updatedAt: now
     });
   } else {
@@ -177,9 +259,9 @@ function saveIncome(form, existing) {
       id: generateId(),
       date: form.get("date"),
       hours: Number(form.get("hours")),
-      rate: Number(form.get("rate")),
+      rate,
       tips: Number(form.get("tips")),
-      location: form.get("location"),
+      location,
       deleted: false,
       createdAt: now,
       updatedAt: now
@@ -187,13 +269,12 @@ function saveIncome(form, existing) {
   }
 
   saveData(data);
-  closeSheet();
   switchTab("history");
 }
 
-/* ============================
-   HISTORY VIEW
-============================ */
+/* ================================
+   HISTORY
+================================= */
 function renderHistory() {
   const records = loadData().records.filter(r => !r.deleted);
 
@@ -203,7 +284,7 @@ function renderHistory() {
     grouped[r.date].push(r);
   });
 
-  const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+  const dates = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
 
   $("app").innerHTML = `
     <div class="p-4 space-y-6">
@@ -213,12 +294,12 @@ function renderHistory() {
             ${new Date(date).toDateString()}
           </div>
           ${grouped[date].map(r => `
-            <div class="bg-gray-800 rounded p-3 mb-2" onclick="openEdit('${r.id}')">
+            <div class="bg-gray-800 rounded p-3 mb-2">
               <div class="font-semibold">
-                ${money(r.hours * r.rate + r.tips)}
+                ${money(r.hours*r.rate + r.tips)}
               </div>
               <div class="text-xs text-gray-400">
-                ${r.hours}h @ ${money(r.rate)} • Tips ${money(r.tips)}
+                ${r.hours}h @ ${money(r.rate)} • ${r.location}
               </div>
             </div>
           `).join("")}
@@ -231,50 +312,30 @@ function renderHistory() {
 }
 
 function updateMonthlyTotal(records) {
-  const month = todayISO().slice(0, 7);
+  const month = todayISO().slice(0,7);
   const total = records
-    .filter(r => r.date.startsWith(month))
-    .reduce((sum, r) => sum + r.hours * r.rate + r.tips, 0);
-
+    .filter(r=>r.date.startsWith(month))
+    .reduce((s,r)=>s + r.hours*r.rate + r.tips,0);
   $("monthlyBannerValue").textContent = money(total);
 }
 
-/* ============================
-   SLIDE SHEET
-============================ */
-function openEdit(id) {
-  const record = loadData().records.find(r => r.id === id);
-  $("overlay").classList.remove("hidden");
-  $("sheet").classList.remove("hidden");
-  $("sheet").innerHTML = `
-    <div class="flex justify-between mb-4">
-      <div class="font-semibold">Edit Entry</div>
-      <button onclick="closeSheet()">Close</button>
-    </div>
-  `;
-  renderAdd(record);
-}
-
-function closeSheet() {
-  $("overlay").classList.add("hidden");
-  $("sheet").classList.add("hidden");
-}
-
-/* ============================
-   SETTINGS
-============================ */
+/* ================================
+   SETTINGS + IMPORT
+================================= */
 function renderSettings() {
-  const data = loadData();
   $("app").innerHTML = `
-    <div class="p-4 space-y-4">
-      <button onclick="exportData()" class="w-full bg-gray-800 p-3 rounded">
-        Export to Notes / Copy JSON
-      </button>
+  <div class="p-4 space-y-4">
+    <button onclick="exportData()" class="w-full bg-gray-800 p-3 rounded">
+      Export
+    </button>
 
-      <textarea readonly class="w-full h-48 bg-gray-900 p-3 rounded text-xs">
-${JSON.stringify(data, null, 2)}
-      </textarea>
-    </div>
+    <textarea id="importArea" placeholder="Paste JSON here"
+      class="w-full h-40 bg-gray-900 p-3 rounded text-xs"></textarea>
+
+    <button onclick="importData()" class="w-full bg-indigo-600 p-3 rounded">
+      Import JSON
+    </button>
+  </div>
   `;
 }
 
@@ -284,22 +345,36 @@ function exportData() {
     navigator.share({ text });
   } else {
     navigator.clipboard.writeText(text);
-    alert("Copied to clipboard");
+    alert("Copied");
   }
 }
 
-/* ============================
-   SERVICE WORKER
-============================ */
+function importData() {
+  try {
+    const raw = $("importArea").value;
+    const parsed = JSON.parse(raw);
+
+    if (!parsed.records || !Array.isArray(parsed.records)) {
+      alert("Invalid format.");
+      return;
+    }
+
+    saveData(parsed);
+    alert("Import successful.");
+    switchTab("history");
+  } catch (e) {
+    alert("Invalid JSON.");
+  }
+}
+
+/* ================================
+   START
+================================= */
+switchTab("add");
+
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
-
-/* ============================
-   START
-============================ */
-switchTab("add");
 </script>
-
 </body>
 </html>
