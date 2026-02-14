@@ -3,54 +3,64 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Income Tracker</title>
+<title>LocalLedger</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#111827" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="font-family: 'Space Mono', monospace;">
 
-<header class="px-4 py-3 border-b border-gray-800 text-center font-semibold">
-Income Tracker
+<header class="px-4 py-3 border-b border-gray-800 text-center font-bold sticky top-0 bg-gray-950 z-10 text-lg tracking-wider">
+LocalLedger
 </header>
 
-<main id="app" class="flex-1 overflow-y-auto pb-32"></main>
+<main id="app" class="flex-1 overflow-y-auto pb-40"></main>
 
 <!-- Monthly Banner -->
-<div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3 hidden">
-<button id="monthlyBannerButton" class="w-full flex justify-between text-sm">
-<span class="uppercase text-gray-400">Visible Month Total</span>
-<span id="monthlyBannerValue" class="font-semibold">$0.00</span>
+<div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3">
+<button id="monthlyBannerButton" class="w-full flex justify-between items-center" onclick="showDateFilterMenu()">
+<div class="text-center flex-1">
+  <div id="dateFilterLabel" class="text-xs text-gray-400 uppercase">This Month</div>
+  <div id="monthlyBannerValue" class="text-xl font-bold">$0.00</div>
+</div>
+<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+</svg>
 </button>
 </div>
 
 <!-- Bottom Navigation -->
-<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs">
-<button data-tab="add" class="tab flex-1 py-2 text-center text-gray-400">
+<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs pb-2">
+<button data-tab="add" class="tab flex-1 py-3 text-center text-gray-400">
 <div class="flex flex-col items-center gap-1">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M12 5v14M5 12h14"/>
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4"/>
 </svg>
 <span>Add</span>
 </div>
 </button>
 
-<button data-tab="history" class="tab flex-1 py-2 text-center text-gray-400">
+<button data-tab="history" class="tab flex-1 py-3 text-center text-gray-400">
 <div class="flex flex-col items-center gap-1">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M3 12h18M12 3v18"/>
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h16"/>
 </svg>
 <span>History</span>
 </div>
 </button>
 
-<button data-tab="settings" class="tab flex-1 py-2 text-center text-gray-400">
+<button data-tab="settings" class="tab flex-1 py-3 text-center text-gray-400">
 <div class="flex flex-col items-center gap-1">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-<path d="M2 12h2M20 12h2M12 2v2M12 20v2"/>
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+<circle cx="12" cy="12" r="3"/>
 </svg>
 <span>Settings</span>
 </div>
@@ -120,30 +130,124 @@ function generateId() {
 }
 
 function todayISO() {
-  return new Date().toISOString().split("T")[0];
+  // Use local date instead of UTC to avoid timezone shifts
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 function money(v) {
   return `$${Number(v || 0).toFixed(2)}`;
+}
+
+/* Toast notifications - bottom right, stacking */
+function showToast(message, duration = 3000) {
+  let container = $("toast-container");
+  if (!container) {
+    const c = document.createElement("div");
+    c.id = "toast-container";
+    c.className = "fixed bottom-24 right-4 z-50 flex flex-col gap-2 max-w-[200px]";
+    document.body.appendChild(c);
+    container = $("toast-container");
+  }
+  
+  const toast = document.createElement("div");
+  toast.className = "bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg opacity-90";
+  toast.textContent = message;
+  container.appendChild(toast);
+  console.log("[TOAST]", message);
+  
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.style.opacity = "0";
+      toast.style.transition = "opacity 0.3s";
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, duration);
+}
+
+function debug(msg) {
+  // Debug logging - currently disabled for production
+  // console.log("[DEBUG]", msg);
+}
+
+/* Add debug/test entries */
+function addDebugEntries() {
+  const locations = ["Downtown Bar", "City Club", "Rooftop Lounge", "The Local", "Sports Pub", "Fine Dining", "Café Corner"];
+  const data = loadData();
+  const now = Date.now();
+  const today = new Date();
+  
+  // Generate 50 entries spanning 3 months (90 days)
+  for (let i = 0; i < 50; i++) {
+    const daysAgo = Math.floor(Math.random() * 90) + 1; // 1-90 days ago
+    const date = new Date(today);
+    date.setDate(date.getDate() - daysAgo);
+    const dateStr = date.toISOString().split("T")[0];
+    
+    const location = locations[Math.floor(Math.random() * locations.length)];
+    const hours = 4 + Math.floor(Math.random() * 7); // 4-10 hours, whole numbers
+    const rate = 15 + Math.floor(Math.random() * 20); // $15-35/hr
+    const tips = Math.floor(Math.random() * 50); // $0-50 tips
+    
+    data.records.push({
+      id: generateId(),
+      date: dateStr,
+      hours: hours,
+      rate: rate,
+      tips: tips,
+      location: location,
+      deleted: false,
+      createdAt: now - (daysAgo * 24 * 60 * 60 * 1000),
+      updatedAt: now - (daysAgo * 24 * 60 * 60 * 1000)
+    });
+    
+    // Also save location rate
+    if (!data.locations[location]) {
+      data.locations[location] = { lastRate: rate };
+    }
+  }
+  
+  saveData(data);
+  showToast("Added 50 debug entries!", 3000);
+  switchTab("history");
 }
 
 /* ================================
    TAB CONTROL
 ================================= */
 let activeTab = "add";
+let savedFormData = null; // Store form data when switching away from Add tab
 
 document.querySelectorAll(".tab").forEach(btn => {
   btn.onclick = () => switchTab(btn.dataset.tab);
 });
 
 function switchTab(tab) {
+  // Save form data when leaving add tab
+  if (activeTab === "add" && tab !== "add") {
+    const form = $("incomeForm");
+    if (form) {
+      savedFormData = {
+        date: form.date?.value || "",
+        hours: form.hours?.value || "",
+        location: form.location?.value || "",
+        rate: form.rate?.value || "",
+        tips: form.tips?.value || ""
+      };
+      debug("Form data saved");
+    }
+  }
+  
+  debug("switchTab called: " + tab);
   activeTab = tab;
   document.querySelectorAll(".tab").forEach(b => {
-    b.classList.toggle("text-gray-100", b.dataset.tab === tab);
+    b.classList.toggle("text-indigo-400", b.dataset.tab === tab);
     b.classList.toggle("text-gray-400", b.dataset.tab !== tab);
   });
-  $("monthlyBanner").classList.toggle("hidden", tab !== "history");
 
-  if (tab === "add") renderAdd();
+  if (tab === "add") renderAdd(savedFormData);
   if (tab === "history") renderHistory();
   if (tab === "settings") renderSettings();
 }
@@ -152,14 +256,27 @@ function switchTab(tab) {
    ADD FORM WITH LOCATION INTELLIGENCE
 ================================= */
 function renderAdd(existing = null) {
+  debug("renderAdd called, existing: " + (existing ? existing.id : "null"));
   const data = loadData();
-  const r = existing || { date: todayISO(), hours: "", rate: "", tips: "", location: "" };
+  
+  // Use existing if provided, otherwise use saved form data, otherwise defaults
+  let r;
+  if (existing) {
+    r = existing;
+  } else if (savedFormData) {
+    r = { date: savedFormData.date || todayISO(), hours: savedFormData.hours || "", rate: savedFormData.rate || "", tips: savedFormData.tips || "", location: savedFormData.location || "" };
+    savedFormData = null; // Clear after use
+  } else {
+    r = { date: todayISO(), hours: "", rate: "", tips: "", location: "" };
+  }
 
   $("app").innerHTML = `
   <form id="incomeForm" class="p-4 space-y-4 relative">
-    <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded">
+    <button type="button" onclick="addDebugEntries()" class="absolute top-2 right-2 text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 25 Entries</button>
+    
+    <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded text-gray-100">
 
-    <input type="number" step="0.1" name="hours" placeholder="Hours Worked"
+    <input type="number" step="0.25" name="hours" placeholder="Hours Worked"
       value="${r.hours}" class="w-full p-3 bg-gray-800 rounded">
 
     <div class="relative">
@@ -176,7 +293,7 @@ function renderAdd(existing = null) {
       placeholder="Tips" value="${r.tips}"
       class="w-full p-3 bg-gray-800 rounded">
 
-    <button class="w-full bg-indigo-600 py-3 rounded font-semibold">
+    <button type="submit" class="w-full bg-indigo-600 py-3 rounded font-semibold">
       ${existing ? "Update Entry" : "Add Entry"}
     </button>
   </form>
@@ -186,6 +303,7 @@ function renderAdd(existing = null) {
 
   $("incomeForm").onsubmit = e => {
     e.preventDefault();
+    debug("Form submitted!");
     saveIncome(new FormData(e.target), existing);
   };
 }
@@ -233,98 +351,372 @@ function autoFillRate(location) {
 }
 
 function saveIncome(form, existing) {
+  debug("saveIncome called - START");
+  
+  // Check localStorage is available
+  try {
+    localStorage.setItem("test", "test");
+    localStorage.removeItem("test");
+    debug("localStorage is available");
+  } catch (e) {
+    debug("ERROR: localStorage not available: " + e.message);
+    showToast("localStorage not available!", 5000);
+    return;
+  }
+  
   const data = loadData();
   const now = Date.now();
 
   const location = form.get("location");
   const rate = Number(form.get("rate"));
+  const hours = Number(form.get("hours"));
+  const tips = Number(form.get("tips"));
+  const date = form.get("date");
 
-  if (!data.locations[location]) {
-    data.locations[location] = { lastRate: rate };
-  } else {
-    data.locations[location].lastRate = rate;
+  debug(`Form data: date=${date}, hours=${hours}, rate=${rate}, tips=${tips}, location=${location}`);
+
+  if (!location || !hours || !rate || hours <= 0 || rate <= 0) {
+    debug("ERROR: Missing required fields!");
+    showToast("Please fill in hours, rate, and location", 3000);
+    return;
   }
 
+  debug("Validation passed, about to save location");
+
+  // Ensure locations object exists
+  if (!data.locations) {
+    data.locations = {};
+    debug("Initialized data.locations");
+  }
+
+  try {
+    if (!data.locations[location]) {
+      data.locations[location] = { lastRate: rate };
+    } else {
+      data.locations[location].lastRate = rate;
+    }
+    debug("Location saved successfully");
+  } catch (e) {
+    debug("ERROR saving location: " + e.message);
+    showToast("Error saving location: " + e.message, 5000);
+    return;
+  }
+
+  debug(`Records before push: ${data.records.length}`);
+
+  const tipsNum = Number(form.get("tips")) || 0;
+
   if (existing) {
-    Object.assign(existing, {
-      date: form.get("date"),
-      hours: Number(form.get("hours")),
-      rate,
-      tips: Number(form.get("tips")),
-      location,
-      updatedAt: now
-    });
+    // Find the record in the current data by ID
+    const recordIndex = data.records.findIndex(r => r.id === existing.id);
+    debug(`Updating record at index: ${recordIndex}, id: ${existing.id}`);
+    
+    if (recordIndex >= 0) {
+      data.records[recordIndex] = {
+        ...data.records[recordIndex],
+        date: form.get("date"),
+        hours: hours,
+        rate: rate,
+        tips: tipsNum,
+        location,
+        updatedAt: now
+      };
+      debug("Record updated successfully");
+      showToast("Entry updated! ✅", 2000);
+    } else {
+      debug("ERROR: Record not found in data!");
+    }
   } else {
     data.records.push({
       id: generateId(),
       date: form.get("date"),
-      hours: Number(form.get("hours")),
-      rate,
-      tips: Number(form.get("tips")),
+      hours: hours,
+      rate: rate,
+      tips: tipsNum,
       location,
       deleted: false,
       createdAt: now,
       updatedAt: now
     });
+    debug(`Record pushed, new count: ${data.records.length}`);
   }
 
-  saveData(data);
+  try {
+    saveData(data);
+    debug("Data saved successfully!");
+    showToast("Entry added! ✅", 2000);
+  } catch (e) {
+    debug("ERROR in saveData: " + e.message);
+    showToast("Error saving data: " + e.message, 5000);
+    return;
+  }
+  
   switchTab("history");
+}
+
+/* Delete a record (soft delete) */
+function deleteRecord(id) {
+  debug("Deleting record: " + id);
+  const data = loadData();
+  const record = data.records.find(r => r.id === id);
+  if (record) {
+    record.deleted = true;
+    record.updatedAt = Date.now();
+    saveData(data);
+    showToast("Entry deleted", 2000);
+    renderHistory();
+  }
+}
+
+/* Edit a record */
+function editRecord(id) {
+  debug("Editing record: " + id);
+  const data = loadData();
+  const record = data.records.find(r => r.id === id);
+  if (record) {
+    switchTab("add");
+    // Need to render add form with existing data
+    setTimeout(() => renderAdd(record), 100);
+  }
 }
 
 /* ================================
    HISTORY
 ================================= */
-function renderHistory() {
-  const records = loadData().records.filter(r => !r.deleted);
+// Current date filter state
+let dateFilter = {
+  type: "month", // "month", "range", "ytd", "past3months"
+  startDate: null,
+  endDate: null,
+  label: "This Month"
+};
 
+function getFilteredRecords(records) {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+  
+  let startDate, endDate;
+  
+  if (dateFilter.type === "month") {
+    // Current month
+    startDate = new Date(currentYear, currentMonth, 1);
+    endDate = new Date(currentYear, currentMonth + 1, 0);
+  } else if (dateFilter.type === "ytd") {
+    startDate = new Date(currentYear, 0, 1);
+    endDate = today;
+  } else if (dateFilter.type === "past3months") {
+    startDate = new Date(currentYear, currentMonth - 3, 1);
+    endDate = today;
+  } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
+    startDate = new Date(dateFilter.startDate);
+    endDate = new Date(dateFilter.endDate);
+  } else {
+    // Default to current month
+    startDate = new Date(currentYear, currentMonth, 1);
+    endDate = new Date(currentYear, currentMonth + 1, 0);
+  }
+  
+  const startStr = startDate.toISOString().split("T")[0];
+  const endStr = endDate.toISOString().split("T")[0];
+  
+  return records.filter(r => r.date >= startStr && r.date <= endStr);
+}
+
+function showDateFilterMenu() {
+  const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const threeMonthsLabel = threeMonthsAgo.toLocaleString("default", { month: "long", year: "numeric" });
+  
+  const menu = `
+    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeFilterMenu()"></div>
+    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50">
+      <div class="text-lg font-bold mb-4">Select Date Range</div>
+      <div class="space-y-2">
+        <button onclick="setDateFilter('month', null, null, 'This Month')" class="w-full bg-gray-800 p-3 rounded text-left">This Month</button>
+        <button onclick="setDateFilter('ytd', null, null, 'Year to Date')" class="w-full bg-gray-800 p-3 rounded text-left">Year to Date</button>
+        <button onclick="setDateFilter('past3months', null, null, 'Past 3 Months')" class="w-full bg-gray-800 p-3 rounded text-left">Past 3 Months</button>
+        <button onclick="showCustomRangePicker()" class="w-full bg-gray-800 p-3 rounded text-left">Custom Range...</button>
+      </div>
+      <button onclick="closeFilterMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
+    </div>
+  `;
+  
+  // Remove existing if any
+  const existing = $("filterSheet");
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML("beforeend", menu);
+}
+
+function closeFilterMenu() {
+  const overlay = $("filterOverlay");
+  const sheet = $("filterSheet");
+  if (overlay) overlay.remove();
+  if (sheet) sheet.remove();
+}
+
+function setDateFilter(type, start, end, label) {
+  dateFilter = { type, startDate: start, endDate: end, label };
+  closeFilterMenu();
+  renderHistory();
+}
+
+function showCustomRangePicker() {
+  closeFilterMenu();
+  const today = new Date().toISOString().split("T")[0];
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+  const threeMonthsAgoStr = threeMonthsAgo.toISOString().split("T")[0];
+  
+  const menu = `
+    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeFilterMenu()"></div>
+    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50">
+      <div class="text-lg font-bold mb-4">Custom Range</div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-gray-400">Start Date</label>
+          <input type="date" id="rangeStart" value="${threeMonthsAgoStr}" class="w-full p-3 bg-gray-800 rounded">
+        </div>
+        <div>
+          <label class="text-sm text-gray-400">End Date</label>
+          <input type="date" id="rangeEnd" value="${today}" class="w-full p-3 bg-gray-800 rounded">
+        </div>
+        <button onclick="applyCustomRange()" class="w-full bg-indigo-600 p-3 rounded">Apply</button>
+      </div>
+      <button onclick="closeFilterMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
+    </div>
+  `;
+  
+  const existing = $("filterSheet");
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML("beforeend", menu);
+}
+
+function applyCustomRange() {
+  const start = $("rangeStart").value;
+  const end = $("rangeEnd").value;
+  if (start && end) {
+    setDateFilter("range", start, end, `${start} to ${end}`);
+  }
+}
+
+function renderHistory() {
+  debug("renderHistory called");
+  const allData = loadData();
+  const records = allData.records.filter(r => !r.deleted);
+  const filteredRecords = getFilteredRecords(records);
+  
+  // Calculate totals
+  const totalIncome = filteredRecords.reduce((sum, r) => sum + (r.hours * r.rate) + r.tips, 0);
+  const totalTips = filteredRecords.reduce((sum, r) => sum + r.tips, 0);
+  const totalHours = filteredRecords.reduce((sum, r) => sum + r.hours, 0);
+  
+  // Group by date
   const grouped = {};
-  records.forEach(r => {
+  filteredRecords.forEach(r => {
     grouped[r.date] ||= [];
     grouped[r.date].push(r);
   });
-
+  
   const dates = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+  
+  // Helper to parse date in local timezone
+  const formatDate = (isoDate) => {
+    const [y, m, d] = isoDate.split("-");
+    const date = new Date(y, m - 1, d);
+    return date.toDateString();
+  };
 
   $("app").innerHTML = `
+    <!-- Stats Summary -->
+    <div class="p-4 space-y-2">
+      <div class="text-center text-xs text-gray-400">${dateFilter.label}</div>
+      <div class="text-2xl font-bold text-left">${money(totalIncome)}</div>
+      <div class="flex justify-between text-sm">
+        <span class="text-gray-400">${totalHours.toFixed(1)} hrs</span>
+        <span class="text-gray-400">Tips: ${money(totalTips)}</span>
+      </div>
+    </div>
+    
+    <!-- Entries -->
     <div class="p-4 space-y-6">
-      ${dates.map(date => `
+      ${dates.length === 0 ? '<div class="text-center text-gray-400 py-8">No entries found</div>' : dates.map(date => `
         <div>
           <div class="text-xs uppercase text-gray-400 mb-2">
-            ${new Date(date).toDateString()}
+            ${formatDate(date)}
           </div>
-          ${grouped[date].map(r => `
-            <div class="bg-gray-800 rounded p-3 mb-2">
-              <div class="font-semibold">
-                ${money(r.hours*r.rate + r.tips)}
+          ${grouped[date].map(r => {
+            const shiftEarnings = r.hours * r.rate;
+            const totalForShift = shiftEarnings + r.tips;
+            return `
+            <div class="bg-gray-800 rounded p-3 mb-2 flex justify-between items-start">
+              <div class="flex-1">
+                <div class="font-semibold text-lg">
+                  ${money(totalForShift)}
+                </div>
+                <div class="text-xs text-gray-400">
+                  ${r.hours}h @ ${money(r.rate)} • ${r.location}
+                </div>
+                ${r.tips > 0 ? `<div class="text-xs text-green-400">Tips: ${money(r.tips)}</div>` : ''}
               </div>
-              <div class="text-xs text-gray-400">
-                ${r.hours}h @ ${money(r.rate)} • ${r.location}
+              <div class="flex gap-2 ml-2">
+                <button onclick="editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
+                <button onclick="deleteRecord('${r.id}')" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>
               </div>
             </div>
-          `).join("")}
+          `}).join("")}
         </div>
       `).join("")}
     </div>
+    
+    <!-- Pie Chart Container (placeholder for future) -->
+    <div id="chartContainer" class="p-4 hidden">
+      <div class="text-sm text-gray-400 mb-2">Income by Location</div>
+      <canvas id="incomeChart" class="w-full h-48"></canvas>
+    </div>
   `;
-
-  updateMonthlyTotal(records);
+  
+  // Update monthly banner
+  updateMonthlyTotal(filteredRecords);
 }
-
 function updateMonthlyTotal(records) {
-  const month = todayISO().slice(0,7);
-  const total = records
-    .filter(r=>r.date.startsWith(month))
-    .reduce((s,r)=>s + r.hours*r.rate + r.tips,0);
+  const total = records.reduce((s,r)=>s + r.hours*r.rate + r.tips, 0);
   $("monthlyBannerValue").textContent = money(total);
+  
+  // Also update the label
+  const labelEl = $("dateFilterLabel");
+  if (labelEl) {
+    labelEl.textContent = dateFilter.label;
+  }
 }
 
 /* ================================
-   SETTINGS + IMPORT
+   SETTINGS + IMPORT + LOCATIONS
 ================================= */
 function renderSettings() {
+  const data = loadData();
+  const locations = Object.keys(data.locations || {});
+  
+  const locationsList = locations.map(loc => `
+    <div class="flex justify-between items-center bg-gray-800 p-2 rounded mb-1">
+      <span>${loc} ($${data.locations[loc].lastRate}/hr)</span>
+      <button onclick="renameLocation('${loc}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Rename</button>
+    </div>
+  `).join("");
+
   $("app").innerHTML = `
   <div class="p-4 space-y-4">
+    <div class="text-lg font-bold">Locations (${locations.length})</div>
+    <div id="locationsList">${locationsList || "No locations yet"}</div>
+    <button onclick="showMergeLocations()" class="w-full bg-purple-600 p-3 rounded">
+      Merge Locations
+    </button>
+    
+    <hr class="border-gray-700">
+    
     <button onclick="exportData()" class="w-full bg-gray-800 p-3 rounded">
       Export
     </button>
@@ -335,17 +727,94 @@ function renderSettings() {
     <button onclick="importData()" class="w-full bg-indigo-600 p-3 rounded">
       Import JSON
     </button>
+    
+    <button onclick="clearAllData()" class="w-full bg-red-600 p-3 rounded mt-4">
+      ⚠️ CLEAR ALL DATA
+    </button>
   </div>
   `;
+}
+
+function renameLocation(oldName) {
+  const newName = prompt("Enter new name for '" + oldName + "':");
+  if (newName && newName !== oldName) {
+    const data = loadData();
+    // Update location rate
+    const rate = data.locations[oldName].lastRate;
+    data.locations[newName] = { lastRate: rate };
+    delete data.locations[oldName];
+    
+    // Update all records with this location
+    data.records.forEach(r => {
+      if (r.location === oldName) {
+        r.location = newName;
+        r.updatedAt = Date.now();
+      }
+    });
+    
+    saveData(data);
+    showToast("Location renamed!", 2000);
+    renderSettings();
+  }
+}
+
+function showMergeLocations() {
+  const data = loadData();
+  const locations = Object.keys(data.locations || {});
+  
+  if (locations.length < 2) {
+    showToast("Need at least 2 locations to merge", 2000);
+    return;
+  }
+  
+  const from = prompt("Enter source location to merge FROM:");
+  const to = prompt("Enter destination location to merge TO:");
+  
+  if (from && to && from !== to && data.locations[from] && data.locations[to]) {
+    // Merge: update all records from 'from' to 'to'
+    let count = 0;
+    data.records.forEach(r => {
+      if (r.location === from) {
+        r.location = to;
+        r.updatedAt = Date.now();
+        count++;
+      }
+    });
+    
+    // Delete the source location
+    delete data.locations[from];
+    
+    saveData(data);
+    showToast(`Merged ${count} records to "${to}"`, 3000);
+    renderSettings();
+  } else {
+    showToast("Invalid location names", 2000);
+  }
 }
 
 function exportData() {
   const text = JSON.stringify(loadData(), null, 2);
   if (navigator.share) {
-    navigator.share({ text });
+    navigator.share({ text: text }).then(() => {
+      showToast("Shared!", 2000);
+    }).catch(err => {
+      console.log("Share cancelled or failed", err);
+      copyToClipboard(text);
+    });
   } else {
-    navigator.clipboard.writeText(text);
-    alert("Copied");
+    copyToClipboard(text);
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast("Copied to clipboard!", 2000);
+    }).catch(() => {
+      prompt("Copy this JSON:", text);
+    });
+  } else {
+    prompt("Copy this JSON:", text);
   }
 }
 
@@ -364,6 +833,23 @@ function importData() {
     switchTab("history");
   } catch (e) {
     alert("Invalid JSON.");
+  }
+}
+
+function clearAllData() {
+  if (confirm("⚠️ ARE YOU SURE? This will delete ALL income records and locations. This cannot be undone!")) {
+    if (confirm("Really? All data will be lost forever!")) {
+      localStorage.setItem(DATA_KEY, JSON.stringify({
+        records: [],
+        locations: {}
+      }));
+      localStorage.setItem(META_KEY, JSON.stringify({
+        userId: "user1",
+        nextId: 1
+      }));
+      showToast("All data cleared!", 3000);
+      switchTab("history");
+    }
   }
 }
 
