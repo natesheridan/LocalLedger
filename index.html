@@ -17,8 +17,16 @@
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="font-family: 'Space Mono', monospace;">
 
-<header class="px-4 py-4 border-b border-gray-800 text-center font-bold sticky top-0 bg-gray-950 z-10 text-lg tracking-wider pt-8">
-LocalLedger
+<header class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 pt-12 flex justify-between items-center">
+<div class="flex-1 text-center">
+  <span class="text-xl font-bold tracking-wider">LocalLedger</span>
+</div>
+<button data-tab="settings" class="tab p-2 text-gray-400">
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+</button>
 </header>
 
 <main id="app" class="flex-1 overflow-y-auto pb-40"></main>
@@ -38,6 +46,15 @@ LocalLedger
 
 <!-- Bottom Navigation -->
 <nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs pb-2">
+<button data-tab="dashboard" class="tab flex-1 py-3 text-center text-gray-400">
+<div class="flex flex-col items-center gap-1">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+</svg>
+<span>Dashboard</span>
+</div>
+</button>
+
 <button data-tab="add" class="tab flex-1 py-3 text-center text-gray-400">
 <div class="flex flex-col items-center gap-1">
 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -55,21 +72,17 @@ LocalLedger
 <span>History</span>
 </div>
 </button>
-
-<button data-tab="settings" class="tab flex-1 py-3 text-center text-gray-400">
-<div class="flex flex-col items-center gap-1">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-<circle cx="12" cy="12" r="3"/>
-</svg>
-<span>Settings</span>
-</div>
-</button>
 </nav>
 
 <div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
 <div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+  // Make Chart globally available immediately
+  window.Chart = Chart;
+</script>
+<script src="charts.js"></script>
 <script>
 /* ================================
    STORAGE STRUCTURE
@@ -141,6 +154,9 @@ function money(v) {
   return `$${Number(v || 0).toFixed(2)}`;
 }
 
+// Date filter for history and charts - must be defined early
+var dateFilter = { type: "month", startDate: null, endDate: null, label: "This Month" };
+
 /* Toast notifications - bottom right, stacking */
 function showToast(message, duration = 3000) {
   let container = $("toast-container");
@@ -170,6 +186,26 @@ function showToast(message, duration = 3000) {
 function debug(msg) {
   // Debug logging - currently disabled for production
   // console.log("[DEBUG]", msg);
+}
+
+/* Floating label handler */
+function updateLabel(labelId) {
+  const label = document.getElementById(labelId);
+  if (!label) return;
+  
+  const inputId = label.getAttribute('for');
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  
+  const hasValue = input.value && input.value.length > 0;
+  
+  if (hasValue) {
+    label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+    label.classList.remove('top-3', 'text-gray-400', 'text-sm');
+  } else {
+    label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+    label.classList.add('top-3', 'text-gray-400', 'text-sm');
+  }
 }
 
 /* Add debug/test entries */
@@ -217,30 +253,94 @@ function addDebugEntries() {
 /* ================================
    TAB CONTROL
 ================================= */
-let activeTab = "add";
+let activeTab = "dashboard";
 let savedFormData = null; // Store form data when switching away from Add tab
+let editModeRecord = null; // Track if we're editing an existing record
 
 document.querySelectorAll(".tab").forEach(btn => {
-  btn.onclick = () => switchTab(btn.dataset.tab);
+  btn.onclick = () => {
+    let targetTab = btn.dataset.tab;
+    
+    // If clicking Add while in edit mode, submit the form instead of switching
+    if (targetTab === "add" && editModeRecord) {
+      const form = $("incomeForm");
+      if (form) {
+        form.dispatchEvent(new Event('submit', { bubbles: true }));
+      }
+      return;
+    }
+    
+    switchTab(targetTab);
+  };
 });
 
+function updateBottomNavForEditMode(isEditing) {
+  const nav = document.querySelector("nav");
+  const addTab = document.querySelector('[data-tab="add"]');
+  const dashTab = document.querySelector('[data-tab="dashboard"]');
+  const histTab = document.querySelector('[data-tab="history"]');
+  const settingsBtn = document.querySelector('[data-tab="settings"]');
+  
+  if (!addTab) return;
+  
+  if (isEditing) {
+    // Hide other tabs and settings button
+    if (dashTab) dashTab.style.display = "none";
+    if (histTab) histTab.style.display = "none";
+    if (settingsBtn) settingsBtn.style.display = "none";
+    
+    // Change Add button to Save button
+    addTab.style.flex = "1";
+    addTab.innerHTML = `
+      <div class="flex flex-col items-center gap-1">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+        <span class="text-sm">Save Changes</span>
+      </div>
+    `;
+  } else {
+    // Restore all tabs and settings button
+    if (dashTab) dashTab.style.display = "block";
+    if (histTab) histTab.style.display = "block";
+    if (settingsBtn) settingsBtn.style.display = "block";
+    
+    // Restore Add button
+    addTab.style.flex = "1";
+    addTab.innerHTML = `
+      <div class="flex flex-col items-center gap-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Add</span>
+      </div>
+    `;
+  }
+}
+
 function switchTab(tab) {
-  // Save form data when leaving add tab
+  // Save form data when leaving add tab (only if NOT in edit mode)
   if (activeTab === "add" && tab !== "add") {
-    const form = $("incomeForm");
-    if (form) {
-      savedFormData = {
-        date: form.date?.value || "",
-        hours: form.hours?.value || "",
-        location: form.location?.value || "",
-        rate: form.rate?.value || "",
-        tips: form.tips?.value || ""
-      };
-      debug("Form data saved");
+    if (editModeRecord) {
+      // Cancel edit mode - clear everything
+      editModeRecord = null;
+      savedFormData = null;
+      updateBottomNavForEditMode(false);
+    } else {
+      // Normal tab switch - save form data
+      const form = $("incomeForm");
+      if (form) {
+        savedFormData = {
+          date: form.date?.value || "",
+          hours: form.hours?.value || "",
+          location: form.location?.value || "",
+          rate: form.rate?.value || "",
+          tips: form.tips?.value || ""
+        };
+      }
     }
   }
   
-  debug("switchTab called: " + tab);
   activeTab = tab;
   document.querySelectorAll(".tab").forEach(b => {
     b.classList.toggle("text-indigo-400", b.dataset.tab === tab);
@@ -253,10 +353,206 @@ function switchTab(tab) {
     banner.classList.toggle("hidden", tab !== "history");
   }
 
-  if (tab === "add") renderAdd(savedFormData);
-  if (tab === "history") renderHistory();
-  if (tab === "settings") renderSettings();
+  // Add transition effect
+  const app = $("app");
+  app.style.opacity = "0";
+  app.style.transform = "translateX(20px)";
+  app.style.transition = "opacity 0.2s, transform 0.2s";
+  
+  setTimeout(() => {
+    if (tab === "dashboard") renderDashboard();
+    else if (tab === "add") renderAdd(editModeRecord || savedFormData);
+    else if (tab === "history") renderHistory();
+    else if (tab === "settings") renderSettings();
+    
+    // Restore visibility with animation
+    app.style.opacity = "1";
+    app.style.transform = "translateX(0)";
+  }, 150);
 }
+
+/* ================================
+   DASHBOARD WITH CHARTS
+================================= */
+function renderDashboard() {
+  const data = loadData();
+  const records = data.records.filter(r => !r.deleted);
+  
+  // Calculate stats
+  const today = new Date();
+  const thisMonth = today.toISOString().slice(0, 7);
+  
+  // This month
+  const thisMonthRecords = records.filter(r => r.date && r.date.startsWith(thisMonth));
+  const thisMonthTotal = thisMonthRecords.reduce((sum, r) => {
+    const hours = parseFloat(r.hours) || 0;
+    const rate = parseFloat(r.rate) || 0;
+    const tips = parseFloat(r.tips) || 0;
+    return sum + (hours * rate) + tips;
+  }, 0);
+  const thisMonthHours = thisMonthRecords.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
+  
+  // Last month
+  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const lastMonthStr = lastMonth.toISOString().slice(0, 7);
+  const lastMonthRecords = records.filter(r => r.date && r.date.startsWith(lastMonthStr));
+  const lastMonthTotal = lastMonthRecords.reduce((sum, r) => {
+    const hours = parseFloat(r.hours) || 0;
+    const rate = parseFloat(r.rate) || 0;
+    const tips = parseFloat(r.tips) || 0;
+    return sum + (hours * rate) + tips;
+  }, 0);
+  
+  // All time
+  const allTimeTotal = records.reduce((sum, r) => {
+    const hours = parseFloat(r.hours) || 0;
+    const rate = parseFloat(r.rate) || 0;
+    const tips = parseFloat(r.tips) || 0;
+    return sum + (hours * rate) + tips;
+  }, 0);
+  const allTimeHours = records.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
+  
+  // Change percentage
+  const change = lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal * 100).toFixed(0) : 0;
+  const isUp = change >= 0;
+  
+  // Top locations
+  const locationTotals = {};
+  records.forEach(r => {
+    locationTotals[r.location] = (locationTotals[r.location] || 0) + (r.hours * r.rate) + r.tips;
+  });
+  const topLocations = Object.entries(locationTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  
+  // Update date filter for charts based on history filter
+  if (typeof dateFilter === 'undefined') {
+    dateFilter = { type: "month", startDate: null, endDate: null, label: "This Month" };
+  }
+  
+  $("app").innerHTML = `
+    <div class="p-4 space-y-4">
+      <!-- Stats Summary -->
+      <div class="text-center text-gray-400 text-sm">This Month</div>
+      <div class="text-center text-4xl font-bold">${money(thisMonthTotal)}</div>
+      <div class="text-center ${isUp ? 'text-green-400' : 'text-red-400'}">
+        ${isUp ? '↑' : '↓'} ${Math.abs(change)}% vs last month
+      </div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-gray-800 rounded p-4 text-center">
+          <div class="text-gray-400 text-xs">This Month Hours</div>
+          <div class="text-xl font-bold">${thisMonthHours.toFixed(1)}</div>
+        </div>
+        <div class="bg-gray-800 rounded p-4 text-center">
+          <div class="text-gray-400 text-xs">All Time</div>
+          <div class="text-xl font-bold">${money(allTimeTotal)}</div>
+        </div>
+      </div>
+      
+      <!-- Top Locations -->
+      <div class="bg-gray-800 rounded p-4">
+        <div class="text-gray-400 text-xs mb-2">Top Locations</div>
+        ${topLocations.map(([loc, total]) => `
+          <div class="flex justify-between py-1 border-b border-gray-700 last:border-0">
+            <span>${loc}</span>
+            <span class="font-bold">${money(total)}</span>
+          </div>
+        `).join("")}
+      </div>
+      
+      <!-- Charts Section -->
+      <div class="bg-gray-800 rounded p-4">
+        <div class="text-gray-400 text-xs mb-3">Analytics</div>
+        
+        <!-- Chart Type Tabs -->
+        ${renderChartControls()}
+        
+        <!-- Chart Containers -->
+        <div id="chartContainers" class="relative" style="height: 280px;">
+          <canvas id="locationPieChart" class="w-full h-full"></canvas>
+          <canvas id="tipsVsHourlyChart" class="w-full h-full hidden"></canvas>
+          <canvas id="dailyIncomeChart" class="w-full h-full hidden"></canvas>
+          <canvas id="hoursByLocationChart" class="w-full h-full hidden"></canvas>
+        </div>
+        
+        <!-- Fallback: Simple data display when charts unavailable -->
+        <div id="chartFallback" class="hidden space-y-3 mt-4">
+          <div>
+            <div class="text-xs text-gray-400 mb-1">By Location (Pie)</div>
+            <div id="fallbackPie" class="text-sm"></div>
+          </div>
+          <div>
+            <div class="text-xs text-gray-400 mb-1">Tips vs Hourly (Bar)</div>
+            <div id="fallbackBar" class="text-sm"></div>
+          </div>
+        </div>
+        
+        <!-- Chart Date Filter -->
+        <div class="mt-3 pt-3 border-t border-gray-700">
+          <button onclick="showChartDateFilter()" class="w-full text-xs bg-gray-700 px-3 py-2 rounded flex justify-between items-center">
+            <span class="text-gray-400">Chart Range:</span>
+            <span class="text-indigo-400">${dateFilter.label}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Render charts after DOM is ready
+  renderAllCharts();
+}
+
+/* Chart date filter */
+function showChartDateFilter() {
+  const menu = `
+    <div id="chartFilterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeChartFilter()"></div>
+    <div id="chartFilterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
+      <div class="text-lg font-bold mb-4">Chart Date Range</div>
+      <div class="space-y-2">
+        <button onclick="setChartDateFilter('month', null, null, 'This Month')" class="w-full bg-gray-800 p-3 rounded text-left">This Month</button>
+        <button onclick="setChartDateFilter('past3months', null, null, 'Past 3 Months')" class="w-full bg-gray-800 p-3 rounded text-left">Past 3 Months</button>
+        <button onclick="setChartDateFilter('ytd', null, null, 'Year to Date')" class="w-full bg-gray-800 p-3 rounded text-left">Year to Date</button>
+      </div>
+      <button onclick="closeChartFilter()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
+    </div>
+  `;
+  
+  const existing = $("chartFilterSheet");
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML("beforeend", menu);
+  
+  requestAnimationFrame(() => {
+    const sheet = $("chartFilterSheet");
+    const overlay = $("chartFilterOverlay");
+    if (sheet) sheet.classList.remove("translate-y-full");
+    if (overlay) overlay.classList.remove("opacity-0");
+  });
+}
+
+function closeChartFilter() {
+  const sheet = $("chartFilterSheet");
+  const overlay = $("chartFilterOverlay");
+  
+  if (sheet) sheet.classList.add("translate-y-full");
+  if (overlay) overlay.classList.add("opacity-0");
+  
+  setTimeout(() => {
+    if (overlay) overlay.remove();
+    if (sheet) sheet.remove();
+  }, 300);
+}
+
+function setChartDateFilter(type, start, end, label) {
+  dateFilter = { type, startDate: start, endDate: end, label };
+  closeChartFilter();
+  renderDashboard();
+}
+
+/* ================================
+   ADD FORM WITH LOCATION INTELLIGENCE
+================================= */
 
 /* ================================
    ADD FORM WITH LOCATION INTELLIGENCE
@@ -272,6 +568,7 @@ function renderAdd(existing = null) {
   if (existing && existing.id && typeof existing.id === 'string' && existing.id.startsWith('income_')) {
     // Editing an existing record - has a valid record ID
     isEditMode = true;
+    editModeRecord = existing;
     r = existing;
   } else if (savedFormData) {
     // Restoring saved form data when switching back to add tab
@@ -279,31 +576,47 @@ function renderAdd(existing = null) {
     savedFormData = null; // Clear after use
   } else {
     // Fresh form
+    editModeRecord = null;
     r = { date: todayISO(), hours: "", rate: "", tips: "", location: "" };
   }
 
+  // Update bottom nav for edit mode
+  updateBottomNavForEditMode(isEditMode);
+
+  const buttonHtml = isEditMode ? '' : `<button type="button" onclick="addDebugEntries()" class="absolute top-2 right-2 text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 50 Entries</button>`;
+
   $("app").innerHTML = `
-  <form id="incomeForm" class="p-4 space-y-4 relative">
-    <button type="button" onclick="addDebugEntries()" class="absolute top-2 right-2 text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 50 Entries</button>
+  <form id="incomeForm" class="p-4 space-y-4 relative pb-24">
+    ${buttonHtml}
     
-    <input type="date" name="date" value="${r.date}" class="w-full p-3 bg-gray-800 rounded text-gray-100 border border-gray-700">
-
-    <input type="number" step="0.25" name="hours" placeholder="Hours Worked"
-      value="${r.hours}" class="w-full p-3 bg-gray-800 rounded">
-
     <div class="relative">
-      <input type="text" id="locationInput" name="location" placeholder="Location"
-        value="${r.location}" class="w-full p-3 bg-gray-800 rounded">
-      <div id="locationDropdown" class="absolute bg-gray-800 w-full mt-1 rounded hidden max-h-40 overflow-y-auto"></div>
+      <input type="date" name="date" id="dateInput" value="${r.date}" class="w-full p-3 bg-transparent text-gray-100 box-border h-12 appearance-none peer" tabindex="1" oninput="updateLabel('dateLabel')">
+      <label id="dateLabel" for="dateInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.date ? 'top-0 text-xs text-indigo-400' : ''}">Date</label>
     </div>
 
-    <input type="number" step="0.01" name="rate" id="rateInput"
-      placeholder="Hourly Rate" value="${r.rate}"
-      class="w-full p-3 bg-gray-800 rounded">
+    <div class="relative">
+      <input type="number" step="0.25" name="hours" id="hoursInput" value="${r.hours}" class="w-full p-3 bg-gray-800 rounded peer" tabindex="2" oninput="updateLabel('hoursLabel')" placeholder=" ">
+      <label id="hoursLabel" for="hoursInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.hours ? 'top-0 text-xs text-indigo-400 -translate-y-2' : ''}">Hours Worked</label>
+    </div>
 
-    <input type="number" step="0.01" name="tips"
-      placeholder="Tips" value="${r.tips}"
-      class="w-full p-3 bg-gray-800 rounded">
+    <div class="relative">
+      <input type="text" id="locationInput" name="location" autocomplete="off"
+        value="${r.location}" class="w-full p-3 bg-gray-800 rounded peer" tabindex="3" oninput="updateLabel('locationLabel')" placeholder=" ">
+      <label id="locationLabel" for="locationInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.location ? 'top-0 text-xs text-indigo-400 -translate-y-2' : ''}">Location</label>
+      <div id="locationDropdown" class="absolute bg-gray-800 w-full mt-1 rounded hidden max-h-40 overflow-y-auto z-10"></div>
+    </div>
+
+    <div class="relative">
+      <input type="number" step="0.01" name="rate" id="rateInput"
+        value="${r.rate}" class="w-full p-3 bg-gray-800 rounded peer" oninput="updateLabel('rateLabel')" placeholder=" ">
+      <label id="rateLabel" for="rateInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.rate ? 'top-0 text-xs text-indigo-400 -translate-y-2' : ''}">Hourly Rate</label>
+    </div>
+
+    <div class="relative">
+      <input type="number" step="0.01" name="tips" id="tipsInput"
+        value="${r.tips}" class="w-full p-3 bg-gray-800 rounded peer" oninput="updateLabel('tipsLabel')" placeholder=" ">
+      <label id="tipsLabel" for="tipsInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.tips ? 'top-0 text-xs text-indigo-400 -translate-y-2' : ''}">Tips</label>
+    </div>
 
     <button type="submit" class="w-full bg-indigo-600 py-3 rounded font-semibold">
       ${isEditMode ? "Update Entry" : "Add Entry"}
@@ -313,9 +626,18 @@ function renderAdd(existing = null) {
 
   setupLocationAutocomplete();
 
+  // Initialize labels based on existing values
+  setTimeout(() => {
+    if ($("dateInput")?.value) updateLabel('dateLabel');
+    if ($("hoursInput")?.value) updateLabel('hoursLabel');
+    if ($("locationInput")?.value) updateLabel('locationLabel');
+    if ($("rateInput")?.value) updateLabel('rateLabel');
+    if ($("tipsInput")?.value) updateLabel('tipsLabel');
+  }, 50);
+
   $("incomeForm").onsubmit = e => {
     e.preventDefault();
-    saveIncome(new FormData(e.target), isEditMode ? existing : null);
+    saveIncome(new FormData(e.target), editModeRecord);
   };
 }
 
@@ -325,7 +647,10 @@ function setupLocationAutocomplete() {
   const input = $("locationInput");
   const dropdown = $("locationDropdown");
 
+  // Trigger label animation on input
   input.oninput = () => {
+    updateLabel('locationLabel');
+    
     const value = input.value.toLowerCase();
     const matches = Object.keys(data.locations)
       .filter(loc => loc.toLowerCase().includes(value));
@@ -344,6 +669,7 @@ function setupLocationAutocomplete() {
     dropdown.querySelectorAll("div").forEach(div => {
       div.onclick = () => {
         input.value = div.textContent;
+        updateLabel('locationLabel');
         autoFillRate(div.textContent);
         dropdown.classList.add("hidden");
       };
@@ -358,6 +684,7 @@ function autoFillRate(location) {
   const data = loadData();
   if (data.locations[location]) {
     $("rateInput").value = data.locations[location].lastRate;
+    updateLabel('rateLabel');
   }
 }
 
@@ -432,10 +759,7 @@ function saveIncome(form, existing) {
         location,
         updatedAt: now
       };
-      debug("Record updated successfully");
-      showToast("Entry updated! ✅", 2000);
     } else {
-      debug("ERROR: Record not found in data!");
     }
   } else {
     data.records.push({
@@ -449,15 +773,19 @@ function saveIncome(form, existing) {
       createdAt: now,
       updatedAt: now
     });
-    debug(`Record pushed, new count: ${data.records.length}`);
   }
 
   try {
     saveData(data);
-    debug("Data saved successfully!");
-    showToast("Entry added! ✅", 2000);
+    showToast(editModeRecord ? "Entry updated! ✅" : "Entry added! ✅", 2000);
+    
+    // Clear edit mode and form data
+    if (editModeRecord) {
+      editModeRecord = null;
+      savedFormData = null; // Clear saved form data too
+      updateBottomNavForEditMode(false);
+    }
   } catch (e) {
-    debug("ERROR in saveData: " + e.message);
     showToast("Error saving data: " + e.message, 5000);
     return;
   }
@@ -494,8 +822,8 @@ function editRecord(id) {
 /* ================================
    HISTORY
 ================================= */
-// Current date filter state
-let dateFilter = {
+// Current date filter state (already defined globally)
+dateFilter = {
   type: "month", // "month", "range", "ytd", "past3months"
   startDate: null,
   endDate: null,
@@ -538,14 +866,10 @@ function showDateFilterMenu() {
   // Flip arrow to point up when menu is open
   const arrowEl = document.getElementById("filterArrow");
   if (arrowEl) { arrowEl.style.transform = "rotate(180deg)"; }
-  const currentMonth = new Date().toLocaleString("default", { month: "long", year: "numeric" });
-  const threeMonthsAgo = new Date();
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-  const threeMonthsLabel = threeMonthsAgo.toLocaleString("default", { month: "long", year: "numeric" });
   
   const menu = `
-    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeFilterMenu()"></div>
-    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50">
+    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeFilterMenu()"></div>
+    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Select Date Range</div>
       <div class="space-y-2">
         <button onclick="setDateFilter('month', null, null, 'This Month')" class="w-full bg-gray-800 p-3 rounded text-left">This Month</button>
@@ -562,13 +886,32 @@ function showDateFilterMenu() {
   if (existing) existing.remove();
   
   document.body.insertAdjacentHTML("beforeend", menu);
+  
+  // Animate in
+  requestAnimationFrame(() => {
+    const sheet = $("filterSheet");
+    const overlay = $("filterOverlay");
+    if (sheet) sheet.classList.remove("translate-y-full");
+    if (overlay) overlay.classList.remove("opacity-0");
+  });
 }
 
 function closeFilterMenu() {
-  const overlay = $("filterOverlay");
   const sheet = $("filterSheet");
-  if (overlay) overlay.remove();
-  if (sheet) sheet.remove();
+  const overlay = $("filterOverlay");
+  
+  // Animate out
+  if (sheet) {
+    sheet.classList.add("translate-y-full");
+  }
+  if (overlay) {
+    overlay.classList.add("opacity-0");
+  }
+  
+  setTimeout(() => {
+    if (overlay) overlay.remove();
+    if (sheet) sheet.remove();
+  }, 300);
   
   // Reset arrow to point down
   const arrowEl = $("filterArrow");
@@ -591,17 +934,17 @@ function showCustomRangePicker() {
   const threeMonthsAgoStr = threeMonthsAgo.toISOString().split("T")[0];
   
   const menu = `
-    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeFilterMenu()"></div>
-    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50">
+    <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeFilterMenu()"></div>
+    <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Custom Range</div>
       <div class="space-y-4">
         <div>
           <label class="text-sm text-gray-400">Start Date</label>
-          <input type="date" id="rangeStart" value="${threeMonthsAgoStr}" class="w-full p-3 bg-gray-800 rounded">
+          <input type="date" id="rangeStart" value="${threeMonthsAgoStr}" class="w-full p-3 bg-transparent text-gray-100 appearance-none">
         </div>
         <div>
           <label class="text-sm text-gray-400">End Date</label>
-          <input type="date" id="rangeEnd" value="${today}" class="w-full p-3 bg-gray-800 rounded">
+          <input type="date" id="rangeEnd" value="${today}" class="w-full p-3 bg-transparent text-gray-100 appearance-none">
         </div>
         <button onclick="applyCustomRange()" class="w-full bg-indigo-600 p-3 rounded">Apply</button>
       </div>
@@ -613,6 +956,14 @@ function showCustomRangePicker() {
   if (existing) existing.remove();
   
   document.body.insertAdjacentHTML("beforeend", menu);
+  
+  // Animate in
+  requestAnimationFrame(() => {
+    const sheet = $("filterSheet");
+    const overlay = $("filterOverlay");
+    if (sheet) sheet.classList.remove("translate-y-full");
+    if (overlay) overlay.classList.remove("opacity-0");
+  });
 }
 
 function applyCustomRange() {
@@ -876,7 +1227,7 @@ function clearAllData() {
 /* ================================
    START
 ================================= */
-switchTab("add");
+switchTab("dashboard");
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");

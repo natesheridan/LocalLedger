@@ -1,7 +1,8 @@
-const CACHE = "income-tracker-v1";
+const CACHE = "income-tracker-v2";
 const ASSETS = [
   "./",
-  "./index.html"
+  "./index.html",
+  "./charts.js"
 ];
 
 self.addEventListener("install", e => {
