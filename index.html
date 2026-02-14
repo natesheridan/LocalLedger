@@ -265,9 +265,13 @@ function renderAdd(existing = null) {
   const data = loadData();
   
   // Use existing record (edit mode) OR saved form data, OR defaults
+  // Check if existing has an id (actual record) vs just being saved form data
   let r;
-  if (existing && existing.id) {
-    // Editing an existing record
+  let isEditMode = false;
+  
+  if (existing && existing.id && typeof existing.id === 'string' && existing.id.startsWith('income_')) {
+    // Editing an existing record - has a valid record ID
+    isEditMode = true;
     r = existing;
   } else if (savedFormData) {
     // Restoring saved form data when switching back to add tab
@@ -302,7 +306,7 @@ function renderAdd(existing = null) {
       class="w-full p-3 bg-gray-800 rounded">
 
     <button type="submit" class="w-full bg-indigo-600 py-3 rounded font-semibold">
-      ${existing ? "Update Entry" : "Add Entry"}
+      ${isEditMode ? "Update Entry" : "Add Entry"}
     </button>
   </form>
   `;
@@ -311,8 +315,7 @@ function renderAdd(existing = null) {
 
   $("incomeForm").onsubmit = e => {
     e.preventDefault();
-    debug("Form submitted!");
-    saveIncome(new FormData(e.target), existing);
+    saveIncome(new FormData(e.target), isEditMode ? existing : null);
   };
 }
 
