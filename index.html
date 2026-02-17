@@ -35,8 +35,11 @@
 <div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3">
 <button id="monthlyBannerButton" class="w-full flex justify-between items-center" onclick="showDateFilterMenu()">
 <div class="text-center flex-1">
-  <div id="dateFilterLabel" class="text-xs text-gray-400 uppercase">This Month</div>
-  <div id="monthlyBannerValue" class="text-xl font-bold">$0.00</div>
+  <div class="flex items-center justify-center gap-2">
+    <span id="filterIndicator" class="text-xs text-indigo-400">∞</span>
+    <span id="dateFilterLabel" class="text-xs text-gray-400 uppercase">All Time</span>
+  </div>
+  <div id="monthlyBannerValue" class="text-xl font-bold pb-3">$0.00</div>
 </div>
 <svg id="filterArrow" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -77,12 +80,7 @@
 <div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
 <div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-  // Make Chart globally available immediately
-  window.Chart = Chart;
-</script>
-<script src="charts.js"></script>
+<script src="offline-charts.js"></script>
 <script>
 /* ================================
    STORAGE STRUCTURE
@@ -103,7 +101,8 @@ function initStorage() {
   if (!localStorage.getItem(DATA_KEY)) {
     localStorage.setItem(DATA_KEY, JSON.stringify({
       records: [],
-      locations: {}
+      locations: {},
+      customFields: []
     }));
   }
 
@@ -155,7 +154,7 @@ function money(v) {
 }
 
 // Date filter for history and charts - must be defined early
-var dateFilter = { type: "month", startDate: null, endDate: null, label: "This Month" };
+var dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
 
 /* Toast notifications - bottom right, stacking */
 function showToast(message, duration = 3000) {
@@ -254,6 +253,10 @@ function addDebugEntries() {
    TAB CONTROL
 ================================= */
 let activeTab = "dashboard";
+let showDeletedRecords = false; // Toggle for showing deleted records in history
+let loadedMonths = 2; // Number of months to show (starts with current month)
+let allRecords = []; // Store all records for infinite scroll
+let isScrollLoad = false; // Track if this is a scroll-triggered load
 let savedFormData = null; // Store form data when switching away from Add tab
 let editModeRecord = null; // Track if we're editing an existing record
 
@@ -427,13 +430,13 @@ function renderDashboard() {
   
   // Update date filter for charts based on history filter
   if (typeof dateFilter === 'undefined') {
-    dateFilter = { type: "month", startDate: null, endDate: null, label: "This Month" };
+    dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
   }
   
   $("app").innerHTML = `
     <div class="p-4 space-y-4">
       <!-- Stats Summary -->
-      <div class="text-center text-gray-400 text-sm">This Month</div>
+      <div class="text-center text-gray-400 text-sm">${dateFilter.label}</div>
       <div class="text-center text-4xl font-bold">${money(thisMonthTotal)}</div>
       <div class="text-center ${isUp ? 'text-green-400' : 'text-red-400'}">
         ${isUp ? '↑' : '↓'} ${Math.abs(change)}% vs last month
@@ -447,6 +450,22 @@ function renderDashboard() {
         <div class="bg-gray-800 rounded p-4 text-center">
           <div class="text-gray-400 text-xs">All Time</div>
           <div class="text-xl font-bold">${money(allTimeTotal)}</div>
+        </div>
+      </div>
+      
+      <!-- More Stats -->
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-gray-800 rounded p-3 text-center">
+          <div class="text-gray-400 text-xs">Shifts</div>
+          <div class="text-lg font-bold">${thisMonthRecords.length}</div>
+        </div>
+        <div class="bg-gray-800 rounded p-3 text-center">
+          <div class="text-gray-400 text-xs">Avg/Shift</div>
+          <div class="text-lg font-bold">${thisMonthRecords.length ? money(thisMonthTotal / thisMonthRecords.length) : '$0'}</div>
+        </div>
+        <div class="bg-gray-800 rounded p-3 text-center">
+          <div class="text-gray-400 text-xs">Avg/Hour</div>
+          <div class="text-lg font-bold">${thisMonthHours ? money(thisMonthTotal / thisMonthHours) : '$0'}</div>
         </div>
       </div>
       
@@ -468,24 +487,12 @@ function renderDashboard() {
         <!-- Chart Type Tabs -->
         ${renderChartControls()}
         
-        <!-- Chart Containers -->
-        <div id="chartContainers" class="relative" style="height: 280px;">
-          <canvas id="locationPieChart" class="w-full h-full"></canvas>
-          <canvas id="tipsVsHourlyChart" class="w-full h-full hidden"></canvas>
-          <canvas id="dailyIncomeChart" class="w-full h-full hidden"></canvas>
-          <canvas id="hoursByLocationChart" class="w-full h-full hidden"></canvas>
-        </div>
-        
-        <!-- Fallback: Simple data display when charts unavailable -->
-        <div id="chartFallback" class="hidden space-y-3 mt-4">
-          <div>
-            <div class="text-xs text-gray-400 mb-1">By Location (Pie)</div>
-            <div id="fallbackPie" class="text-sm"></div>
-          </div>
-          <div>
-            <div class="text-xs text-gray-400 mb-1">Tips vs Hourly (Bar)</div>
-            <div id="fallbackBar" class="text-sm"></div>
-          </div>
+        <!-- Chart Containers (simple SVG charts) -->
+        <div id="chartContainers" class="relative" style="height: 320px;">
+          <div id="locationPieChart" class="w-full h-full"></div>
+          <div id="tipsVsHourlyChart" class="w-full h-full hidden"></div>
+          <div id="dailyIncomeChart" class="w-full h-full hidden"></div>
+          <div id="hoursByLocationChart" class="w-full h-full hidden"></div>
         </div>
         
         <!-- Chart Date Filter -->
@@ -510,6 +517,7 @@ function showChartDateFilter() {
     <div id="chartFilterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Chart Date Range</div>
       <div class="space-y-2">
+        <button onclick="setChartDateFilter('all', null, null, 'All Time')" class="w-full bg-indigo-600 p-3 rounded text-left">📜 All Time</button>
         <button onclick="setChartDateFilter('month', null, null, 'This Month')" class="w-full bg-gray-800 p-3 rounded text-left">This Month</button>
         <button onclick="setChartDateFilter('past3months', null, null, 'Past 3 Months')" class="w-full bg-gray-800 p-3 rounded text-left">Past 3 Months</button>
         <button onclick="setChartDateFilter('ytd', null, null, 'Year to Date')" class="w-full bg-gray-800 p-3 rounded text-left">Year to Date</button>
@@ -583,7 +591,12 @@ function renderAdd(existing = null) {
   // Update bottom nav for edit mode
   updateBottomNavForEditMode(isEditMode);
 
-  const buttonHtml = isEditMode ? '' : `<button type="button" onclick="addDebugEntries()" class="absolute top-2 right-2 text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 50 Entries</button>`;
+  const buttonHtml = isEditMode ? '' : `
+    <div class="flex gap-2">
+      <button type="button" onclick="clearForm()" class="text-xs bg-gray-700 px-2 py-1 rounded">Clear</button>
+      <button type="button" onclick="addDebugEntries()" class="text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 50</button>
+    </div>
+  `;
 
   $("app").innerHTML = `
   <form id="incomeForm" class="p-4 space-y-4 relative pb-24">
@@ -618,12 +631,23 @@ function renderAdd(existing = null) {
       <label id="tipsLabel" for="tipsInput" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${r.tips ? 'top-0 text-xs text-indigo-400 -translate-y-2' : ''}">Tips</label>
     </div>
 
+    <!-- Custom Fields Section -->
+    <div id="customFieldsSection" class="space-y-3 pt-2 border-t border-gray-700">
+      <!-- Custom fields will be rendered here -->
+    </div>
+
+    <!-- Add Custom Field Button -->
+    <button type="button" onclick="showAddCustomFieldMenu()" class="w-full bg-gray-800 py-2 rounded text-sm text-gray-400 hover:text-white">
+      + Add Custom Field
+    </button>
+
     <button type="submit" class="w-full bg-indigo-600 py-3 rounded font-semibold">
       ${isEditMode ? "Update Entry" : "Add Entry"}
     </button>
   </form>
   `;
 
+  setupCustomFields();
   setupLocationAutocomplete();
 
   // Initialize labels based on existing values
@@ -639,6 +663,178 @@ function renderAdd(existing = null) {
     e.preventDefault();
     saveIncome(new FormData(e.target), editModeRecord);
   };
+}
+
+/* ================================
+   CUSTOM FIELDS
+================================= */
+
+function setupCustomFields() {
+  const section = $("customFieldsSection");
+  if (!section) return;
+  
+  const data = loadData();
+  const customFields = data.customFields || [];
+  
+  if (customFields.length === 0) {
+    section.innerHTML = '';
+    return;
+  }
+  
+  section.innerHTML = customFields.map((field, index) => {
+    const fieldId = `custom_${index}`;
+    const existingValue = editModeRecord ? editModeRecord[field.key] : '';
+    const hasValue = existingValue && existingValue.length > 0;
+    
+    if (field.type === 'checkbox') {
+      return `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" name="${fieldId}" id="${fieldId}" ${existingValue ? 'checked' : ''} class="w-5 h-5" onchange="updateCustomFieldLabel('${fieldId}')">
+          <label for="${fieldId}" class="text-gray-300">${field.label}</label>
+        </div>
+      `;
+    } else if (field.type === 'number') {
+      return `
+        <div class="relative">
+          <input type="number" name="${fieldId}" id="${fieldId}" value="${existingValue}" 
+            class="w-full p-3 bg-gray-800 rounded peer" placeholder=" " oninput="updateCustomFieldLabel('${fieldId}')">
+          <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
+        </div>
+      `;
+    } else if (field.type === 'date') {
+      return `
+        <div class="relative">
+          <input type="date" name="${fieldId}" id="${fieldId}" value="${existingValue}"
+            class="w-full p-3 bg-transparent text-gray-100 appearance-none" onchange="updateCustomFieldLabel('${fieldId}')">
+          <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
+        </div>
+      `;
+    } else {
+      // Default to text input
+      return `
+        <div class="relative">
+          <input type="text" name="${fieldId}" id="${fieldId}" value="${existingValue}"
+            class="w-full p-3 bg-gray-800 rounded peer" placeholder=" " oninput="updateCustomFieldLabel('${fieldId}')">
+          <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
+        </div>
+      `;
+    }
+  }).join('');
+  
+  // Initialize labels after render
+  setTimeout(() => {
+    customFields.forEach((field, index) => {
+      const fieldId = `custom_${index}`;
+      updateCustomFieldLabel(fieldId);
+    });
+  }, 50);
+}
+
+function updateCustomFieldLabel(fieldId) {
+  const input = document.getElementById(fieldId);
+  const label = document.getElementById(fieldId + '_label');
+  if (!input || !label) return;
+  
+  const hasValue = input.type === 'checkbox' 
+    ? input.checked 
+    : (input.value && input.value.length > 0);
+  
+  if (hasValue) {
+    label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+    label.classList.remove('top-3', 'text-gray-400', 'text-sm');
+  } else {
+    label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+    label.classList.add('top-3', 'text-gray-400', 'text-sm');
+  }
+}
+
+function showAddCustomFieldMenu() {
+  const data = loadData();
+  const customFields = data.customFields || [];
+  
+  if (customFields.length >= 10) {
+    showToast("Maximum 10 custom fields allowed", 2000);
+    return;
+  }
+  
+  const menu = `
+    <div id="customFieldOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeCustomFieldMenu()"></div>
+    <div id="customFieldSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
+      <div class="text-lg font-bold mb-4">Add Custom Field</div>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm text-gray-400">Field Name</label>
+          <input type="text" id="customFieldName" placeholder="e.g., Company, Address, Notes" 
+            class="w-full p-3 bg-gray-800 rounded text-white">
+        </div>
+        <div>
+          <label class="text-sm text-gray-400">Field Type</label>
+          <select id="customFieldType" class="w-full p-3 bg-gray-800 rounded text-white">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="checkbox">Checkbox</option>
+          </select>
+        </div>
+        <button onclick="saveCustomField()" class="w-full bg-indigo-600 p-3 rounded">Add Field</button>
+      </div>
+      <button onclick="closeCustomFieldMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
+    </div>
+  `;
+  
+  const existing = $("customFieldSheet");
+  if (existing) existing.remove();
+  
+  document.body.insertAdjacentHTML("beforeend", menu);
+  
+  requestAnimationFrame(() => {
+    const sheet = $("customFieldSheet");
+    const overlay = $("customFieldOverlay");
+    if (sheet) sheet.classList.remove("translate-y-full");
+    if (overlay) overlay.classList.remove("opacity-0");
+  });
+}
+
+function closeCustomFieldMenu() {
+  const sheet = $("customFieldSheet");
+  const overlay = $("customFieldOverlay");
+  
+  if (sheet) sheet.classList.add("translate-y-full");
+  if (overlay) overlay.classList.add("opacity-0");
+  
+  setTimeout(() => {
+    if (overlay) overlay.remove();
+    if (sheet) sheet.remove();
+  }, 300);
+}
+
+function saveCustomField() {
+  const name = $("customFieldName").value.trim();
+  const type = $("customFieldType").value;
+  
+  if (!name) {
+    showToast("Please enter a field name", 2000);
+    return;
+  }
+  
+  const data = loadData();
+  if (!data.customFields) data.customFields = [];
+  
+  // Create field key (sanitized for storage)
+  const fieldKey = "CustomField_" + name.replace(/[^a-zA-Z0-9]/g, "_");
+  
+  data.customFields.push({
+    label: name,
+    type: type,
+    key: fieldKey
+  });
+  
+  saveData(data);
+  closeCustomFieldMenu();
+  showToast(`Added "${name}" field`, 2000);
+  
+  // Re-render the add form to show new field
+  renderAdd(editModeRecord || savedFormData);
 }
 
 /* Location Autocomplete */
@@ -677,6 +873,27 @@ function setupLocationAutocomplete() {
   };
 
   input.onblur = () => setTimeout(() => dropdown.classList.add("hidden"), 200);
+}
+
+/* Clear the form */
+function clearForm() {
+  savedFormData = null;
+  editModeRecord = null;
+  updateBottomNavForEditMode(false);
+  
+  const form = $("incomeForm");
+  if (form) {
+    form.reset();
+    // Reset floating labels
+    ['dateLabel', 'hoursLabel', 'locationLabel', 'rateLabel', 'tipsLabel'].forEach(id => {
+      const label = document.getElementById(id);
+      if (label) {
+        label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+        label.classList.add('top-3', 'text-gray-400', 'text-sm');
+      }
+    });
+  }
+  showToast("Form cleared", 1500);
 }
 
 /* Auto-fill rate based on last saved location rate */
@@ -743,6 +960,24 @@ function saveIncome(form, existing) {
   debug(`Records before push: ${data.records.length}`);
 
   const tipsNum = Number(form.get("tips")) || 0;
+  
+  // Get custom field values - store with field.key as the key
+  const customFields = data.customFields || [];
+  const customFieldData = {};
+  customFields.forEach((field, index) => {
+    const inputId = `custom_${index}`;
+    let value = form.get(inputId);
+    
+    // Handle checkbox
+    const input = document.getElementById(inputId);
+    if (field.type === 'checkbox' && input) {
+      value = input.checked ? 'true' : 'false';
+    }
+    
+    if (value !== null && value !== "") {
+      customFieldData[field.key] = value;
+    }
+  });
 
   if (existing) {
     // Find the record in the current data by ID
@@ -757,9 +992,9 @@ function saveIncome(form, existing) {
         rate: rate,
         tips: tipsNum,
         location,
+        ...customFieldData,
         updatedAt: now
       };
-    } else {
     }
   } else {
     data.records.push({
@@ -769,6 +1004,7 @@ function saveIncome(form, existing) {
       rate: rate,
       tips: tipsNum,
       location,
+      ...customFieldData,
       deleted: false,
       createdAt: now,
       updatedAt: now
@@ -793,18 +1029,39 @@ function saveIncome(form, existing) {
   switchTab("history");
 }
 
-/* Delete a record (soft delete) */
+/* Delete a record (soft delete) with confirmation */
 function deleteRecord(id) {
-  debug("Deleting record: " + id);
   const data = loadData();
   const record = data.records.find(r => r.id === id);
-  if (record) {
+  if (!record) return;
+  
+  // Show confirmation
+  if (confirm('Delete this entry?')) {
     record.deleted = true;
     record.updatedAt = Date.now();
     saveData(data);
     showToast("Entry deleted", 2000);
     renderHistory();
   }
+}
+
+/* Restore a deleted record */
+function restoreRecord(id) {
+  const data = loadData();
+  const record = data.records.find(r => r.id === id);
+  if (record) {
+    record.deleted = false;
+    record.updatedAt = Date.now();
+    saveData(data);
+    showToast("Entry restored", 2000);
+    renderHistory();
+  }
+}
+
+/* Toggle showing deleted records */
+function toggleDeletedRecords() {
+  showDeletedRecords = !showDeletedRecords;
+  renderHistory();
 }
 
 /* Edit a record */
@@ -824,10 +1081,10 @@ function editRecord(id) {
 ================================= */
 // Current date filter state (already defined globally)
 dateFilter = {
-  type: "month", // "month", "range", "ytd", "past3months"
+  type: "all", // "all", "month", "range", "ytd", "past3months"
   startDate: null,
   endDate: null,
-  label: "This Month"
+  label: "All Time"
 };
 
 function getFilteredRecords(records) {
@@ -872,6 +1129,7 @@ function showDateFilterMenu() {
     <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Select Date Range</div>
       <div class="space-y-2">
+        <button onclick="setDateFilter('all', null, null, 'All Time (Scroll)')" class="w-full bg-indigo-600 p-3 rounded text-left">📜 All Time (Infinite Scroll)</button>
         <button onclick="setDateFilter('month', null, null, 'This Month')" class="w-full bg-gray-800 p-3 rounded text-left">This Month</button>
         <button onclick="setDateFilter('ytd', null, null, 'Year to Date')" class="w-full bg-gray-800 p-3 rounded text-left">Year to Date</button>
         <button onclick="setDateFilter('past3months', null, null, 'Past 3 Months')" class="w-full bg-gray-800 p-3 rounded text-left">Past 3 Months</button>
@@ -929,9 +1187,9 @@ function setDateFilter(type, start, end, label) {
 function showCustomRangePicker() {
   closeFilterMenu();
   const today = new Date().toISOString().split("T")[0];
-  const threeMonthsAgo = new Date();
-  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-  const threeMonthsAgoStr = threeMonthsAgo.toISOString().split("T")[0];
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+  const twoWeeksAgoStr = twoWeeksAgo.toISOString().split("T")[0];
   
   const menu = `
     <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeFilterMenu()"></div>
@@ -940,7 +1198,7 @@ function showCustomRangePicker() {
       <div class="space-y-4">
         <div>
           <label class="text-sm text-gray-400">Start Date</label>
-          <input type="date" id="rangeStart" value="${threeMonthsAgoStr}" class="w-full p-3 bg-transparent text-gray-100 appearance-none">
+          <input type="date" id="rangeStart" value="${twoWeeksAgoStr}" class="w-full p-3 bg-transparent text-gray-100 appearance-none">
         </div>
         <div>
           <label class="text-sm text-gray-400">End Date</label>
@@ -975,56 +1233,136 @@ function applyCustomRange() {
 }
 
 function renderHistory() {
-  debug("renderHistory called");
+  // Reset loaded months when entering history (only if not a scroll load)
+  if (!isScrollLoad) {
+    loadedMonths = 2;
+  }
+  isScrollLoad = false;
+  
   const allData = loadData();
-  const records = allData.records.filter(r => !r.deleted);
-  const filteredRecords = getFilteredRecords(records);
   
-  // Calculate totals
-  const totalIncome = filteredRecords.reduce((sum, r) => sum + (r.hours * r.rate) + r.tips, 0);
-  const totalTips = filteredRecords.reduce((sum, r) => sum + r.tips, 0);
-  const totalHours = filteredRecords.reduce((sum, r) => sum + r.hours, 0);
+  // Get all non-deleted records sorted by date (newest first)
+  let records = showDeletedRecords 
+    ? allData.records.filter(r => r.deleted)
+    : allData.records.filter(r => !r.deleted);
+    
+  // Sort all records by date descending
+  records.sort((a, b) => b.date.localeCompare(a.date));
   
-  // Group by date
-  const grouped = {};
-  filteredRecords.forEach(r => {
-    grouped[r.date] ||= [];
-    grouped[r.date].push(r);
+  // Store for scroll loading
+  allRecords = records;
+  
+  // Check if we have a date filter active (not "All Time")
+  const isFiltered = dateFilter && dateFilter.type !== 'all';
+  
+  // If filtered, calculate date range
+  let startDate = null;
+  let endDate = null;
+  if (isFiltered) {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+    
+    if (dateFilter.type === "month") {
+      startDate = new Date(currentYear, currentMonth, 1);
+      endDate = new Date(currentYear, currentMonth + 1, 0);
+    } else if (dateFilter.type === "ytd") {
+      startDate = new Date(currentYear, 0, 1);
+      endDate = today;
+    } else if (dateFilter.type === "past3months") {
+      startDate = new Date(currentYear, currentMonth - 3, 1);
+      endDate = today;
+    } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
+      startDate = new Date(dateFilter.startDate);
+      endDate = new Date(dateFilter.endDate);
+    }
+  }
+  
+  // Filter by date if range is set
+  if (startDate && endDate) {
+    const startStr = startDate.toISOString().split("T")[0];
+    const endStr = endDate.toISOString().split("T")[0];
+    records = records.filter(r => r.date >= startStr && r.date <= endStr);
+  }
+  
+  // Group all filtered records by month
+  const byMonth = {};
+  records.forEach(r => {
+    const monthKey = r.date.substring(0, 7); // "2026-02"
+    if (!byMonth[monthKey]) byMonth[monthKey] = [];
+    byMonth[monthKey].push(r);
   });
   
-  const dates = Object.keys(grouped).sort((a,b)=>b.localeCompare(a));
+  // Get sorted month keys
+  const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
   
-  // Helper to parse date in local timezone
+  // Calculate totals for first loaded months (or all if filtered)
+  let loadedRecords = [];
+  if (isFiltered) {
+    // If filtered, show all months at once
+    loadedRecords = records;
+  } else {
+    // If not filtered (infinity), show one month at a time
+    for (let i = 0; i < Math.min(loadedMonths, months.length); i++) {
+      loadedRecords.push(...byMonth[months[i]]);
+    }
+  }
+  
+  const totalIncome = loadedRecords.reduce((sum, r) => sum + (r.hours * r.rate) + r.tips, 0);
+  const totalTips = loadedRecords.reduce((sum, r) => sum + r.tips, 0);
+  const totalHours = loadedRecords.reduce((sum, r) => sum + r.hours, 0);
+  
   const formatDate = (isoDate) => {
     const [y, m, d] = isoDate.split("-");
     const date = new Date(y, m - 1, d);
     return date.toDateString();
   };
 
+  const formatMonth = (monthKey) => {
+    const [year, month] = monthKey.split('-');
+    const date = new Date(year, month - 1, 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  // Calculate month totals for banner
+  const monthTotals = {};
+  months.forEach(m => {
+    monthTotals[m] = byMonth[m].reduce((sum, r) => sum + (r.hours * r.rate) + r.tips, 0);
+  });
+
   $("app").innerHTML = `
     <!-- Stats Summary -->
     <div class="p-4 space-y-2">
-      <div class="text-center text-xs text-gray-400">${dateFilter.label}</div>
+      <div class="flex justify-between items-center">
+        <div class="text-center text-xs text-gray-400">${dateFilter.label}</div>
+        <button onclick="toggleDeletedRecords()" class="text-xs ${showDeletedRecords ? 'text-red-400' : 'text-gray-500'}">
+          ${showDeletedRecords ? '✓ Showing Deleted' : 'Show Deleted'}
+        </button>
+      </div>
+      ${!showDeletedRecords ? `
       <div class="text-2xl font-bold text-left">${money(totalIncome)}</div>
       <div class="flex justify-between text-sm">
         <span class="text-gray-400">${totalHours.toFixed(1)} hrs</span>
         <span class="text-gray-400">Tips: ${money(totalTips)}</span>
       </div>
+      ` : ''}
     </div>
     
-    <!-- Entries -->
-    <div class="p-4 space-y-6">
-      ${dates.length === 0 ? '<div class="text-center text-gray-400 py-8">No entries found</div>' : dates.map(date => `
-        <div>
+    <!-- Entries with infinite scroll -->
+    <div id="historyList" class="p-4 space-y-6">
+      ${months.slice(0, loadedMonths).map(month => `
+        <div class="month-group" data-month="${month}" data-total="${monthTotals[month]}">
           <div class="text-xs uppercase text-gray-400 mb-2">
-            ${formatDate(date)}
+            ${formatMonth(month)} <span class="text-indigo-400">${money(monthTotals[month])}</span>
           </div>
-          ${grouped[date].map(r => {
+          ${byMonth[month].map(r => {
+            // Group by date within month
             const shiftEarnings = r.hours * r.rate;
             const totalForShift = shiftEarnings + r.tips;
             return `
             <div class="bg-gray-800 rounded p-3 mb-2 flex justify-between items-start">
               <div class="flex-1">
+                <div class="text-xs text-gray-500 mb-1">${formatDate(r.date)}</div>
                 <div class="font-semibold text-lg">
                   ${money(totalForShift)}
                 </div>
@@ -1034,33 +1372,135 @@ function renderHistory() {
                 ${r.tips > 0 ? `<div class="text-xs text-green-400">Tips: ${money(r.tips)}</div>` : ''}
               </div>
               <div class="flex gap-2 ml-2">
-                <button onclick="editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
-                <button onclick="deleteRecord('${r.id}')" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>
+                ${showDeletedRecords 
+                  ? `<button onclick="restoreRecord('${r.id}')" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
+                  : `<button onclick="editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
+                     <button onclick="deleteRecord('${r.id}')" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
+                }
               </div>
             </div>
           `}).join("")}
         </div>
       `).join("")}
-    </div>
-    
-    <!-- Pie Chart Container (placeholder for future) -->
-    <div id="chartContainer" class="p-4 hidden">
-      <div class="text-sm text-gray-400 mb-2">Income by Location</div>
-      <canvas id="incomeChart" class="w-full h-48"></canvas>
+      
+      ${!isFiltered && loadedMonths < months.length ? `
+        <div id="loadMoreTrigger" class="text-center py-4">
+          <div class="text-gray-500 text-sm">Scroll for more...</div>
+        </div>
+      ` : ''}
     </div>
   `;
   
-  // Update monthly banner
-  updateMonthlyTotal(filteredRecords);
+  // Setup infinite scroll observer (only if not filtered)
+  if (!isFiltered) {
+    setupInfiniteScroll(months, monthTotals);
+  }
+  
+  // Update banner with visible month
+  updateBannerForVisibleMonth();
 }
+
+function setupInfiniteScroll(months, monthTotals) {
+  // Remove any existing scroll listeners first
+  window.removeEventListener('scroll', handleHistoryScroll);
+  
+  // Use simple scroll event instead of IntersectionObserver
+  window.addEventListener('scroll', handleHistoryScroll);
+}
+
+function handleHistoryScroll() {
+  // Only run if we're on history tab
+  if (activeTab !== 'history') return;
+  
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight;
+  
+  console.log('Scroll check:', { scrollTop, clientHeight, scrollHeight, loadedMonths });
+  
+  // When user scrolls within 150px of bottom
+  if (scrollTop + clientHeight >= scrollHeight - 150) {
+    // Get months from data
+    const allData = loadData();
+    let records = showDeletedRecords 
+      ? allData.records.filter(r => r.deleted)
+      : allData.records.filter(r => !r.deleted);
+    records.sort((a, b) => b.date.localeCompare(a.date));
+    
+    const byMonth = {};
+    records.forEach(r => {
+      const monthKey = r.date.substring(0, 7);
+      if (!byMonth[monthKey]) byMonth[monthKey] = [];
+      byMonth[monthKey].push(r);
+    });
+    const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
+    
+    console.log('Loaded months:', loadedMonths, 'Total months:', months.length);
+    
+    if (loadedMonths < months.length) {
+      isScrollLoad = true;
+      loadedMonths++;
+      console.log('Loading more months:', loadedMonths);
+      renderHistory();
+    }
+  }
+}
+
+function updateBannerForVisibleMonth() {
+  const months = document.querySelectorAll('.month-group');
+  if (months.length === 0) return;
+  
+  const observer = new IntersectionObserver((entries) => {
+    let maxVisibleMonth = null;
+    let maxVisibleRatio = 0;
+    
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const ratio = entry.intersectionRatio;
+        if (ratio > maxVisibleRatio) {
+          maxVisibleRatio = ratio;
+          maxVisibleMonth = entry.target;
+        }
+      }
+    });
+    
+    if (maxVisibleMonth) {
+      const total = maxVisibleMonth.dataset.total;
+      const month = maxVisibleMonth.dataset.month;
+      const [year, mon] = month.split('-');
+      const date = new Date(year, mon - 1, 1);
+      const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      
+      $("monthlyBannerValue").textContent = money(parseFloat(total));
+      $("dateFilterLabel").textContent = monthName;
+    }
+  }, { threshold: 0.1 });
+  
+  months.forEach(m => observer.observe(m));
+}
+
 function updateMonthlyTotal(records) {
   const total = records.reduce((s,r)=>s + r.hours*r.rate + r.tips, 0);
   $("monthlyBannerValue").textContent = money(total);
   
-  // Also update the label
+  // Update the label and indicator
   const labelEl = $("dateFilterLabel");
+  const indicatorEl = $("filterIndicator");
   if (labelEl) {
     labelEl.textContent = dateFilter.label;
+  }
+  if (indicatorEl) {
+    if (dateFilter.type === 'all') {
+      indicatorEl.textContent = '∞';
+    } else if (dateFilter.type === 'ytd') {
+      indicatorEl.textContent = '📅';
+    } else if (dateFilter.type === 'month') {
+      indicatorEl.textContent = '📆';
+    } else if (dateFilter.type === 'past3months') {
+      indicatorEl.textContent = '3';
+    } else if (dateFilter.type === 'range') {
+      indicatorEl.textContent = '📋';
+    }
   }
 }
 
@@ -1070,11 +1510,19 @@ function updateMonthlyTotal(records) {
 function renderSettings() {
   const data = loadData();
   const locations = Object.keys(data.locations || {});
+  const customFields = data.customFields || [];
   
   const locationsList = locations.map(loc => `
     <div class="flex justify-between items-center bg-gray-800 p-2 rounded mb-1">
       <span>${loc} ($${data.locations[loc].lastRate}/hr)</span>
       <button onclick="renameLocation('${loc}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Rename</button>
+    </div>
+  `).join("");
+
+  const customFieldsList = customFields.map((field, index) => `
+    <div class="flex justify-between items-center bg-gray-800 p-2 rounded mb-1">
+      <span>${field.label} (${field.type})</span>
+      <button onclick="deleteCustomField(${index})" class="text-xs bg-red-700 px-2 py-1 rounded">Delete</button>
     </div>
   `).join("");
 
@@ -1085,6 +1533,12 @@ function renderSettings() {
     <button onclick="showMergeLocations()" class="w-full bg-purple-600 p-3 rounded">
       Merge Locations
     </button>
+    
+    <hr class="border-gray-700">
+    
+    <div class="text-lg font-bold">Custom Fields (${customFields.length}/10)</div>
+    <div id="customFieldsList">${customFieldsList || "No custom fields yet"}</div>
+    <p class="text-xs text-gray-500">Add custom fields in the Add tab</p>
     
     <hr class="border-gray-700">
     
@@ -1164,16 +1618,59 @@ function showMergeLocations() {
 }
 
 function exportData() {
-  const text = JSON.stringify(loadData(), null, 2);
-  if (navigator.share) {
-    navigator.share({ text: text }).then(() => {
-      showToast("Shared!", 2000);
-    }).catch(err => {
-      console.log("Share cancelled or failed", err);
+  const data = loadData();
+  
+  // Ask user which format
+  const format = prompt('Export as JSON or CSV? (type: json or csv)', 'json');
+  
+  if (format && format.toLowerCase() === 'csv') {
+    exportAsCSV(data);
+  } else {
+    // Original JSON export
+    const text = JSON.stringify(data, null, 2);
+    if (navigator.share) {
+      navigator.share({ text: text }).then(() => {
+        showToast("Shared!", 2000);
+      }).catch(err => {
+        console.log("Share cancelled or failed", err);
+        copyToClipboard(text);
+      });
+    } else {
       copyToClipboard(text);
+    }
+  }
+}
+
+function exportAsCSV(data) {
+  const records = data.records.filter(r => !r.deleted);
+  
+  // CSV header
+  let csv = 'Date,Hours,Rate,Location,Tips,Total\n';
+  
+  // Add rows
+  records.forEach(r => {
+    const total = (r.hours * r.rate) + r.tips;
+    csv += `${r.date},${r.hours},${r.rate},"${r.location}",${r.tips},${total.toFixed(2)}\n`;
+  });
+  
+  // Add summary at end
+  const totalHours = records.reduce((s, r) => s + r.hours, 0);
+  const totalTips = records.reduce((s, r) => s + r.tips, 0);
+  const totalIncome = records.reduce((s, r) => s + (r.hours * r.rate) + r.tips, 0);
+  
+  csv += `\nSummary\n`;
+  csv += `Total Hours,${totalHours.toFixed(2)}\n`;
+  csv += `Total Tips,${totalTips.toFixed(2)}\n`;
+  csv += `Total Income,${totalIncome.toFixed(2)}\n`;
+  
+  if (navigator.share) {
+    navigator.share({ text: csv }).then(() => {
+      showToast("Shared CSV!", 2000);
+    }).catch(err => {
+      copyToClipboard(csv);
     });
   } else {
-    copyToClipboard(text);
+    copyToClipboard(csv);
   }
 }
 
@@ -1204,6 +1701,17 @@ function importData() {
     switchTab("history");
   } catch (e) {
     alert("Invalid JSON.");
+  }
+}
+
+/* Delete a custom field */
+function deleteCustomField(index) {
+  if (confirm("Delete this custom field? It will be removed from all records.")) {
+    const data = loadData();
+    data.customFields.splice(index, 1);
+    saveData(data);
+    showToast("Custom field deleted", 2000);
+    renderSettings();
   }
 }
 
