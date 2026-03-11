@@ -1,343 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LocalLedger</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#111827" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LocalLedger</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="font-family: 'Space Mono', monospace;">
 
-<header class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 pt-12 flex justify-between items-center">
-<div class="flex-1 text-center">
-  <span class="text-xl font-bold tracking-wider">LocalLedger</span>
-</div>
-<button data-tab="settings" class="tab p-2 text-gray-400">
-  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-</button>
-</header>
+  <header
+    class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 pt-12 flex justify-between items-center">
+    <div class="flex-1 text-center">
+      <span class="text-xl font-bold tracking-wider">LocalLedger</span>
+    </div>
+    <button data-tab="settings" class="tab p-2 text-gray-400">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path
+          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <circle cx="12" cy="12" r="3" />
+      </svg>
+    </button>
+  </header>
 
-<main id="app" class="flex-1 overflow-y-auto pb-40"></main>
+  <main id="app" class="flex-1 overflow-y-auto pb-40"></main>
 
-<!-- Monthly Banner -->
-<div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3">
-<button id="monthlyBannerButton" class="w-full flex justify-between items-center" onclick="showDateFilterMenu()">
-<div class="text-center flex-1">
-  <div class="flex items-center justify-center gap-2">
-    <span id="filterIndicator" class="text-xs text-indigo-400">∞</span>
-    <span id="dateFilterLabel" class="text-xs text-gray-400 uppercase">All Time</span>
+  <!-- Monthly Banner -->
+  <div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3">
+    <button id="monthlyBannerButton" class="w-full flex justify-between items-center" onclick="showDateFilterMenu()">
+      <div class="text-center flex-1">
+        <div class="flex items-center justify-center gap-2">
+          <span id="filterIndicator" class="text-xs text-indigo-400">∞</span>
+          <span id="dateFilterLabel" class="text-xs text-gray-400 uppercase">All Time</span>
+        </div>
+        <div id="monthlyBannerValue" class="text-xl font-bold pb-3">$0.00</div>
+      </div>
+      <svg id="filterArrow" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
   </div>
-  <div id="monthlyBannerValue" class="text-xl font-bold pb-3">$0.00</div>
-</div>
-<svg id="filterArrow" class="w-5 h-5 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-</svg>
-</button>
-</div>
 
-<!-- Bottom Navigation -->
-<nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs pb-2">
-<button data-tab="dashboard" class="tab flex-1 py-3 text-center text-gray-400">
-<div class="flex flex-col items-center gap-1">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-</svg>
-<span>Dashboard</span>
-</div>
-</button>
+  <!-- Bottom Navigation -->
+  <nav class="fixed bottom-0 inset-x-0 bg-gray-900 border-t border-gray-800 flex text-xs pb-2">
+    <button data-tab="dashboard" class="tab flex-1 py-3 text-center text-gray-400">
+      <div class="flex flex-col items-center gap-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span>Dashboard</span>
+      </div>
+    </button>
 
-<button data-tab="add" class="tab flex-1 py-3 text-center text-gray-400">
-<div class="flex flex-col items-center gap-1">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M12 4v16m8-8H4"/>
-</svg>
-<span>Add</span>
-</div>
-</button>
+    <button data-tab="add" class="tab flex-1 py-3 text-center text-gray-400">
+      <div class="flex flex-col items-center gap-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 4v16m8-8H4" />
+        </svg>
+        <span>Add</span>
+      </div>
+    </button>
 
-<button data-tab="history" class="tab flex-1 py-3 text-center text-gray-400">
-<div class="flex flex-col items-center gap-1">
-<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-<path d="M4 6h16M4 12h16M4 18h16"/>
-</svg>
-<span>History</span>
-</div>
-</button>
-</nav>
+    <button data-tab="history" class="tab flex-1 py-3 text-center text-gray-400">
+      <div class="flex flex-col items-center gap-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span>History</span>
+      </div>
+    </button>
+  </nav>
 
-<div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
-<div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden"></div>
+  <div id="overlay" class="fixed inset-0 bg-black/50 hidden"></div>
+  <div id="sheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-xl p-4 max-h-[90vh] overflow-y-auto hidden">
+  </div>
 
-<script src="offline-charts.js"></script>
-<script>
-/* ================================
-   STORAGE STRUCTURE
-================================= */
-const DATA_KEY = "income_data";
-const META_KEY = "income_meta";
+  <script src="offline-charts.js"></script>
+  <script>
+    /* ================================
+       STORAGE STRUCTURE
+    ================================= */
+    const DATA_KEY = "income_data";
+    const META_KEY = "income_meta";
 
-/*
-income_data = {
-  records: [],
-  locations: {
-    "Downtown Bar": { lastRate: 25 }
-  }
-}
-*/
-
-function initStorage() {
-  if (!localStorage.getItem(DATA_KEY)) {
-    localStorage.setItem(DATA_KEY, JSON.stringify({
+    /*
+    income_data = {
       records: [],
-      locations: {},
-      customFields: []
-    }));
-  }
-
-  if (!localStorage.getItem(META_KEY)) {
-    localStorage.setItem(META_KEY, JSON.stringify({
-      userId: "user1",
-      nextId: 1
-    }));
-  }
-}
-initStorage();
-
-isDevMode = false;
-
-/* ================================
-   HELPERS
-================================= */
-const $ = id => document.getElementById(id);
-
-function loadData() {
-  return JSON.parse(localStorage.getItem(DATA_KEY));
-}
-function saveData(d) {
-  localStorage.setItem(DATA_KEY, JSON.stringify(d));
-}
-function loadMeta() {
-  return JSON.parse(localStorage.getItem(META_KEY));
-}
-function saveMeta(m) {
-  localStorage.setItem(META_KEY, JSON.stringify(m));
-}
-
-function generateId() {
-  const m = loadMeta();
-  const id = `income_${m.userId}_${m.nextId}`;
-  m.nextId++;
-  saveMeta(m);
-  return id;
-}
-
-function todayISO() {
-  // Use local date instead of UTC to avoid timezone shifts
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-function money(v) {
-  return `$${Number(v || 0).toFixed(2)}`;
-}
-
-function normalizeHexColor(hex) {
-  if (!hex) return null;
-  const s = String(hex).trim();
-  if (!s || s === "none") return null;
-  const withHash = s.startsWith("#") ? s : `#${s}`;
-  const m = withHash.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
-  if (!m) return null;
-  let h = m[0].toLowerCase();
-  if (h.length === 4) {
-    h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
-  }
-  return h;
-}
-
-function hexToRgba(hex, alpha = 1) {
-  const h = normalizeHexColor(hex);
-  if (!h) return null;
-  const r = parseInt(h.slice(1, 3), 16);
-  const g = parseInt(h.slice(3, 5), 16);
-  const b = parseInt(h.slice(5, 7), 16);
-  const a = Math.max(0, Math.min(1, Number(alpha)));
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
-}
-
-function getLocationPreferredColor(loc) {
-  const d = loadData();
-  const c = d?.locations?.[loc]?.preferredColor;
-  return normalizeHexColor(c);
-}
-
-function getLocationTintStyle(loc) {
-  const hex = getLocationPreferredColor(loc);
-  if (!hex) return "";
-  const bg = hexToRgba(hex, 0.10);
-  const border = hexToRgba(hex, 0.30);
-  if (!bg || !border) return "";
-  return `background-color: ${bg}; border-color: ${border};`;
-}
-
-// Date filter for history and charts - must be defined early
-var dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
-
-// History filters & sorting
-var historyFilters = {
-  // Per custom field key:
-  // - text: { selected: Set<string> }
-  // - number/money: { min: number|null, max: number|null }
-  // - checkbox: { onlyChecked: boolean }
-  custom: {}
-};
-
-var historySort = { type: "date", key: null, direction: "desc" };
-
-var dashboardFilters = {
-  custom: {}
-};
-
-function countActiveCustomFilters(filters) {
-  const custom = filters?.custom || {};
-  let count = 0;
-  Object.values(custom).forEach(f => {
-    if (!f) return;
-    if (f.selected && f.selected.size) count += 1;
-    else if (typeof f.onlyChecked === "boolean" && f.onlyChecked) count += 1;
-    else if (f.min !== null || f.max !== null) count += 1;
-  });
-  return count;
-}
-
-function countActiveDateFilter() {
-  return dateFilter && dateFilter.type !== "all" ? 1 : 0;
-}
-
-function getRecordFieldValue(record, def) {
-  const raw = record?.[def.key];
-  if (raw === null || raw === undefined) return null;
-  if (def.type === "checkbox") {
-    const checked = raw === true || raw === "true" || raw === 1 || raw === "1";
-    return checked;
-  }
-  if (def.type === "number" || def.type === "money") {
-    const v = parseFloat(raw);
-    return Number.isFinite(v) ? v : null;
-  }
-  return String(raw);
-}
-
-function applyCustomFilters(records, defs, filters) {
-  const customDefs = defs || [];
-  const active = filters || historyFilters;
-  return records.filter(r => {
-    for (const def of customDefs) {
-      if (!def || !def.key) continue;
-      const f = active.custom?.[def.key];
-      if (!f) continue;
-
-      if (def.type === "checkbox") {
-        if (f.onlyChecked) {
-          const checked = getRecordFieldValue(r, def);
-          if (!checked) return false;
-        }
-      } else if (def.type === "number" || def.type === "money") {
-        const v = getRecordFieldValue(r, def);
-        if (v === null) {
-          if (f.min !== null || f.max !== null) return false;
-        } else {
-          if (f.min !== null && v < f.min) return false;
-          if (f.max !== null && v > f.max) return false;
-        }
-      } else {
-        const val = getRecordFieldValue(r, def);
-        const selected = f.selected;
-        if (selected && selected.size) {
-          if (!val || !selected.has(val)) return false;
-        }
+      locations: {
+        "Downtown Bar": { lastRate: 25 }
       }
     }
-    return true;
-  });
-}
+    */
 
-function applyHistorySort(records, defs) {
-  const out = [...records];
-  const t = historySort?.type || "date";
-  if (t === "date") {
-    out.sort((a, b) => (historySort.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date)));
-    return out;
-  }
-  if (t === "total") {
-    out.sort((a, b) => {
-      const av = calculateRecordTotal(a, defs);
-      const bv = calculateRecordTotal(b, defs);
-      return historySort.direction === "asc" ? (av - bv) : (bv - av);
-    });
-    return out;
-  }
-  if (t === "custom-number" && historySort.key) {
-    const def = (defs || []).find(d => d && d.key === historySort.key);
-    out.sort((a, b) => {
-      const av = def ? (getRecordFieldValue(a, def) ?? -Infinity) : -Infinity;
-      const bv = def ? (getRecordFieldValue(b, def) ?? -Infinity) : -Infinity;
-      return historySort.direction === "asc" ? (av - bv) : (bv - av);
-    });
-    return out;
-  }
-  return out;
-}
-
-function showHistoryFilterMenu() {
-  const data = loadData();
-  const defs = data.customFields || [];
-  const records = data.records.filter(r => !r.deleted);
-
-  // Build unique text values + numeric ranges from all data (fast, local)
-  const uniques = {};
-  const ranges = {};
-  defs.forEach(def => {
-    if (!def || !def.key) return;
-    if (def.type === "text" || def.type === "date") uniques[def.key] = new Set();
-    if (def.type === "number" || def.type === "money") ranges[def.key] = { min: Infinity, max: -Infinity };
-  });
-
-  records.forEach(r => {
-    defs.forEach(def => {
-      if (!def || !def.key) return;
-      const v = getRecordFieldValue(r, def);
-      if (v === null || v === "" || v === false) return;
-      if (uniques[def.key]) uniques[def.key].add(String(v));
-      if (ranges[def.key] && typeof v === "number") {
-        ranges[def.key].min = Math.min(ranges[def.key].min, v);
-        ranges[def.key].max = Math.max(ranges[def.key].max, v);
+    function initStorage() {
+      if (!localStorage.getItem(DATA_KEY)) {
+        localStorage.setItem(DATA_KEY, JSON.stringify({
+          records: [],
+          locations: {},
+          customFields: []
+        }));
       }
-    });
-  });
 
-  const numericSections = defs
-    .filter(d => d && (d.type === "number" || d.type === "money"))
-    .map(d => {
-      const r = ranges[d.key];
-      if (!r || !Number.isFinite(r.min) || !Number.isFinite(r.max)) return "";
-      const cur = historyFilters.custom?.[d.key] || { min: null, max: null };
-      const step = d.type === "money" ? "0.01" : "1";
-      return `
+      if (!localStorage.getItem(META_KEY)) {
+        localStorage.setItem(META_KEY, JSON.stringify({
+          userId: "user1",
+          nextId: 1
+        }));
+      }
+    }
+    initStorage();
+
+    isDevMode = false;
+
+    /* ================================
+       HELPERS
+    ================================= */
+    const $ = id => document.getElementById(id);
+
+    function loadData() {
+      return JSON.parse(localStorage.getItem(DATA_KEY));
+    }
+    function saveData(d) {
+      localStorage.setItem(DATA_KEY, JSON.stringify(d));
+    }
+    function loadMeta() {
+      return JSON.parse(localStorage.getItem(META_KEY));
+    }
+    function saveMeta(m) {
+      localStorage.setItem(META_KEY, JSON.stringify(m));
+    }
+
+    function generateId() {
+      const m = loadMeta();
+      const id = `income_${m.userId}_${m.nextId}`;
+      m.nextId++;
+      saveMeta(m);
+      return id;
+    }
+
+    function todayISO() {
+      // Use local date instead of UTC to avoid timezone shifts
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+    function money(v) {
+      return `$${Number(v || 0).toFixed(2)}`;
+    }
+
+    function normalizeHexColor(hex) {
+      if (!hex) return null;
+      const s = String(hex).trim();
+      if (!s || s === "none") return null;
+      const withHash = s.startsWith("#") ? s : `#${s}`;
+      const m = withHash.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+      if (!m) return null;
+      let h = m[0].toLowerCase();
+      if (h.length === 4) {
+        h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
+      }
+      return h;
+    }
+
+    function hexToRgba(hex, alpha = 1) {
+      const h = normalizeHexColor(hex);
+      if (!h) return null;
+      const r = parseInt(h.slice(1, 3), 16);
+      const g = parseInt(h.slice(3, 5), 16);
+      const b = parseInt(h.slice(5, 7), 16);
+      const a = Math.max(0, Math.min(1, Number(alpha)));
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    function getLocationPreferredColor(loc) {
+      const d = loadData();
+      const c = d?.locations?.[loc]?.preferredColor;
+      return normalizeHexColor(c);
+    }
+
+    function getLocationTintStyle(loc) {
+      const hex = getLocationPreferredColor(loc);
+      if (!hex) return "";
+      const bg = hexToRgba(hex, 0.10);
+      const border = hexToRgba(hex, 0.30);
+      if (!bg || !border) return "";
+      return `background-color: ${bg}; border-color: ${border};`;
+    }
+
+    // Date filter for history and charts - must be defined early
+    var dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
+
+    // History filters & sorting
+    var historyFilters = {
+      // Per custom field key:
+      // - text: { selected: Set<string> }
+      // - number/money: { min: number|null, max: number|null }
+      // - checkbox: { onlyChecked: boolean }
+      custom: {}
+    };
+
+    var historySort = { type: "date", key: null, direction: "desc" };
+
+    var dashboardFilters = {
+      custom: {}
+    };
+
+    function countActiveCustomFilters(filters) {
+      const custom = filters?.custom || {};
+      let count = 0;
+      Object.values(custom).forEach(f => {
+        if (!f) return;
+        if (f.selected && f.selected.size) count += 1;
+        else if (typeof f.onlyChecked === "boolean" && f.onlyChecked) count += 1;
+        else if (f.min !== null || f.max !== null) count += 1;
+      });
+      return count;
+    }
+
+    function countActiveDateFilter() {
+      return dateFilter && dateFilter.type !== "all" ? 1 : 0;
+    }
+
+    function getRecordFieldValue(record, def) {
+      const raw = record?.[def.key];
+      if (raw === null || raw === undefined) return null;
+      if (def.type === "checkbox") {
+        const checked = raw === true || raw === "true" || raw === 1 || raw === "1";
+        return checked;
+      }
+      if (def.type === "number" || def.type === "money") {
+        const v = parseFloat(raw);
+        return Number.isFinite(v) ? v : null;
+      }
+      return String(raw);
+    }
+
+    function applyCustomFilters(records, defs, filters) {
+      const customDefs = defs || [];
+      const active = filters || historyFilters;
+      return records.filter(r => {
+        for (const def of customDefs) {
+          if (!def || !def.key) continue;
+          const f = active.custom?.[def.key];
+          if (!f) continue;
+
+          if (def.type === "checkbox") {
+            if (f.onlyChecked) {
+              const checked = getRecordFieldValue(r, def);
+              if (!checked) return false;
+            }
+          } else if (def.type === "number" || def.type === "money") {
+            const v = getRecordFieldValue(r, def);
+            if (v === null) {
+              if (f.min !== null || f.max !== null) return false;
+            } else {
+              if (f.min !== null && v < f.min) return false;
+              if (f.max !== null && v > f.max) return false;
+            }
+          } else {
+            const val = getRecordFieldValue(r, def);
+            const selected = f.selected;
+            if (selected && selected.size) {
+              if (!val || !selected.has(val)) return false;
+            }
+          }
+        }
+        return true;
+      });
+    }
+
+    function applyHistorySort(records, defs) {
+      const out = [...records];
+      const t = historySort?.type || "date";
+      if (t === "date") {
+        out.sort((a, b) => (historySort.direction === "asc" ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date)));
+        return out;
+      }
+      if (t === "total") {
+        out.sort((a, b) => {
+          const av = calculateRecordTotal(a, defs);
+          const bv = calculateRecordTotal(b, defs);
+          return historySort.direction === "asc" ? (av - bv) : (bv - av);
+        });
+        return out;
+      }
+      if (t === "custom-number" && historySort.key) {
+        const def = (defs || []).find(d => d && d.key === historySort.key);
+        out.sort((a, b) => {
+          const av = def ? (getRecordFieldValue(a, def) ?? -Infinity) : -Infinity;
+          const bv = def ? (getRecordFieldValue(b, def) ?? -Infinity) : -Infinity;
+          return historySort.direction === "asc" ? (av - bv) : (bv - av);
+        });
+        return out;
+      }
+      return out;
+    }
+
+    function showHistoryFilterMenu() {
+      const data = loadData();
+      const defs = data.customFields || [];
+      const records = data.records.filter(r => !r.deleted);
+
+      // Build unique text values + numeric ranges from all data (fast, local)
+      const uniques = {};
+      const ranges = {};
+      defs.forEach(def => {
+        if (!def || !def.key) return;
+        if (def.type === "text" || def.type === "date") uniques[def.key] = new Set();
+        if (def.type === "number" || def.type === "money") ranges[def.key] = { min: Infinity, max: -Infinity };
+      });
+
+      records.forEach(r => {
+        defs.forEach(def => {
+          if (!def || !def.key) return;
+          const v = getRecordFieldValue(r, def);
+          if (v === null || v === "" || v === false) return;
+          if (uniques[def.key]) uniques[def.key].add(String(v));
+          if (ranges[def.key] && typeof v === "number") {
+            ranges[def.key].min = Math.min(ranges[def.key].min, v);
+            ranges[def.key].max = Math.max(ranges[def.key].max, v);
+          }
+        });
+      });
+
+      const numericSections = defs
+        .filter(d => d && (d.type === "number" || d.type === "money"))
+        .map(d => {
+          const r = ranges[d.key];
+          if (!r || !Number.isFinite(r.min) || !Number.isFinite(r.max)) return "";
+          const cur = historyFilters.custom?.[d.key] || { min: null, max: null };
+          const step = d.type === "money" ? "0.01" : "1";
+          return `
         <div class="bg-gray-800/50 rounded p-3 space-y-2">
           <div class="text-xs text-gray-300">${d.label}</div>
           <div class="grid grid-cols-2 gap-2">
@@ -347,18 +353,18 @@ function showHistoryFilterMenu() {
           <div class="text-[11px] text-gray-400">Range: ${d.type === "money" ? money(r.min) : r.min} – ${d.type === "money" ? money(r.max) : r.max}</div>
         </div>
       `;
-    }).join("");
+        }).join("");
 
-  const textSections = defs
-    .filter(d => d && (d.type === "text" || d.type === "date"))
-    .map(d => {
-      const set = uniques[d.key];
-      if (!set) return "";
-      const values = [...set].sort();
-      if (values.length === 0 || values.length > 20) return "";
-      const cur = historyFilters.custom?.[d.key];
-      const selected = cur?.selected || new Set();
-      return `
+      const textSections = defs
+        .filter(d => d && (d.type === "text" || d.type === "date"))
+        .map(d => {
+          const set = uniques[d.key];
+          if (!set) return "";
+          const values = [...set].sort();
+          if (values.length === 0 || values.length > 20) return "";
+          const cur = historyFilters.custom?.[d.key];
+          const selected = cur?.selected || new Set();
+          return `
         <div class="bg-gray-800/50 rounded p-3 space-y-2">
           <div class="text-xs text-gray-300">${d.label}</div>
           <div class="grid grid-cols-2 gap-2">
@@ -371,13 +377,13 @@ function showHistoryFilterMenu() {
           </div>
         </div>
       `;
-    }).join("");
+        }).join("");
 
-  const checkboxSections = defs
-    .filter(d => d && d.type === "checkbox")
-    .map(d => {
-      const cur = historyFilters.custom?.[d.key] || { onlyChecked: false };
-      return `
+      const checkboxSections = defs
+        .filter(d => d && d.type === "checkbox")
+        .map(d => {
+          const cur = historyFilters.custom?.[d.key] || { onlyChecked: false };
+          return `
         <div class="bg-gray-800/50 rounded p-3">
           <label class="flex items-center gap-2 text-xs text-gray-300/80">
             <input type="checkbox" id="hf_${d.key}_onlyChecked" class="accent-indigo-500" ${cur.onlyChecked ? 'checked' : ''}>
@@ -385,9 +391,9 @@ function showHistoryFilterMenu() {
           </label>
         </div>
       `;
-    }).join("");
+        }).join("");
 
-  const menu = `
+      const menu = `
     <div id="historyFilterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeHistoryFilterMenu()"></div>
     <div id="historyFilterSheet" class="fixed bottom-20 inset-x-0 max-h-[70vh] overflow-y-auto bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="flex items-center justify-between mb-3">
@@ -434,54 +440,54 @@ function showHistoryFilterMenu() {
     </div>
   `;
 
-  const existing = $("historyFilterSheet");
-  if (existing) existing.remove();
-  document.body.insertAdjacentHTML("beforeend", menu);
+      const existing = $("historyFilterSheet");
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML("beforeend", menu);
 
-  requestAnimationFrame(() => {
-    const sheet = $("historyFilterSheet");
-    const overlay = $("historyFilterOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-  });
-}
+      requestAnimationFrame(() => {
+        const sheet = $("historyFilterSheet");
+        const overlay = $("historyFilterOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+      });
+    }
 
-function showDashboardFilterMenu() {
-  const data = loadData();
-  const defs = data.customFields || [];
-  const records = data.records.filter(r => !r.deleted);
+    function showDashboardFilterMenu() {
+      const data = loadData();
+      const defs = data.customFields || [];
+      const records = data.records.filter(r => !r.deleted);
 
-  const uniques = {};
-  const ranges = {};
-  defs.forEach(def => {
-    if (!def || !def.key) return;
-    if (def.type === "text" || def.type === "date") uniques[def.key] = new Set();
-    if (def.type === "number" || def.type === "money") ranges[def.key] = { min: Infinity, max: -Infinity };
-  });
+      const uniques = {};
+      const ranges = {};
+      defs.forEach(def => {
+        if (!def || !def.key) return;
+        if (def.type === "text" || def.type === "date") uniques[def.key] = new Set();
+        if (def.type === "number" || def.type === "money") ranges[def.key] = { min: Infinity, max: -Infinity };
+      });
 
-  records.forEach(r => {
-    defs.forEach(def => {
-      if (!def || !def.key) return;
-      const v = getRecordFieldValue(r, def);
-      if (v === null || v === "" || v === false) return;
-      if (uniques[def.key]) uniques[def.key].add(String(v));
-      if (ranges[def.key] && typeof v === "number") {
-        ranges[def.key].min = Math.min(ranges[def.key].min, v);
-        ranges[def.key].max = Math.max(ranges[def.key].max, v);
-      }
-    });
-  });
+      records.forEach(r => {
+        defs.forEach(def => {
+          if (!def || !def.key) return;
+          const v = getRecordFieldValue(r, def);
+          if (v === null || v === "" || v === false) return;
+          if (uniques[def.key]) uniques[def.key].add(String(v));
+          if (ranges[def.key] && typeof v === "number") {
+            ranges[def.key].min = Math.min(ranges[def.key].min, v);
+            ranges[def.key].max = Math.max(ranges[def.key].max, v);
+          }
+        });
+      });
 
-  const textSections = defs
-    .filter(d => d && (d.type === "text" || d.type === "date"))
-    .map(d => {
-      const set = uniques[d.key];
-      if (!set) return "";
-      const values = [...set].sort();
-      if (values.length === 0 || values.length > 20) return "";
-      const cur = dashboardFilters.custom?.[d.key];
-      const selected = cur?.selected || new Set();
-      return `
+      const textSections = defs
+        .filter(d => d && (d.type === "text" || d.type === "date"))
+        .map(d => {
+          const set = uniques[d.key];
+          if (!set) return "";
+          const values = [...set].sort();
+          if (values.length === 0 || values.length > 20) return "";
+          const cur = dashboardFilters.custom?.[d.key];
+          const selected = cur?.selected || new Set();
+          return `
         <div class="bg-gray-800/50 rounded p-3 space-y-2">
           <div class="text-xs text-gray-300">${d.label}</div>
           <div class="grid grid-cols-2 gap-2">
@@ -494,16 +500,16 @@ function showDashboardFilterMenu() {
           </div>
         </div>
       `;
-    }).join("");
+        }).join("");
 
-  const numericSections = defs
-    .filter(d => d && (d.type === "number" || d.type === "money"))
-    .map(d => {
-      const r = ranges[d.key];
-      if (!r || !Number.isFinite(r.min) || !Number.isFinite(r.max)) return "";
-      const cur = dashboardFilters.custom?.[d.key] || { min: null, max: null };
-      const step = d.type === "money" ? "0.01" : "1";
-      return `
+      const numericSections = defs
+        .filter(d => d && (d.type === "number" || d.type === "money"))
+        .map(d => {
+          const r = ranges[d.key];
+          if (!r || !Number.isFinite(r.min) || !Number.isFinite(r.max)) return "";
+          const cur = dashboardFilters.custom?.[d.key] || { min: null, max: null };
+          const step = d.type === "money" ? "0.01" : "1";
+          return `
         <div class="bg-gray-800/50 rounded p-3 space-y-2">
           <div class="text-xs text-gray-300">${d.label}</div>
           <div class="grid grid-cols-2 gap-2">
@@ -513,12 +519,12 @@ function showDashboardFilterMenu() {
           <div class="text-[11px] text-gray-400">Range: ${d.type === "money" ? money(r.min) : r.min} – ${d.type === "money" ? money(r.max) : r.max}</div>
         </div>
       `;
-    }).join("");
+        }).join("");
 
-  const groupable = defs.filter(d => d && (d.type === "text" || d.type === "date"));
-  const groupKey = window.dashboardCustomGroupKey || "";
+      const groupable = defs.filter(d => d && (d.type === "text" || d.type === "date"));
+      const groupKey = window.dashboardCustomGroupKey || "";
 
-  const menu = `
+      const menu = `
     <div id="dashboardFilterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeDashboardFilterMenu()"></div>
     <div id="dashboardFilterSheet" class="fixed bottom-20 inset-x-0 max-h-[70vh] overflow-y-auto bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="flex items-center justify-between mb-3">
@@ -545,321 +551,321 @@ function showDashboardFilterMenu() {
     </div>
   `;
 
-  const existing = $("dashboardFilterSheet");
-  if (existing) existing.remove();
-  document.body.insertAdjacentHTML("beforeend", menu);
+      const existing = $("dashboardFilterSheet");
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML("beforeend", menu);
 
-  requestAnimationFrame(() => {
-    const sheet = $("dashboardFilterSheet");
-    const overlay = $("dashboardFilterOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-  });
-}
-
-function closeDashboardFilterMenu() {
-  const sheet = $("dashboardFilterSheet");
-  const overlay = $("dashboardFilterOverlay");
-  if (sheet) sheet.classList.add("translate-y-full");
-  if (overlay) overlay.classList.add("opacity-0");
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 250);
-}
-
-function resetDashboardFilters() {
-  dashboardFilters = { custom: {} };
-  window.dashboardCustomGroupKey = "";
-  renderDashboard();
-  closeDashboardFilterMenu();
-}
-
-function clearDashboardFiltersQuick() {
-  dashboardFilters = { custom: {} };
-  renderDashboard();
-}
-
-function applyDashboardFiltersFromUI() {
-  const data = loadData();
-  const defs = data.customFields || [];
-  const next = { custom: {} };
-
-  defs.forEach(def => {
-    if (!def || !def.key) return;
-    if (def.type === "text" || def.type === "date") {
-      const nodes = document.querySelectorAll(`input[type="checkbox"][data-df-text="${def.key}"]`);
-      const selected = new Set();
-      nodes.forEach(n => { if (n.checked) selected.add(n.value); });
-      if (selected.size) next.custom[def.key] = { selected };
-    } else if (def.type === "number" || def.type === "money") {
-      const minRaw = document.getElementById(`df_${def.key}_min`)?.value;
-      const maxRaw = document.getElementById(`df_${def.key}_max`)?.value;
-      const min = minRaw === "" ? null : parseFloat(minRaw);
-      const max = maxRaw === "" ? null : parseFloat(maxRaw);
-      if (min !== null || max !== null) next.custom[def.key] = { min: Number.isFinite(min) ? min : null, max: Number.isFinite(max) ? max : null };
+      requestAnimationFrame(() => {
+        const sheet = $("dashboardFilterSheet");
+        const overlay = $("dashboardFilterOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+      });
     }
-  });
 
-  dashboardFilters = next;
-  window.dashboardCustomGroupKey = document.getElementById("df_group_key")?.value || "";
-
-  renderDashboard();
-  closeDashboardFilterMenu();
-}
-
-function closeHistoryFilterMenu() {
-  const sheet = $("historyFilterSheet");
-  const overlay = $("historyFilterOverlay");
-  if (sheet) sheet.classList.add("translate-y-full");
-  if (overlay) overlay.classList.add("opacity-0");
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 250);
-}
-
-function applyHistoryDateRange() {
-  const start = $("hf_date_start")?.value;
-  const end = $("hf_date_end")?.value;
-  if (start && end) setDateFilter("range", start, end, `${start} to ${end}`);
-}
-
-function resetHistoryFilters() {
-  historyFilters = { custom: {} };
-  historySort = { type: "date", key: null, direction: "desc" };
-  renderHistory();
-  closeHistoryFilterMenu();
-}
-
-function clearHistoryFiltersQuick() {
-  historyFilters = { custom: {} };
-  historySort = { type: "date", key: null, direction: "desc" };
-  // Keep dateFilter as-is (so monthly banner/date range still works),
-  // but you can clear it from the date picker if desired.
-  renderHistory();
-}
-
-function applyHistoryFiltersFromUI() {
-  const data = loadData();
-  const defs = data.customFields || [];
-  const next = { custom: {} };
-
-  defs.forEach(def => {
-    if (!def || !def.key) return;
-    if (def.type === "text" || def.type === "date") {
-      const nodes = document.querySelectorAll(`input[type="checkbox"][data-hf-text="${def.key}"]`);
-      const selected = new Set();
-      nodes.forEach(n => { if (n.checked) selected.add(n.value); });
-      if (selected.size) next.custom[def.key] = { selected };
-    } else if (def.type === "number" || def.type === "money") {
-      const minRaw = document.getElementById(`hf_${def.key}_min`)?.value;
-      const maxRaw = document.getElementById(`hf_${def.key}_max`)?.value;
-      const min = minRaw === "" ? null : parseFloat(minRaw);
-      const max = maxRaw === "" ? null : parseFloat(maxRaw);
-      if (min !== null || max !== null) next.custom[def.key] = { min: Number.isFinite(min) ? min : null, max: Number.isFinite(max) ? max : null };
-    } else if (def.type === "checkbox") {
-      const onlyChecked = !!document.getElementById(`hf_${def.key}_onlyChecked`)?.checked;
-      if (onlyChecked) next.custom[def.key] = { onlyChecked: true };
+    function closeDashboardFilterMenu() {
+      const sheet = $("dashboardFilterSheet");
+      const overlay = $("dashboardFilterOverlay");
+      if (sheet) sheet.classList.add("translate-y-full");
+      if (overlay) overlay.classList.add("opacity-0");
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 250);
     }
-  });
 
-  historyFilters = next;
-
-  const sortVal = $("hf_sort")?.value || "date_desc";
-  if (sortVal.startsWith("date_")) {
-    historySort = { type: "date", key: null, direction: sortVal.endsWith("_asc") ? "asc" : "desc" };
-  } else if (sortVal.startsWith("total_")) {
-    historySort = { type: "total", key: null, direction: sortVal.endsWith("_asc") ? "asc" : "desc" };
-  } else if (sortVal.startsWith("num_")) {
-    const parts = sortVal.split("_"); // num, key..., dir
-    const direction = parts[parts.length - 1] === "asc" ? "asc" : "desc";
-    const key = parts.slice(1, -1).join("_");
-    historySort = { type: "custom-number", key, direction };
-  }
-
-  renderHistory();
-  closeHistoryFilterMenu();
-}
-
-function getCustomFieldDefs() {
-  try {
-    const d = loadData();
-    return d?.customFields || [];
-  } catch {
-    return [];
-  }
-}
-
-function calculateBasePay(record) {
-  const hours = parseFloat(record?.hours) || 0;
-  const rate = parseFloat(record?.rate) || 0;
-  const payType = record?.payType === "flat" ? "flat" : "hourly";
-  return payType === "flat" ? rate : (hours * rate);
-}
-
-function calculateMoneyCustomContribution(record, customFieldDefs) {
-  if (!record) return 0;
-  const defs = customFieldDefs || [];
-  let sum = 0;
-  defs.forEach(def => {
-    if (!def || def.type !== "money") return;
-    const raw = record[def.key];
-    if (raw === null || raw === undefined || raw === "") return;
-    const v = parseFloat(raw);
-    if (!Number.isFinite(v)) return;
-    const mode = def.addToTotal || "none"; // "none" | "add" | "subtract"
-    if (mode === "add") sum += v;
-    else if (mode === "subtract") sum -= v;
-  });
-  return sum;
-}
-
-function calculateRecordTotal(record, customFieldDefs) {
-  const tips = parseFloat(record?.tips) || 0;
-  return calculateBasePay(record) + tips + calculateMoneyCustomContribution(record, customFieldDefs);
-}
-
-/* Toast notifications - bottom right, stacking */
-function showToast(message, duration = 3000) {
-  let container = $("toast-container");
-  if (!container) {
-    const c = document.createElement("div");
-    c.id = "toast-container";
-    c.className = "fixed bottom-24 right-4 z-50 flex flex-col gap-2 max-w-[200px]";
-    document.body.appendChild(c);
-    container = $("toast-container");
-  }
-  
-  const toast = document.createElement("div");
-  toast.className = "bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg opacity-90";
-  toast.textContent = message;
-  container.appendChild(toast);
-  console.log("[TOAST]", message);
-  
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.style.opacity = "0";
-      toast.style.transition = "opacity 0.3s";
-      setTimeout(() => toast.remove(), 300);
+    function resetDashboardFilters() {
+      dashboardFilters = { custom: {} };
+      window.dashboardCustomGroupKey = "";
+      renderDashboard();
+      closeDashboardFilterMenu();
     }
-  }, duration);
-}
 
-function debug(msg) {
-  // Debug logging - currently disabled for production
-  // console.log("[DEBUG]", msg);
-}
-
-/* Floating label handler */
-function updateLabel(labelId) {
-  const label = document.getElementById(labelId);
-  if (!label) return;
-  
-  const inputId = label.getAttribute('for');
-  const input = document.getElementById(inputId);
-  if (!input) return;
-  
-  const hasValue = input.value && input.value.length > 0;
-  
-  if (hasValue) {
-    label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
-    label.classList.remove('top-3', 'text-gray-400', 'text-sm');
-  } else {
-    label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
-    label.classList.add('top-3', 'text-gray-400', 'text-sm');
-  }
-}
-
-/* Add debug/test entries */
-function addDebugEntries() {
-  const locations = ["Matsuhisa", "Eddie V's", "Big City Bar", "The Local", "Sports Pub", "Fine Dining", "Café Corner"];
-  const data = loadData();
-  const now = Date.now();
-  const today = new Date();
-  
-  // Generate 100 entries spanning 6 months (180 days)
-  for (let i = 0; i < 100; i++) {
-    const daysAgo = Math.floor(Math.random() * 180) + 1; // 1-180 days ago
-    const date = new Date(today);
-    date.setDate(date.getDate() - daysAgo);
-    const dateStr = date.toISOString().split("T")[0];
-    
-    const location = locations[Math.floor(Math.random() * locations.length)];
-    const hours = 4 + Math.floor(Math.random() * 4); // 4-8 hours, whole numbers
-    const rate = 15 + Math.floor(Math.random() * 10); // $15-25/hr
-    const tips = 30 + Math.floor(Math.random() * 200); // $30-230 tips
-    
-    data.records.push({
-      id: generateId(),
-      date: dateStr,
-      hours: hours,
-      rate: rate,
-      tips: tips,
-      location: location,
-      deleted: false,
-      createdAt: now - (daysAgo * 24 * 60 * 60 * 1000),
-      updatedAt: now - (daysAgo * 24 * 60 * 60 * 1000)
-    });
-    
-    // Also save location rate
-    if (!data.locations[location]) {
-      data.locations[location] = { lastRate: rate };
+    function clearDashboardFiltersQuick() {
+      dashboardFilters = { custom: {} };
+      renderDashboard();
     }
-  }
-  
-  saveData(data);
-  showToast("Added 100 debug entries!", 3000);
-  switchTab("history");
-}
 
-/* ================================
-   TAB CONTROL
-================================= */
-let activeTab = "dashboard";
-let showDeletedRecords = false; // Toggle for showing deleted records in history
-let loadedMonths = 2; // Number of months to show (starts with current month)
-let allRecords = []; // Store all records for infinite scroll
-let isScrollLoad = false; // Track if this is a scroll-triggered load
-let savedFormData = null; // Store form data when switching away from Add tab
-let editModeRecord = null; // Track if we're editing an existing record
-let skipNextAddFormSave = false; // Prevent saving form state after successful submit
+    function applyDashboardFiltersFromUI() {
+      const data = loadData();
+      const defs = data.customFields || [];
+      const next = { custom: {} };
 
-document.querySelectorAll(".tab").forEach(btn => {
-  btn.onclick = () => {
-    let targetTab = btn.dataset.tab;
-    
-    // If clicking Add while in edit mode, submit the form instead of switching
-    if (targetTab === "add" && editModeRecord) {
-      const form = $("incomeForm");
-      if (form) {
-        form.dispatchEvent(new Event('submit', { bubbles: true }));
+      defs.forEach(def => {
+        if (!def || !def.key) return;
+        if (def.type === "text" || def.type === "date") {
+          const nodes = document.querySelectorAll(`input[type="checkbox"][data-df-text="${def.key}"]`);
+          const selected = new Set();
+          nodes.forEach(n => { if (n.checked) selected.add(n.value); });
+          if (selected.size) next.custom[def.key] = { selected };
+        } else if (def.type === "number" || def.type === "money") {
+          const minRaw = document.getElementById(`df_${def.key}_min`)?.value;
+          const maxRaw = document.getElementById(`df_${def.key}_max`)?.value;
+          const min = minRaw === "" ? null : parseFloat(minRaw);
+          const max = maxRaw === "" ? null : parseFloat(maxRaw);
+          if (min !== null || max !== null) next.custom[def.key] = { min: Number.isFinite(min) ? min : null, max: Number.isFinite(max) ? max : null };
+        }
+      });
+
+      dashboardFilters = next;
+      window.dashboardCustomGroupKey = document.getElementById("df_group_key")?.value || "";
+
+      renderDashboard();
+      closeDashboardFilterMenu();
+    }
+
+    function closeHistoryFilterMenu() {
+      const sheet = $("historyFilterSheet");
+      const overlay = $("historyFilterOverlay");
+      if (sheet) sheet.classList.add("translate-y-full");
+      if (overlay) overlay.classList.add("opacity-0");
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 250);
+    }
+
+    function applyHistoryDateRange() {
+      const start = $("hf_date_start")?.value;
+      const end = $("hf_date_end")?.value;
+      if (start && end) setDateFilter("range", start, end, `${start} to ${end}`);
+    }
+
+    function resetHistoryFilters() {
+      historyFilters = { custom: {} };
+      historySort = { type: "date", key: null, direction: "desc" };
+      renderHistory();
+      closeHistoryFilterMenu();
+    }
+
+    function clearHistoryFiltersQuick() {
+      historyFilters = { custom: {} };
+      historySort = { type: "date", key: null, direction: "desc" };
+      // Keep dateFilter as-is (so monthly banner/date range still works),
+      // but you can clear it from the date picker if desired.
+      renderHistory();
+    }
+
+    function applyHistoryFiltersFromUI() {
+      const data = loadData();
+      const defs = data.customFields || [];
+      const next = { custom: {} };
+
+      defs.forEach(def => {
+        if (!def || !def.key) return;
+        if (def.type === "text" || def.type === "date") {
+          const nodes = document.querySelectorAll(`input[type="checkbox"][data-hf-text="${def.key}"]`);
+          const selected = new Set();
+          nodes.forEach(n => { if (n.checked) selected.add(n.value); });
+          if (selected.size) next.custom[def.key] = { selected };
+        } else if (def.type === "number" || def.type === "money") {
+          const minRaw = document.getElementById(`hf_${def.key}_min`)?.value;
+          const maxRaw = document.getElementById(`hf_${def.key}_max`)?.value;
+          const min = minRaw === "" ? null : parseFloat(minRaw);
+          const max = maxRaw === "" ? null : parseFloat(maxRaw);
+          if (min !== null || max !== null) next.custom[def.key] = { min: Number.isFinite(min) ? min : null, max: Number.isFinite(max) ? max : null };
+        } else if (def.type === "checkbox") {
+          const onlyChecked = !!document.getElementById(`hf_${def.key}_onlyChecked`)?.checked;
+          if (onlyChecked) next.custom[def.key] = { onlyChecked: true };
+        }
+      });
+
+      historyFilters = next;
+
+      const sortVal = $("hf_sort")?.value || "date_desc";
+      if (sortVal.startsWith("date_")) {
+        historySort = { type: "date", key: null, direction: sortVal.endsWith("_asc") ? "asc" : "desc" };
+      } else if (sortVal.startsWith("total_")) {
+        historySort = { type: "total", key: null, direction: sortVal.endsWith("_asc") ? "asc" : "desc" };
+      } else if (sortVal.startsWith("num_")) {
+        const parts = sortVal.split("_"); // num, key..., dir
+        const direction = parts[parts.length - 1] === "asc" ? "asc" : "desc";
+        const key = parts.slice(1, -1).join("_");
+        historySort = { type: "custom-number", key, direction };
       }
-      return;
-    }
-    
-    switchTab(targetTab);
-  };
-});
 
-function updateBottomNavForEditMode(isEditing) {
-  const nav = document.querySelector("nav");
-  const addTab = document.querySelector('[data-tab="add"]');
-  const dashTab = document.querySelector('[data-tab="dashboard"]');
-  const histTab = document.querySelector('[data-tab="history"]');
-  const settingsBtn = document.querySelector('[data-tab="settings"]');
-  
-  if (!addTab) return;
-  
-  if (isEditing) {
-    // Hide other tabs and settings button
-    if (dashTab) dashTab.style.display = "none";
-    if (histTab) histTab.style.display = "none";
-    if (settingsBtn) settingsBtn.style.display = "none";
-    
-    // Change Add button to Save button
-    addTab.style.flex = "1";
-    addTab.innerHTML = `
+      renderHistory();
+      closeHistoryFilterMenu();
+    }
+
+    function getCustomFieldDefs() {
+      try {
+        const d = loadData();
+        return d?.customFields || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function calculateBasePay(record) {
+      const hours = parseFloat(record?.hours) || 0;
+      const rate = parseFloat(record?.rate) || 0;
+      const payType = record?.payType === "flat" ? "flat" : "hourly";
+      return payType === "flat" ? rate : (hours * rate);
+    }
+
+    function calculateMoneyCustomContribution(record, customFieldDefs) {
+      if (!record) return 0;
+      const defs = customFieldDefs || [];
+      let sum = 0;
+      defs.forEach(def => {
+        if (!def || def.type !== "money") return;
+        const raw = record[def.key];
+        if (raw === null || raw === undefined || raw === "") return;
+        const v = parseFloat(raw);
+        if (!Number.isFinite(v)) return;
+        const mode = def.addToTotal || "none"; // "none" | "add" | "subtract"
+        if (mode === "add") sum += v;
+        else if (mode === "subtract") sum -= v;
+      });
+      return sum;
+    }
+
+    function calculateRecordTotal(record, customFieldDefs) {
+      const tips = parseFloat(record?.tips) || 0;
+      return calculateBasePay(record) + tips + calculateMoneyCustomContribution(record, customFieldDefs);
+    }
+
+    /* Toast notifications - bottom right, stacking */
+    function showToast(message, duration = 3000) {
+      let container = $("toast-container");
+      if (!container) {
+        const c = document.createElement("div");
+        c.id = "toast-container";
+        c.className = "fixed bottom-24 right-4 z-50 flex flex-col gap-2 max-w-[200px]";
+        document.body.appendChild(c);
+        container = $("toast-container");
+      }
+
+      const toast = document.createElement("div");
+      toast.className = "bg-gray-800 text-white text-sm px-3 py-2 rounded-lg shadow-lg opacity-90";
+      toast.textContent = message;
+      container.appendChild(toast);
+      console.log("[TOAST]", message);
+
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.opacity = "0";
+          toast.style.transition = "opacity 0.3s";
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, duration);
+    }
+
+    function debug(msg) {
+      // Debug logging - currently disabled for production
+      // console.log("[DEBUG]", msg);
+    }
+
+    /* Floating label handler */
+    function updateLabel(labelId) {
+      const label = document.getElementById(labelId);
+      if (!label) return;
+
+      const inputId = label.getAttribute('for');
+      const input = document.getElementById(inputId);
+      if (!input) return;
+
+      const hasValue = input.value && input.value.length > 0;
+
+      if (hasValue) {
+        label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+        label.classList.remove('top-3', 'text-gray-400', 'text-sm');
+      } else {
+        label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+        label.classList.add('top-3', 'text-gray-400', 'text-sm');
+      }
+    }
+
+    /* Add debug/test entries */
+    function addDebugEntries() {
+      const locations = ["Matsuhisa", "Eddie V's", "Big City Bar", "The Local", "Sports Pub", "Fine Dining", "Café Corner"];
+      const data = loadData();
+      const now = Date.now();
+      const today = new Date();
+
+      // Generate 100 entries spanning 6 months (180 days)
+      for (let i = 0; i < 100; i++) {
+        const daysAgo = Math.floor(Math.random() * 180) + 1; // 1-180 days ago
+        const date = new Date(today);
+        date.setDate(date.getDate() - daysAgo);
+        const dateStr = date.toISOString().split("T")[0];
+
+        const location = locations[Math.floor(Math.random() * locations.length)];
+        const hours = 4 + Math.floor(Math.random() * 4); // 4-8 hours, whole numbers
+        const rate = 15 + Math.floor(Math.random() * 10); // $15-25/hr
+        const tips = 30 + Math.floor(Math.random() * 200); // $30-230 tips
+
+        data.records.push({
+          id: generateId(),
+          date: dateStr,
+          hours: hours,
+          rate: rate,
+          tips: tips,
+          location: location,
+          deleted: false,
+          createdAt: now - (daysAgo * 24 * 60 * 60 * 1000),
+          updatedAt: now - (daysAgo * 24 * 60 * 60 * 1000)
+        });
+
+        // Also save location rate
+        if (!data.locations[location]) {
+          data.locations[location] = { lastRate: rate };
+        }
+      }
+
+      saveData(data);
+      showToast("Added 100 debug entries!", 3000);
+      switchTab("history");
+    }
+
+    /* ================================
+       TAB CONTROL
+    ================================= */
+    let activeTab = "dashboard";
+    let showDeletedRecords = false; // Toggle for showing deleted records in history
+    let loadedMonths = 2; // Number of months to show (starts with current month)
+    let allRecords = []; // Store all records for infinite scroll
+    let isScrollLoad = false; // Track if this is a scroll-triggered load
+    let savedFormData = null; // Store form data when switching away from Add tab
+    let editModeRecord = null; // Track if we're editing an existing record
+    let skipNextAddFormSave = false; // Prevent saving form state after successful submit
+
+    document.querySelectorAll(".tab").forEach(btn => {
+      btn.onclick = () => {
+        let targetTab = btn.dataset.tab;
+
+        // If clicking Add while in edit mode, submit the form instead of switching
+        if (targetTab === "add" && editModeRecord) {
+          const form = $("incomeForm");
+          if (form) {
+            form.dispatchEvent(new Event('submit', { bubbles: true }));
+          }
+          return;
+        }
+
+        switchTab(targetTab);
+      };
+    });
+
+    function updateBottomNavForEditMode(isEditing) {
+      const nav = document.querySelector("nav");
+      const addTab = document.querySelector('[data-tab="add"]');
+      const dashTab = document.querySelector('[data-tab="dashboard"]');
+      const histTab = document.querySelector('[data-tab="history"]');
+      const settingsBtn = document.querySelector('[data-tab="settings"]');
+
+      if (!addTab) return;
+
+      if (isEditing) {
+        // Hide other tabs and settings button
+        if (dashTab) dashTab.style.display = "none";
+        if (histTab) histTab.style.display = "none";
+        if (settingsBtn) settingsBtn.style.display = "none";
+
+        // Change Add button to Save button
+        addTab.style.flex = "1";
+        addTab.innerHTML = `
       <div class="flex flex-col items-center gap-1">
         <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -867,15 +873,15 @@ function updateBottomNavForEditMode(isEditing) {
         <span class="text-sm">Save Changes</span>
       </div>
     `;
-  } else {
-    // Restore all tabs and settings button
-    if (dashTab) dashTab.style.display = "block";
-    if (histTab) histTab.style.display = "block";
-    if (settingsBtn) settingsBtn.style.display = "block";
-    
-    // Restore Add button
-    addTab.style.flex = "1";
-    addTab.innerHTML = `
+      } else {
+        // Restore all tabs and settings button
+        if (dashTab) dashTab.style.display = "block";
+        if (histTab) histTab.style.display = "block";
+        if (settingsBtn) settingsBtn.style.display = "block";
+
+        // Restore Add button
+        addTab.style.flex = "1";
+        addTab.innerHTML = `
       <div class="flex flex-col items-center gap-1">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path d="M12 4v16m8-8H4"/>
@@ -883,123 +889,125 @@ function updateBottomNavForEditMode(isEditing) {
         <span>Add</span>
       </div>
     `;
-  }
-}
-
-function switchTab(tab) {
-  // Save form data when leaving add tab (only if NOT in edit mode)
-  if (activeTab === "add" && tab !== "add") {
-    if (editModeRecord) {
-      // Cancel edit mode - clear everything
-      editModeRecord = null;
-      savedFormData = null;
-      updateBottomNavForEditMode(false);
-    } else {
-      if (skipNextAddFormSave) {
-        skipNextAddFormSave = false;
-        savedFormData = null;
-      } else {
-        // Normal tab switch - save form data
-        const form = $("incomeForm");
-        if (form) {
-          savedFormData = {
-            date: form.date?.value || "",
-            hours: form.hours?.value || "",
-            location: form.location?.value || "",
-            rate: form.rate?.value || "",
-            tips: form.tips?.value || "",
-            payType: form.payType?.value || "hourly"
-          };
-        }
       }
     }
-  }
-  
-  activeTab = tab;
-  document.querySelectorAll(".tab").forEach(b => {
-    b.classList.toggle("text-indigo-400", b.dataset.tab === tab);
-    b.classList.toggle("text-gray-400", b.dataset.tab !== tab);
-  });
 
-  // Show/hide monthly banner based on tab
-  const banner = $("monthlyBanner");
-  if (banner) {
-    banner.classList.toggle("hidden", tab !== "history");
-  }
+    function switchTab(tab) {
+      // Save form data when leaving add tab (only if NOT in edit mode)
+      if (activeTab === "add" && tab !== "add") {
+        if (editModeRecord) {
+          // Cancel edit mode - clear everything
+          editModeRecord = null;
+          savedFormData = null;
+          updateBottomNavForEditMode(false);
+        } else {
+          if (skipNextAddFormSave) {
+            skipNextAddFormSave = false;
+            savedFormData = null;
+          } else {
+            // Normal tab switch - save form data
+            const form = $("incomeForm");
+            if (form) {
+              savedFormData = {
+                date: form.date?.value || "",
+                hours: form.hours?.value || "",
+                location: form.location?.value || "",
+                rate: form.rate?.value || "",
+                tips: form.tips?.value || "",
+                payType: form.payType?.value || "hourly"
+              };
+            }
+          }
+        }
+      }
 
-  // Add transition effect
-  const app = $("app");
-  app.style.opacity = "0";
-  app.style.transform = "translateX(20px)";
-  app.style.transition = "opacity 0.2s, transform 0.2s";
-  
-  setTimeout(() => {
-    if (tab === "dashboard") renderDashboard();
-    else if (tab === "add") renderAdd(editModeRecord || savedFormData);
-    else if (tab === "history") renderHistory();
-    else if (tab === "settings") renderSettings();
-    
-    // Restore visibility with animation
-    app.style.opacity = "1";
-    app.style.transform = "translateX(0)";
-  }, 150);
-}
+      activeTab = tab;
+      document.querySelectorAll(".tab").forEach(b => {
+        b.classList.toggle("text-indigo-400", b.dataset.tab === tab);
+        b.classList.toggle("text-gray-400", b.dataset.tab !== tab);
+      });
 
-/* ================================
-   DASHBOARD WITH CHARTS
-================================= */
-function renderDashboard() {
-  const data = loadData();
-  const records = data.records.filter(r => !r.deleted);
-  const defs = data.customFields || [];
-  
-  // Calculate stats
-  const today = new Date();
-  const thisMonth = today.toISOString().slice(0, 7);
-  
-  // This month
-  const thisMonthRecords = records.filter(r => r.date && r.date.startsWith(thisMonth));
-  const thisMonthTotal = thisMonthRecords.reduce((sum, r) => {
-    return sum + calculateRecordTotal(r, defs);
-  }, 0);
-  const thisMonthHours = thisMonthRecords.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
-  
-  // Last month
-  const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-  const lastMonthStr = lastMonth.toISOString().slice(0, 7);
-  const lastMonthRecords = records.filter(r => r.date && r.date.startsWith(lastMonthStr));
-  const lastMonthTotal = lastMonthRecords.reduce((sum, r) => {
-    return sum + calculateRecordTotal(r, defs);
-  }, 0);
-  
-  // All time
-  const allTimeTotal = records.reduce((sum, r) => {
-    return sum + calculateRecordTotal(r, defs);
-  }, 0);
-  const allTimeHours = records.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
-  
-  // Change percentage
-  const change = lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal * 100).toFixed(0) : 0;
-  const isUp = change >= 0;
-  
-  // Top locations
-  const locationTotals = {};
-  records.forEach(r => {
-    locationTotals[r.location] = (locationTotals[r.location] || 0) + calculateRecordTotal(r, defs);
-  });
-  const topLocations = Object.entries(locationTotals)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  
-  // Update date filter for charts based on history filter
-  if (typeof dateFilter === 'undefined') {
-    dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
-  }
-  
-  $("app").innerHTML = `
+      // Show/hide monthly banner based on tab
+      const banner = $("monthlyBanner");
+      if (banner) {
+        banner.classList.toggle("hidden", tab !== "history");
+      }
+
+      // Add transition effect
+      const app = $("app");
+      app.style.opacity = "0";
+      app.style.transform = "translateX(20px)";
+      app.style.transition = "opacity 0.2s, transform 0.2s";
+
+      setTimeout(() => {
+        if (tab === "dashboard") renderDashboard();
+        else if (tab === "add") renderAdd(editModeRecord || savedFormData);
+        else if (tab === "history") renderHistory();
+        else if (tab === "settings") renderSettings();
+
+        // Restore visibility with animation
+        app.style.opacity = "1";
+        app.style.transform = "translateX(0)";
+      }, 150);
+    }
+
+    /* ================================
+       DASHBOARD WITH CHARTS
+    ================================= */
+    function renderDashboard() {
+      const data = loadData();
+      const records = data.records.filter(r => !r.deleted);
+      const defs = data.customFields || [];
+
+      // Calculate stats
+      const today = new Date();
+      const thisMonth = today.toISOString().slice(0, 7);
+
+      // This month
+      const thisMonthRecords = records.filter(r => r.date && r.date.startsWith(thisMonth));
+      const thisMonthTotal = thisMonthRecords.reduce((sum, r) => {
+        return sum + calculateRecordTotal(r, defs);
+      }, 0);
+      const thisMonthHours = thisMonthRecords.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
+
+      // Last month
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const lastMonthStr = lastMonth.toISOString().slice(0, 7);
+      const lastMonthRecords = records.filter(r => r.date && r.date.startsWith(lastMonthStr));
+      const lastMonthTotal = lastMonthRecords.reduce((sum, r) => {
+        return sum + calculateRecordTotal(r, defs);
+      }, 0);
+
+      // All time
+      const allTimeTotal = records.reduce((sum, r) => {
+        return sum + calculateRecordTotal(r, defs);
+      }, 0);
+      const allTimeHours = records.reduce((sum, r) => sum + (parseFloat(r.hours) || 0), 0);
+
+      // Change percentage
+      const change = lastMonthTotal > 0 ? ((thisMonthTotal - lastMonthTotal) / lastMonthTotal * 100).toFixed(0) : 0;
+      const isUp = change >= 0;
+
+      // Top locations
+      const locationTotals = {};
+      records.forEach(r => {
+        locationTotals[r.location] = (locationTotals[r.location] || 0) + calculateRecordTotal(r, defs);
+      });
+      const topLocations = Object.entries(locationTotals)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      // Update date filter for charts based on history filter
+      if (typeof dateFilter === 'undefined') {
+        dateFilter = { type: "all", startDate: null, endDate: null, label: "All Time" };
+      }
+
+      $("app").innerHTML = `
     <div class="p-4 space-y-4">
       <!-- Stats Summary -->
-      <div class="text-center text-gray-400 text-sm">${dateFilter.label}</div>
+      <div class="text-center text-gray-400 text-sm">
+  ${new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date())}'s Total
+</div>
       <div class="text-center text-4xl font-bold">${money(thisMonthTotal)}</div>
       <div class="text-center ${isUp ? 'text-green-400' : 'text-red-400'}">
         ${isUp ? '↑' : '↓'} ${Math.abs(change)}% vs last month
@@ -1051,9 +1059,9 @@ function renderDashboard() {
             <button onclick="showDashboardFilterMenu()" class="text-[11px] text-gray-400 hover:text-gray-200 flex items-center gap-2">
               <span>Filters</span>
               ${(() => {
-                const n = countActiveCustomFilters(dashboardFilters);
-                return n ? `<span class="text-[10px] bg-indigo-600/30 text-indigo-200 px-2 py-0.5 rounded-full">${n}</span>` : '';
-              })()}
+          const n = countActiveCustomFilters(dashboardFilters);
+          return n ? `<span class="text-[10px] bg-indigo-600/30 text-indigo-200 px-2 py-0.5 rounded-full">${n}</span>` : '';
+        })()}
             </button>
             ${countActiveCustomFilters(dashboardFilters) ? `<button onclick="clearDashboardFiltersQuick()" class="text-[11px] text-gray-500 hover:text-gray-300">Clear</button>` : ''}
           </div>
@@ -1081,14 +1089,14 @@ function renderDashboard() {
       </div>
     </div>
   `;
-  
-  // Render charts after DOM is ready
-  renderAllCharts();
-}
 
-/* Chart date filter */
-function showChartDateFilter() {
-  const menu = `
+      // Render charts after DOM is ready
+      renderAllCharts();
+    }
+
+    /* Chart date filter */
+    function showChartDateFilter() {
+      const menu = `
     <div id="chartFilterOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeChartFilter()"></div>
     <div id="chartFilterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Chart Date Range</div>
@@ -1101,83 +1109,83 @@ function showChartDateFilter() {
       <button onclick="closeChartFilter()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
     </div>
   `;
-  
-  const existing = $("chartFilterSheet");
-  if (existing) existing.remove();
-  
-  document.body.insertAdjacentHTML("beforeend", menu);
-  
-  requestAnimationFrame(() => {
-    const sheet = $("chartFilterSheet");
-    const overlay = $("chartFilterOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-  });
-}
 
-function closeChartFilter() {
-  const sheet = $("chartFilterSheet");
-  const overlay = $("chartFilterOverlay");
-  
-  if (sheet) sheet.classList.add("translate-y-full");
-  if (overlay) overlay.classList.add("opacity-0");
-  
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 300);
-}
+      const existing = $("chartFilterSheet");
+      if (existing) existing.remove();
 
-function setChartDateFilter(type, start, end, label) {
-  dateFilter = { type, startDate: start, endDate: end, label };
-  closeChartFilter();
-  renderDashboard();
-}
+      document.body.insertAdjacentHTML("beforeend", menu);
 
-/* ================================
-   ADD FORM WITH LOCATION INTELLIGENCE
-================================= */
+      requestAnimationFrame(() => {
+        const sheet = $("chartFilterSheet");
+        const overlay = $("chartFilterOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+      });
+    }
 
-/* ================================
-   ADD FORM WITH LOCATION INTELLIGENCE
-================================= */
-function renderAdd(existing = null) {
-  const data = loadData();
-  
-  // Use existing record (edit mode) OR saved form data, OR defaults
-  // Check if existing has an id (actual record) vs just being saved form data
-  let r;
-  let isEditMode = false;
-  
-  if (existing && existing.id && typeof existing.id === 'string' && existing.id.startsWith('income_')) {
-    // Editing an existing record - has a valid record ID
-    isEditMode = true;
-    editModeRecord = existing;
-    r = existing;
-  } else if (savedFormData) {
-    // Restoring saved form data when switching back to add tab
-    r = { date: savedFormData.date || todayISO(), hours: savedFormData.hours || "", rate: savedFormData.rate || "", tips: savedFormData.tips || "", location: savedFormData.location || "", payType: savedFormData.payType || "hourly" };
-    savedFormData = null; // Clear after use
-  } else {
-    // Fresh form
-    editModeRecord = null;
-    r = { date: todayISO(), hours: "", rate: "", tips: "", location: "", payType: "hourly" };
-  }
+    function closeChartFilter() {
+      const sheet = $("chartFilterSheet");
+      const overlay = $("chartFilterOverlay");
 
-  // Update bottom nav for edit mode
-  updateBottomNavForEditMode(isEditMode);
+      if (sheet) sheet.classList.add("translate-y-full");
+      if (overlay) overlay.classList.add("opacity-0");
+
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 300);
+    }
+
+    function setChartDateFilter(type, start, end, label) {
+      dateFilter = { type, startDate: start, endDate: end, label };
+      closeChartFilter();
+      renderDashboard();
+    }
+
+    /* ================================
+       ADD FORM WITH LOCATION INTELLIGENCE
+    ================================= */
+
+    /* ================================
+       ADD FORM WITH LOCATION INTELLIGENCE
+    ================================= */
+    function renderAdd(existing = null) {
+      const data = loadData();
+
+      // Use existing record (edit mode) OR saved form data, OR defaults
+      // Check if existing has an id (actual record) vs just being saved form data
+      let r;
+      let isEditMode = false;
+
+      if (existing && existing.id && typeof existing.id === 'string' && existing.id.startsWith('income_')) {
+        // Editing an existing record - has a valid record ID
+        isEditMode = true;
+        editModeRecord = existing;
+        r = existing;
+      } else if (savedFormData) {
+        // Restoring saved form data when switching back to add tab
+        r = { date: savedFormData.date || todayISO(), hours: savedFormData.hours || "", rate: savedFormData.rate || "", tips: savedFormData.tips || "", location: savedFormData.location || "", payType: savedFormData.payType || "hourly" };
+        savedFormData = null; // Clear after use
+      } else {
+        // Fresh form
+        editModeRecord = null;
+        r = { date: todayISO(), hours: "", rate: "", tips: "", location: "", payType: "hourly" };
+      }
+
+      // Update bottom nav for edit mode
+      updateBottomNavForEditMode(isEditMode);
 
 
-  const addEntriesButton = `<button type="button" onclick="addDebugEntries()" class="text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 100</button>`;
-  const buttonHtml = isEditMode ? '' : `
+      const addEntriesButton = `<button type="button" onclick="addDebugEntries()" class="text-xs bg-purple-600 px-2 py-1 rounded">DEBUG: Add 100</button>`;
+      const buttonHtml = isEditMode ? '' : `
     <div class="flex gap-2">
       <button type="button" onclick="clearForm()" class="text-xs bg-gray-700 px-2 py-1 rounded">Clear</button>
-      ${(isDevMode==true) ? addEntriesButton : ''}
+      ${(isDevMode == true) ? addEntriesButton : ''}
     </div>
   `;
 
 
-  $("app").innerHTML = `
+      $("app").innerHTML = `
   <form id="incomeForm" class="p-4 space-y-4 relative pb-24">
 
     ${buttonHtml}
@@ -1234,84 +1242,84 @@ function renderAdd(existing = null) {
   </form>
   `;
 
-  setupCustomFields();
-  setupLocationAutocomplete();
-  setTimeout(() => setPayType(r.payType || 'hourly', true), 0);
+      setupCustomFields();
+      setupLocationAutocomplete();
+      setTimeout(() => setPayType(r.payType || 'hourly', true), 0);
 
-  // Initialize labels based on existing values
-  setTimeout(() => {
-    if ($("dateInput")?.value) updateLabel('dateLabel');
-    if ($("hoursInput")?.value) updateLabel('hoursLabel');
-    if ($("locationInput")?.value) updateLabel('locationLabel');
-    if ($("rateInput")?.value) updateLabel('rateLabel');
-    if ($("tipsInput")?.value) updateLabel('tipsLabel');
-  }, 50);
+      // Initialize labels based on existing values
+      setTimeout(() => {
+        if ($("dateInput")?.value) updateLabel('dateLabel');
+        if ($("hoursInput")?.value) updateLabel('hoursLabel');
+        if ($("locationInput")?.value) updateLabel('locationLabel');
+        if ($("rateInput")?.value) updateLabel('rateLabel');
+        if ($("tipsInput")?.value) updateLabel('tipsLabel');
+      }, 50);
 
-  $("incomeForm").onsubmit = e => {
-    e.preventDefault();
-    saveIncome(new FormData(e.target), editModeRecord);
-  };
-}
+      $("incomeForm").onsubmit = e => {
+        e.preventDefault();
+        saveIncome(new FormData(e.target), editModeRecord);
+      };
+    }
 
-function setPayType(type, silent = false) {
-  const payType = (type === "flat") ? "flat" : "hourly";
-  const input = $("payTypeInput");
-  if (input) input.value = payType;
-  const label = $("rateLabel");
-  if (label) label.textContent = payType === "flat" ? "Flat Amount" : "Hourly Rate";
-  // Refresh buttons by re-rendering only if not silent (keeps UI consistent)
-  if (!silent) {
-    // Lightweight button state update
-    const buttons = document.querySelectorAll('button[onclick^="setPayType"]');
-    buttons.forEach(b => {
-      const isFlatBtn = b.getAttribute("onclick")?.includes("'flat'");
-      const active = (payType === "flat") === isFlatBtn;
-      b.classList.toggle("bg-indigo-600", active);
-      b.classList.toggle("text-white", active);
-      b.classList.toggle("bg-gray-700", !active);
-      b.classList.toggle("text-gray-300", !active);
-    });
-  }
-}
+    function setPayType(type, silent = false) {
+      const payType = (type === "flat") ? "flat" : "hourly";
+      const input = $("payTypeInput");
+      if (input) input.value = payType;
+      const label = $("rateLabel");
+      if (label) label.textContent = payType === "flat" ? "Flat Amount" : "Hourly Rate";
+      // Refresh buttons by re-rendering only if not silent (keeps UI consistent)
+      if (!silent) {
+        // Lightweight button state update
+        const buttons = document.querySelectorAll('button[onclick^="setPayType"]');
+        buttons.forEach(b => {
+          const isFlatBtn = b.getAttribute("onclick")?.includes("'flat'");
+          const active = (payType === "flat") === isFlatBtn;
+          b.classList.toggle("bg-indigo-600", active);
+          b.classList.toggle("text-white", active);
+          b.classList.toggle("bg-gray-700", !active);
+          b.classList.toggle("text-gray-300", !active);
+        });
+      }
+    }
 
-/* ================================
-   CUSTOM FIELDS
-================================= */
+    /* ================================
+       CUSTOM FIELDS
+    ================================= */
 
-function setupCustomFields() {
-  const section = $("customFieldsSection");
-  if (!section) return;
-  
-  const data = loadData();
-  const customFields = data.customFields || [];
-  
-  if (customFields.length === 0) {
-    section.innerHTML = '';
-    return;
-  }
-  
-  section.innerHTML = customFields.map((field, index) => {
-    const fieldId = `custom_${index}`;
-    const existingValue = editModeRecord ? editModeRecord[field.key] : '';
-    const hasValue = existingValue && existingValue.length > 0;
-    
-    if (field.type === 'checkbox') {
-      return `
+    function setupCustomFields() {
+      const section = $("customFieldsSection");
+      if (!section) return;
+
+      const data = loadData();
+      const customFields = data.customFields || [];
+
+      if (customFields.length === 0) {
+        section.innerHTML = '';
+        return;
+      }
+
+      section.innerHTML = customFields.map((field, index) => {
+        const fieldId = `custom_${index}`;
+        const existingValue = editModeRecord ? editModeRecord[field.key] : '';
+        const hasValue = existingValue && existingValue.length > 0;
+
+        if (field.type === 'checkbox') {
+          return `
         <div class="flex items-center gap-2">
           <input type="checkbox" name="${fieldId}" id="${fieldId}" ${existingValue ? 'checked' : ''} class="w-5 h-5 accent-indigo-500 bg-gray-800 rounded border border-gray-600" onchange="updateCustomFieldLabel('${fieldId}')">
           <label for="${fieldId}" class="text-gray-300 select-none">${field.label}</label>
         </div>
       `;
-    } else if (field.type === 'number') {
-      return `
+        } else if (field.type === 'number') {
+          return `
         <div class="relative">
           <input type="number" name="${fieldId}" id="${fieldId}" value="${existingValue}" 
             class="w-full p-3 bg-gray-800 rounded peer" placeholder=" " oninput="updateCustomFieldLabel('${fieldId}')">
           <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
         </div>
       `;
-    } else if (field.type === 'money') {
-      return `
+        } else if (field.type === 'money') {
+          return `
         <div class="relative">
           <div class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none">$</div>
           <input type="number" step="0.01" name="${fieldId}" id="${fieldId}" value="${existingValue}"
@@ -1319,63 +1327,63 @@ function setupCustomFields() {
           <label id="${fieldId}_label" for="${fieldId}" class="absolute left-8 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
         </div>
       `;
-    } else if (field.type === 'date') {
-      return `
+        } else if (field.type === 'date') {
+          return `
         <div class="relative">
           <input type="date" name="${fieldId}" id="${fieldId}" value="${existingValue}"
             class="w-full p-3 bg-transparent text-gray-100 appearance-none" onchange="updateCustomFieldLabel('${fieldId}')">
           <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
         </div>
       `;
-    } else {
-      // Default to text input
-      return `
+        } else {
+          // Default to text input
+          return `
         <div class="relative">
           <input type="text" name="${fieldId}" id="${fieldId}" value="${existingValue}"
             class="w-full p-3 bg-gray-800 rounded peer" placeholder=" " oninput="updateCustomFieldLabel('${fieldId}')">
           <label id="${fieldId}_label" for="${fieldId}" class="absolute left-3 top-3 text-gray-400 text-sm pointer-events-none transition-all duration-200 ${hasValue ? '-translate-y-2 top-0 text-xs text-indigo-400' : ''}">${field.label}</label>
         </div>
       `;
+        }
+      }).join('');
+
+      // Initialize labels after render
+      setTimeout(() => {
+        customFields.forEach((field, index) => {
+          const fieldId = `custom_${index}`;
+          updateCustomFieldLabel(fieldId);
+        });
+      }, 50);
     }
-  }).join('');
-  
-  // Initialize labels after render
-  setTimeout(() => {
-    customFields.forEach((field, index) => {
-      const fieldId = `custom_${index}`;
-      updateCustomFieldLabel(fieldId);
-    });
-  }, 50);
-}
 
-function updateCustomFieldLabel(fieldId) {
-  const input = document.getElementById(fieldId);
-  const label = document.getElementById(fieldId + '_label');
-  if (!input || !label) return;
-  
-  const hasValue = input.type === 'checkbox' 
-    ? input.checked 
-    : (input.value && input.value.length > 0);
-  
-  if (hasValue) {
-    label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
-    label.classList.remove('top-3', 'text-gray-400', 'text-sm');
-  } else {
-    label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
-    label.classList.add('top-3', 'text-gray-400', 'text-sm');
-  }
-}
+    function updateCustomFieldLabel(fieldId) {
+      const input = document.getElementById(fieldId);
+      const label = document.getElementById(fieldId + '_label');
+      if (!input || !label) return;
 
-function showAddCustomFieldMenu() {
-  const data = loadData();
-  const customFields = data.customFields || [];
-  
-  if (customFields.length >= 10) {
-    showToast("Maximum 10 custom fields allowed", 2000);
-    return;
-  }
-  
-  const menu = `
+      const hasValue = input.type === 'checkbox'
+        ? input.checked
+        : (input.value && input.value.length > 0);
+
+      if (hasValue) {
+        label.classList.add('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+        label.classList.remove('top-3', 'text-gray-400', 'text-sm');
+      } else {
+        label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+        label.classList.add('top-3', 'text-gray-400', 'text-sm');
+      }
+    }
+
+    function showAddCustomFieldMenu() {
+      const data = loadData();
+      const customFields = data.customFields || [];
+
+      if (customFields.length >= 10) {
+        showToast("Maximum 10 custom fields allowed", 2000);
+        return;
+      }
+
+      const menu = `
     <div id="customFieldOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeCustomFieldMenu()"></div>
     <div id="customFieldSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Add Custom Field</div>
@@ -1414,374 +1422,374 @@ function showAddCustomFieldMenu() {
       <button onclick="closeCustomFieldMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
     </div>
   `;
-  
-  const existing = $("customFieldSheet");
-  if (existing) existing.remove();
-  
-  document.body.insertAdjacentHTML("beforeend", menu);
-  
-  requestAnimationFrame(() => {
-    const sheet = $("customFieldSheet");
-    const overlay = $("customFieldOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-    toggleMoneyFieldOptions();
-  });
-}
 
-function toggleMoneyFieldOptions() {
-  const type = $("customFieldType")?.value;
-  const options = $("moneyFieldOptions");
-  if (!options) return;
-  options.classList.toggle("hidden", type !== "money");
-}
+      const existing = $("customFieldSheet");
+      if (existing) existing.remove();
 
-function closeCustomFieldMenu() {
-  const sheet = $("customFieldSheet");
-  const overlay = $("customFieldOverlay");
-  
-  if (sheet) sheet.classList.add("translate-y-full");
-  if (overlay) overlay.classList.add("opacity-0");
-  
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 300);
-}
+      document.body.insertAdjacentHTML("beforeend", menu);
 
-function saveCustomField() {
-  const name = $("customFieldName").value.trim();
-  const type = $("customFieldType").value;
-  
-  if (!name) {
-    showToast("Please enter a field name", 2000);
-    return;
-  }
-  
-  const data = loadData();
-  if (!data.customFields) data.customFields = [];
-  
-  // Create field key (sanitized for storage)
-  const fieldKey = "CustomField_" + name.replace(/[^a-zA-Z0-9]/g, "_");
-  
-  const addToTotal = type === "money"
-    ? (document.querySelector('input[name="moneyAddToTotal"]:checked')?.value || "none")
-    : undefined;
-
-  data.customFields.push({
-    label: name,
-    type: type,
-    key: fieldKey,
-    ...(type === "money" ? { addToTotal } : {})
-  });
-  
-  saveData(data);
-  closeCustomFieldMenu();
-  showToast(`Added "${name}" field`, 2000);
-  
-  // Re-render the add form to show new field
-  renderAdd(editModeRecord || savedFormData);
-}
-
-/* Location Autocomplete */
-function setupLocationAutocomplete() {
-  const data = loadData();
-  const input = $("locationInput");
-  const dropdown = $("locationDropdown");
-
-  // Trigger label animation on input
-  input.oninput = () => {
-    updateLabel('locationLabel');
-    
-    const value = input.value.toLowerCase();
-    const matches = Object.keys(data.locations)
-      .filter(loc => loc.toLowerCase().includes(value));
-
-    if (!value || matches.length === 0) {
-      dropdown.classList.add("hidden");
-      return;
+      requestAnimationFrame(() => {
+        const sheet = $("customFieldSheet");
+        const overlay = $("customFieldOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+        toggleMoneyFieldOptions();
+      });
     }
 
-    dropdown.innerHTML = matches.map(m =>
-      `<div class="p-2 hover:bg-gray-700 cursor-pointer">${m}</div>`
-    ).join("");
+    function toggleMoneyFieldOptions() {
+      const type = $("customFieldType")?.value;
+      const options = $("moneyFieldOptions");
+      if (!options) return;
+      options.classList.toggle("hidden", type !== "money");
+    }
 
-    dropdown.classList.remove("hidden");
+    function closeCustomFieldMenu() {
+      const sheet = $("customFieldSheet");
+      const overlay = $("customFieldOverlay");
 
-    dropdown.querySelectorAll("div").forEach(div => {
-      div.onclick = () => {
-        input.value = div.textContent;
-        updateLabel('locationLabel');
-        autoFillRate(div.textContent);
-        dropdown.classList.add("hidden");
-      };
-    });
-  };
+      if (sheet) sheet.classList.add("translate-y-full");
+      if (overlay) overlay.classList.add("opacity-0");
 
-  input.onblur = () => setTimeout(() => dropdown.classList.add("hidden"), 200);
-}
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 300);
+    }
 
-/* Clear the form */
-function clearForm() {
-  savedFormData = null;
-  editModeRecord = null;
-  updateBottomNavForEditMode(false);
-  
-  const form = $("incomeForm");
-  if (form) {
-    form.reset();
-    // Reset floating labels
-    ['dateLabel', 'hoursLabel', 'locationLabel', 'rateLabel', 'tipsLabel'].forEach(id => {
-      const label = document.getElementById(id);
-      if (label) {
-        label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
-        label.classList.add('top-3', 'text-gray-400', 'text-sm');
+    function saveCustomField() {
+      const name = $("customFieldName").value.trim();
+      const type = $("customFieldType").value;
+
+      if (!name) {
+        showToast("Please enter a field name", 2000);
+        return;
       }
-    });
-  }
-  showToast("Form cleared", 1500);
-}
 
-/* Auto-fill rate based on last saved location rate */
-function autoFillRate(location) {
-  const data = loadData();
-  if (data.locations[location]) {
-    $("rateInput").value = data.locations[location].lastRate;
-    updateLabel('rateLabel');
-  }
-}
+      const data = loadData();
+      if (!data.customFields) data.customFields = [];
 
-function saveIncome(form, existing) {
-  debug("saveIncome called - START");
-  
-  // Check localStorage is available
-  try {
-    localStorage.setItem("test", "test");
-    localStorage.removeItem("test");
-    debug("localStorage is available");
-  } catch (e) {
-    debug("ERROR: localStorage not available: " + e.message);
-    showToast("localStorage not available!", 5000);
-    return;
-  }
-  
-  const data = loadData();
-  const now = Date.now();
+      // Create field key (sanitized for storage)
+      const fieldKey = "CustomField_" + name.replace(/[^a-zA-Z0-9]/g, "_");
 
-  const location = form.get("location");
-  const rate = Number(form.get("rate"));
-  const hours = Number(form.get("hours"));
-  const tips = Number(form.get("tips"));
-  const date = form.get("date");
+      const addToTotal = type === "money"
+        ? (document.querySelector('input[name="moneyAddToTotal"]:checked')?.value || "none")
+        : undefined;
 
-  debug(`Form data: date=${date}, hours=${hours}, rate=${rate}, tips=${tips}, location=${location}`);
+      data.customFields.push({
+        label: name,
+        type: type,
+        key: fieldKey,
+        ...(type === "money" ? { addToTotal } : {})
+      });
 
-  if (!location || !hours || !rate || hours <= 0 || rate <= 0) {
-    debug("ERROR: Missing required fields!");
-    showToast("Please fill in hours, rate, and location", 3000);
-    return;
-  }
+      saveData(data);
+      closeCustomFieldMenu();
+      showToast(`Added "${name}" field`, 2000);
 
-  debug("Validation passed, about to save location");
+      // Re-render the add form to show new field
+      renderAdd(editModeRecord || savedFormData);
+    }
 
-  // Ensure locations object exists
-  if (!data.locations) {
-    data.locations = {};
-    debug("Initialized data.locations");
-  }
+    /* Location Autocomplete */
+    function setupLocationAutocomplete() {
+      const data = loadData();
+      const input = $("locationInput");
+      const dropdown = $("locationDropdown");
 
-  try {
-    if (!data.locations[location]) {
-      data.locations[location] = { lastRate: rate, preferredColor: null };
-    } else {
-      data.locations[location] = {
-        ...data.locations[location],
-        lastRate: rate
+      // Trigger label animation on input
+      input.oninput = () => {
+        updateLabel('locationLabel');
+
+        const value = input.value.toLowerCase();
+        const matches = Object.keys(data.locations)
+          .filter(loc => loc.toLowerCase().includes(value));
+
+        if (!value || matches.length === 0) {
+          dropdown.classList.add("hidden");
+          return;
+        }
+
+        dropdown.innerHTML = matches.map(m =>
+          `<div class="p-2 hover:bg-gray-700 cursor-pointer">${m}</div>`
+        ).join("");
+
+        dropdown.classList.remove("hidden");
+
+        dropdown.querySelectorAll("div").forEach(div => {
+          div.onclick = () => {
+            input.value = div.textContent;
+            updateLabel('locationLabel');
+            autoFillRate(div.textContent);
+            dropdown.classList.add("hidden");
+          };
+        });
       };
-    }
-    debug("Location saved successfully");
-  } catch (e) {
-    debug("ERROR saving location: " + e.message);
-    showToast("Error saving location: " + e.message, 5000);
-    return;
-  }
 
-  debug(`Records before push: ${data.records.length}`);
-
-  const tipsNum = Number(form.get("tips")) || 0;
-  const payType = form.get("payType") === "flat" ? "flat" : "hourly";
-  
-  // Get custom field values - store with field.key as the key
-  const customFields = data.customFields || [];
-  const customFieldData = {};
-  customFields.forEach((field, index) => {
-    const inputId = `custom_${index}`;
-    let value = form.get(inputId);
-    
-    // Handle checkbox
-    const input = document.getElementById(inputId);
-    if (field.type === 'checkbox' && input) {
-      value = input.checked ? 'true' : 'false';
+      input.onblur = () => setTimeout(() => dropdown.classList.add("hidden"), 200);
     }
-    
-    if (value !== null && value !== "") {
-      customFieldData[field.key] = value;
-    }
-  });
 
-  if (existing) {
-    // Find the record in the current data by ID
-    const recordIndex = data.records.findIndex(r => r.id === existing.id);
-    debug(`Updating record at index: ${recordIndex}, id: ${existing.id}`);
-    
-    if (recordIndex >= 0) {
-      data.records[recordIndex] = {
-        ...data.records[recordIndex],
-        date: form.get("date"),
-        hours: hours,
-        rate: rate,
-        tips: tipsNum,
-        location,
-        payType,
-        ...customFieldData,
-        updatedAt: now
-      };
-    }
-  } else {
-    data.records.push({
-      id: generateId(),
-      date: form.get("date"),
-      hours: hours,
-      rate: rate,
-      tips: tipsNum,
-      location,
-      payType,
-      ...customFieldData,
-      deleted: false,
-      createdAt: now,
-      updatedAt: now
-    });
-  }
-
-  try {
-    saveData(data);
-    showToast(editModeRecord ? "Entry updated! ✅" : "Entry added! ✅", 2000);
-    
-    // Clear edit mode and form data
-    if (editModeRecord) {
+    /* Clear the form */
+    function clearForm() {
+      savedFormData = null;
       editModeRecord = null;
-      savedFormData = null; // Clear saved form data too
       updateBottomNavForEditMode(false);
+
+      const form = $("incomeForm");
+      if (form) {
+        form.reset();
+        // Reset floating labels
+        ['dateLabel', 'hoursLabel', 'locationLabel', 'rateLabel', 'tipsLabel'].forEach(id => {
+          const label = document.getElementById(id);
+          if (label) {
+            label.classList.remove('-translate-y-2', 'top-0', 'text-xs', 'text-indigo-400');
+            label.classList.add('top-3', 'text-gray-400', 'text-sm');
+          }
+        });
+      }
+      showToast("Form cleared", 1500);
     }
-  } catch (e) {
-    showToast("Error saving data: " + e.message, 5000);
-    return;
-  }
-  
-  // Avoid persisting the just-submitted form values into savedFormData
-  savedFormData = null;
-  skipNextAddFormSave = true;
-  editModeRecord = null;
-  updateBottomNavForEditMode(false);
-  switchTab("history");
-}
 
-/* Delete a record (soft delete) with confirmation */
-function deleteRecord(id) {
-  const data = loadData();
-  const record = data.records.find(r => r.id === id);
-  if (!record) return;
-  
-  // Show confirmation
-  if (confirm('Delete this entry?')) {
-    record.deleted = true;
-    record.updatedAt = Date.now();
-    saveData(data);
-    showToast("Entry deleted", 2000);
-    renderHistory();
-  }
-}
+    /* Auto-fill rate based on last saved location rate */
+    function autoFillRate(location) {
+      const data = loadData();
+      if (data.locations[location]) {
+        $("rateInput").value = data.locations[location].lastRate;
+        updateLabel('rateLabel');
+      }
+    }
 
-/* Restore a deleted record */
-function restoreRecord(id) {
-  const data = loadData();
-  const record = data.records.find(r => r.id === id);
-  if (record) {
-    record.deleted = false;
-    record.updatedAt = Date.now();
-    saveData(data);
-    showToast("Entry restored", 2000);
-    renderHistory();
-  }
-}
+    function saveIncome(form, existing) {
+      debug("saveIncome called - START");
 
-/* Toggle showing deleted records */
-function toggleDeletedRecords() {
-  showDeletedRecords = !showDeletedRecords;
-  renderHistory();
-}
+      // Check localStorage is available
+      try {
+        localStorage.setItem("test", "test");
+        localStorage.removeItem("test");
+        debug("localStorage is available");
+      } catch (e) {
+        debug("ERROR: localStorage not available: " + e.message);
+        showToast("localStorage not available!", 5000);
+        return;
+      }
 
-/* Edit a record */
-function editRecord(id) {
-  debug("Editing record: " + id);
-  const data = loadData();
-  const record = data.records.find(r => r.id === id);
-  if (record) {
-    switchTab("add");
-    // Need to render add form with existing data
-    setTimeout(() => renderAdd(record), 100);
-  }
-}
+      const data = loadData();
+      const now = Date.now();
 
-/* ================================
-   HISTORY
-================================= */
-// Current date filter state (already defined globally)
-dateFilter = {
-  type: "all", // "all", "month", "range", "ytd", "past3months"
-  startDate: null,
-  endDate: null,
-  label: "All Time"
-};
+      const location = form.get("location");
+      const rate = Number(form.get("rate"));
+      const hours = Number(form.get("hours"));
+      const tips = Number(form.get("tips"));
+      const date = form.get("date");
 
-function getFilteredRecords(records) {
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth();
-  
-  let startDate, endDate;
-  
-  if (dateFilter.type === "month") {
-    // Current month
-    startDate = new Date(currentYear, currentMonth, 1);
-    endDate = new Date(currentYear, currentMonth + 1, 0);
-  } else if (dateFilter.type === "ytd") {
-    startDate = new Date(currentYear, 0, 1);
-    endDate = today;
-  } else if (dateFilter.type === "past3months") {
-    startDate = new Date(currentYear, currentMonth - 3, 1);
-    endDate = today;
-  } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
-    startDate = new Date(dateFilter.startDate);
-    endDate = new Date(dateFilter.endDate);
-  } else {
-    // Default to current month
-    startDate = new Date(currentYear, currentMonth, 1);
-    endDate = new Date(currentYear, currentMonth + 1, 0);
-  }
-  
-  const startStr = startDate.toISOString().split("T")[0];
-  const endStr = endDate.toISOString().split("T")[0];
-  
-  return records.filter(r => r.date >= startStr && r.date <= endStr);
-}
+      debug(`Form data: date=${date}, hours=${hours}, rate=${rate}, tips=${tips}, location=${location}`);
 
-function showDateFilterMenu() {
-  // Flip arrow to point up when menu is open
-  const arrowEl = document.getElementById("filterArrow");
-  if (arrowEl) { arrowEl.style.transform = "rotate(180deg)"; }
-  
-  const menu = `
+      if (!location || !hours || !rate || hours <= 0 || rate <= 0) {
+        debug("ERROR: Missing required fields!");
+        showToast("Please fill in hours, rate, and location", 3000);
+        return;
+      }
+
+      debug("Validation passed, about to save location");
+
+      // Ensure locations object exists
+      if (!data.locations) {
+        data.locations = {};
+        debug("Initialized data.locations");
+      }
+
+      try {
+        if (!data.locations[location]) {
+          data.locations[location] = { lastRate: rate, preferredColor: null };
+        } else {
+          data.locations[location] = {
+            ...data.locations[location],
+            lastRate: rate
+          };
+        }
+        debug("Location saved successfully");
+      } catch (e) {
+        debug("ERROR saving location: " + e.message);
+        showToast("Error saving location: " + e.message, 5000);
+        return;
+      }
+
+      debug(`Records before push: ${data.records.length}`);
+
+      const tipsNum = Number(form.get("tips")) || 0;
+      const payType = form.get("payType") === "flat" ? "flat" : "hourly";
+
+      // Get custom field values - store with field.key as the key
+      const customFields = data.customFields || [];
+      const customFieldData = {};
+      customFields.forEach((field, index) => {
+        const inputId = `custom_${index}`;
+        let value = form.get(inputId);
+
+        // Handle checkbox
+        const input = document.getElementById(inputId);
+        if (field.type === 'checkbox' && input) {
+          value = input.checked ? 'true' : 'false';
+        }
+
+        if (value !== null && value !== "") {
+          customFieldData[field.key] = value;
+        }
+      });
+
+      if (existing) {
+        // Find the record in the current data by ID
+        const recordIndex = data.records.findIndex(r => r.id === existing.id);
+        debug(`Updating record at index: ${recordIndex}, id: ${existing.id}`);
+
+        if (recordIndex >= 0) {
+          data.records[recordIndex] = {
+            ...data.records[recordIndex],
+            date: form.get("date"),
+            hours: hours,
+            rate: rate,
+            tips: tipsNum,
+            location,
+            payType,
+            ...customFieldData,
+            updatedAt: now
+          };
+        }
+      } else {
+        data.records.push({
+          id: generateId(),
+          date: form.get("date"),
+          hours: hours,
+          rate: rate,
+          tips: tipsNum,
+          location,
+          payType,
+          ...customFieldData,
+          deleted: false,
+          createdAt: now,
+          updatedAt: now
+        });
+      }
+
+      try {
+        saveData(data);
+        showToast(editModeRecord ? "Entry updated! ✅" : "Entry added! ✅", 2000);
+
+        // Clear edit mode and form data
+        if (editModeRecord) {
+          editModeRecord = null;
+          savedFormData = null; // Clear saved form data too
+          updateBottomNavForEditMode(false);
+        }
+      } catch (e) {
+        showToast("Error saving data: " + e.message, 5000);
+        return;
+      }
+
+      // Avoid persisting the just-submitted form values into savedFormData
+      savedFormData = null;
+      skipNextAddFormSave = true;
+      editModeRecord = null;
+      updateBottomNavForEditMode(false);
+      switchTab("history");
+    }
+
+    /* Delete a record (soft delete) with confirmation */
+    function deleteRecord(id) {
+      const data = loadData();
+      const record = data.records.find(r => r.id === id);
+      if (!record) return;
+
+      // Show confirmation
+      if (confirm('Delete this entry?')) {
+        record.deleted = true;
+        record.updatedAt = Date.now();
+        saveData(data);
+        showToast("Entry deleted", 2000);
+        renderHistory();
+      }
+    }
+
+    /* Restore a deleted record */
+    function restoreRecord(id) {
+      const data = loadData();
+      const record = data.records.find(r => r.id === id);
+      if (record) {
+        record.deleted = false;
+        record.updatedAt = Date.now();
+        saveData(data);
+        showToast("Entry restored", 2000);
+        renderHistory();
+      }
+    }
+
+    /* Toggle showing deleted records */
+    function toggleDeletedRecords() {
+      showDeletedRecords = !showDeletedRecords;
+      renderHistory();
+    }
+
+    /* Edit a record */
+    function editRecord(id) {
+      debug("Editing record: " + id);
+      const data = loadData();
+      const record = data.records.find(r => r.id === id);
+      if (record) {
+        switchTab("add");
+        // Need to render add form with existing data
+        setTimeout(() => renderAdd(record), 100);
+      }
+    }
+
+    /* ================================
+       HISTORY
+    ================================= */
+    // Current date filter state (already defined globally)
+    dateFilter = {
+      type: "all", // "all", "month", "range", "ytd", "past3months"
+      startDate: null,
+      endDate: null,
+      label: "All Time"
+    };
+
+    function getFilteredRecords(records) {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      const currentMonth = today.getMonth();
+
+      let startDate, endDate;
+
+      if (dateFilter.type === "month") {
+        // Current month
+        startDate = new Date(currentYear, currentMonth, 1);
+        endDate = new Date(currentYear, currentMonth + 1, 0);
+      } else if (dateFilter.type === "ytd") {
+        startDate = new Date(currentYear, 0, 1);
+        endDate = today;
+      } else if (dateFilter.type === "past3months") {
+        startDate = new Date(currentYear, currentMonth - 3, 1);
+        endDate = today;
+      } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
+        startDate = new Date(dateFilter.startDate);
+        endDate = new Date(dateFilter.endDate);
+      } else {
+        // Default to current month
+        startDate = new Date(currentYear, currentMonth, 1);
+        endDate = new Date(currentYear, currentMonth + 1, 0);
+      }
+
+      const startStr = startDate.toISOString().split("T")[0];
+      const endStr = endDate.toISOString().split("T")[0];
+
+      return records.filter(r => r.date >= startStr && r.date <= endStr);
+    }
+
+    function showDateFilterMenu() {
+      // Flip arrow to point up when menu is open
+      const arrowEl = document.getElementById("filterArrow");
+      if (arrowEl) { arrowEl.style.transform = "rotate(180deg)"; }
+
+      const menu = `
     <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeFilterMenu()"></div>
     <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Select Date Range</div>
@@ -1795,60 +1803,60 @@ function showDateFilterMenu() {
       <button onclick="closeFilterMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
     </div>
   `;
-  
-  // Remove existing if any
-  const existing = $("filterSheet");
-  if (existing) existing.remove();
-  
-  document.body.insertAdjacentHTML("beforeend", menu);
-  
-  // Animate in
-  requestAnimationFrame(() => {
-    const sheet = $("filterSheet");
-    const overlay = $("filterOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-  });
-}
 
-function closeFilterMenu() {
-  const sheet = $("filterSheet");
-  const overlay = $("filterOverlay");
-  
-  // Animate out
-  if (sheet) {
-    sheet.classList.add("translate-y-full");
-  }
-  if (overlay) {
-    overlay.classList.add("opacity-0");
-  }
-  
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 300);
-  
-  // Reset arrow to point down
-  const arrowEl = $("filterArrow");
-  if (arrowEl) {
-    arrowEl.style.transform = "rotate(0deg)";
-  }
-}
+      // Remove existing if any
+      const existing = $("filterSheet");
+      if (existing) existing.remove();
 
-function setDateFilter(type, start, end, label) {
-  dateFilter = { type, startDate: start, endDate: end, label };
-  closeFilterMenu();
-  renderHistory();
-}
+      document.body.insertAdjacentHTML("beforeend", menu);
 
-function showCustomRangePicker() {
-  closeFilterMenu();
-  const today = new Date().toISOString().split("T")[0];
-  const twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-  const twoWeeksAgoStr = twoWeeksAgo.toISOString().split("T")[0];
-  
-  const menu = `
+      // Animate in
+      requestAnimationFrame(() => {
+        const sheet = $("filterSheet");
+        const overlay = $("filterOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+      });
+    }
+
+    function closeFilterMenu() {
+      const sheet = $("filterSheet");
+      const overlay = $("filterOverlay");
+
+      // Animate out
+      if (sheet) {
+        sheet.classList.add("translate-y-full");
+      }
+      if (overlay) {
+        overlay.classList.add("opacity-0");
+      }
+
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 300);
+
+      // Reset arrow to point down
+      const arrowEl = $("filterArrow");
+      if (arrowEl) {
+        arrowEl.style.transform = "rotate(0deg)";
+      }
+    }
+
+    function setDateFilter(type, start, end, label) {
+      dateFilter = { type, startDate: start, endDate: end, label };
+      closeFilterMenu();
+      renderHistory();
+    }
+
+    function showCustomRangePicker() {
+      closeFilterMenu();
+      const today = new Date().toISOString().split("T")[0];
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      const twoWeeksAgoStr = twoWeeksAgo.toISOString().split("T")[0];
+
+      const menu = `
     <div id="filterOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeFilterMenu()"></div>
     <div id="filterSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Custom Range</div>
@@ -1866,135 +1874,135 @@ function showCustomRangePicker() {
       <button onclick="closeFilterMenu()" class="w-full bg-gray-700 p-3 rounded mt-4">Cancel</button>
     </div>
   `;
-  
-  const existing = $("filterSheet");
-  if (existing) existing.remove();
-  
-  document.body.insertAdjacentHTML("beforeend", menu);
-  
-  // Animate in
-  requestAnimationFrame(() => {
-    const sheet = $("filterSheet");
-    const overlay = $("filterOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-  });
-}
 
-function applyCustomRange() {
-  const start = $("rangeStart").value;
-  const end = $("rangeEnd").value;
-  if (start && end) {
-    setDateFilter("range", start, end, `${start} to ${end}`);
-  }
-}
+      const existing = $("filterSheet");
+      if (existing) existing.remove();
 
-function renderHistory() {
-  // Reset loaded months when entering history (only if not a scroll load)
-  if (!isScrollLoad) {
-    loadedMonths = 2;
-  }
-  isScrollLoad = false;
-  
-  const allData = loadData();
-  const defs = allData.customFields || [];
-  
-  // Get all non-deleted records sorted by date (newest first)
-  let records = showDeletedRecords 
-    ? allData.records.filter(r => r.deleted)
-    : allData.records.filter(r => !r.deleted);
-    
-  // Sort all records by date descending
-  records = applyHistorySort(records, defs);
-  
-  // Store for scroll loading
-  allRecords = records;
-  
-  // Check if we have a date filter active (not "All Time")
-  const isFiltered = dateFilter && dateFilter.type !== 'all';
-  
-  // If filtered, calculate date range
-  let startDate = null;
-  let endDate = null;
-  if (isFiltered) {
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth();
-    
-    if (dateFilter.type === "month") {
-      startDate = new Date(currentYear, currentMonth, 1);
-      endDate = new Date(currentYear, currentMonth + 1, 0);
-    } else if (dateFilter.type === "ytd") {
-      startDate = new Date(currentYear, 0, 1);
-      endDate = today;
-    } else if (dateFilter.type === "past3months") {
-      startDate = new Date(currentYear, currentMonth - 3, 1);
-      endDate = today;
-    } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
-      startDate = new Date(dateFilter.startDate);
-      endDate = new Date(dateFilter.endDate);
+      document.body.insertAdjacentHTML("beforeend", menu);
+
+      // Animate in
+      requestAnimationFrame(() => {
+        const sheet = $("filterSheet");
+        const overlay = $("filterOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+      });
     }
-  }
-  
-  // Filter by date if range is set
-  if (startDate && endDate) {
-    const startStr = startDate.toISOString().split("T")[0];
-    const endStr = endDate.toISOString().split("T")[0];
-    records = records.filter(r => r.date >= startStr && r.date <= endStr);
-  }
 
-  // Apply custom field filters after date filtering
-  records = applyCustomFilters(records, defs, historyFilters);
-
-  // Re-apply sort after filtering (keeps order stable)
-  records = applyHistorySort(records, defs);
-  
-  // Group all filtered records by month
-  const byMonth = {};
-  records.forEach(r => {
-    const monthKey = r.date.substring(0, 7); // "2026-02"
-    if (!byMonth[monthKey]) byMonth[monthKey] = [];
-    byMonth[monthKey].push(r);
-  });
-  
-  // Get sorted month keys
-  const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
-  
-  // Calculate totals for first loaded months (or all if filtered)
-  let loadedRecords = [];
-  if (isFiltered) {
-    // If filtered, show all months at once
-    loadedRecords = records;
-  } else {
-    // If not filtered (infinity), show one month at a time
-    for (let i = 0; i < Math.min(loadedMonths, months.length); i++) {
-      loadedRecords.push(...byMonth[months[i]]);
+    function applyCustomRange() {
+      const start = $("rangeStart").value;
+      const end = $("rangeEnd").value;
+      if (start && end) {
+        setDateFilter("range", start, end, `${start} to ${end}`);
+      }
     }
-  }
-  
-  const totalIncome = loadedRecords.reduce((sum, r) => sum + calculateRecordTotal(r, defs), 0);
-  const totalTips = loadedRecords.reduce((sum, r) => sum + r.tips, 0);
-  const totalHours = loadedRecords.reduce((sum, r) => sum + r.hours, 0);
-  
-  const formatDate = (isoDate) => {
-    const [y, m, d] = isoDate.split("-");
-    const date = new Date(y, m - 1, d);
-    return date.toDateString();
-  };
 
-  const formatMonth = (monthKey) => {
-    const [year, month] = monthKey.split('-');
-    const date = new Date(year, month - 1, 1);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  };
+    function renderHistory() {
+      // Reset loaded months when entering history (only if not a scroll load)
+      if (!isScrollLoad) {
+        loadedMonths = 2;
+      }
+      isScrollLoad = false;
 
-  // Calculate month totals for banner
-  const monthTotals = {};
-  months.forEach(m => {
-    monthTotals[m] = byMonth[m].reduce((sum, r) => sum + calculateRecordTotal(r, defs), 0);
-  });
+      const allData = loadData();
+      const defs = allData.customFields || [];
 
-  $("app").innerHTML = `
+      // Get all non-deleted records sorted by date (newest first)
+      let records = showDeletedRecords
+        ? allData.records.filter(r => r.deleted)
+        : allData.records.filter(r => !r.deleted);
+
+      // Sort all records by date descending
+      records = applyHistorySort(records, defs);
+
+      // Store for scroll loading
+      allRecords = records;
+
+      // Check if we have a date filter active (not "All Time")
+      const isFiltered = dateFilter && dateFilter.type !== 'all';
+
+      // If filtered, calculate date range
+      let startDate = null;
+      let endDate = null;
+      if (isFiltered) {
+        const today = new Date();
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth();
+
+        if (dateFilter.type === "month") {
+          startDate = new Date(currentYear, currentMonth, 1);
+          endDate = new Date(currentYear, currentMonth + 1, 0);
+        } else if (dateFilter.type === "ytd") {
+          startDate = new Date(currentYear, 0, 1);
+          endDate = today;
+        } else if (dateFilter.type === "past3months") {
+          startDate = new Date(currentYear, currentMonth - 3, 1);
+          endDate = today;
+        } else if (dateFilter.type === "range" && dateFilter.startDate && dateFilter.endDate) {
+          startDate = new Date(dateFilter.startDate);
+          endDate = new Date(dateFilter.endDate);
+        }
+      }
+
+      // Filter by date if range is set
+      if (startDate && endDate) {
+        const startStr = startDate.toISOString().split("T")[0];
+        const endStr = endDate.toISOString().split("T")[0];
+        records = records.filter(r => r.date >= startStr && r.date <= endStr);
+      }
+
+      // Apply custom field filters after date filtering
+      records = applyCustomFilters(records, defs, historyFilters);
+
+      // Re-apply sort after filtering (keeps order stable)
+      records = applyHistorySort(records, defs);
+
+      // Group all filtered records by month
+      const byMonth = {};
+      records.forEach(r => {
+        const monthKey = r.date.substring(0, 7); // "2026-02"
+        if (!byMonth[monthKey]) byMonth[monthKey] = [];
+        byMonth[monthKey].push(r);
+      });
+
+      // Get sorted month keys
+      const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
+
+      // Calculate totals for first loaded months (or all if filtered)
+      let loadedRecords = [];
+      if (isFiltered) {
+        // If filtered, show all months at once
+        loadedRecords = records;
+      } else {
+        // If not filtered (infinity), show one month at a time
+        for (let i = 0; i < Math.min(loadedMonths, months.length); i++) {
+          loadedRecords.push(...byMonth[months[i]]);
+        }
+      }
+
+      const totalIncome = loadedRecords.reduce((sum, r) => sum + calculateRecordTotal(r, defs), 0);
+      const totalTips = loadedRecords.reduce((sum, r) => sum + r.tips, 0);
+      const totalHours = loadedRecords.reduce((sum, r) => sum + r.hours, 0);
+
+      const formatDate = (isoDate) => {
+        const [y, m, d] = isoDate.split("-");
+        const date = new Date(y, m - 1, d);
+        return date.toDateString();
+      };
+
+      const formatMonth = (monthKey) => {
+        const [year, month] = monthKey.split('-');
+        const date = new Date(year, month - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      };
+
+      // Calculate month totals for banner
+      const monthTotals = {};
+      months.forEach(m => {
+        monthTotals[m] = byMonth[m].reduce((sum, r) => sum + calculateRecordTotal(r, defs), 0);
+      });
+
+      $("app").innerHTML = `
     <!-- Stats Summary -->
     <div class="p-4 space-y-2">
       <div class="flex justify-between items-center">
@@ -2003,9 +2011,9 @@ function renderHistory() {
           <button onclick="showHistoryFilterMenu()" class="text-xs text-gray-400 hover:text-gray-200 flex items-center gap-2">
             <span>Filters</span>
             ${(() => {
-              const n = countActiveCustomFilters(historyFilters);
-              return n ? `<span class="text-[10px] bg-indigo-600/30 text-indigo-200 px-2 py-0.5 rounded-full">${n}</span>` : '';
-            })()}
+          const n = countActiveCustomFilters(historyFilters);
+          return n ? `<span class="text-[10px] bg-indigo-600/30 text-indigo-200 px-2 py-0.5 rounded-full">${n}</span>` : '';
+        })()}
           </button>
           ${countActiveCustomFilters(historyFilters) ? `<button onclick="clearHistoryFiltersQuick()" class="text-[11px] text-gray-500 hover:text-gray-300">Clear</button>` : ''}
           <button onclick="toggleDeletedRecords()" class="text-xs ${showDeletedRecords ? 'text-red-400' : 'text-gray-500'}">
@@ -2030,23 +2038,23 @@ function renderHistory() {
             ${formatMonth(month)} <span class="text-indigo-400">${money(monthTotals[month])}</span>
           </div>
           ${byMonth[month].map(r => {
-            // Group by date within month
-            const totalForShift = calculateRecordTotal(r, defs);
-            const filledCustom = defs
-              .filter(f => f && f.key)
-              .map(f => ({ def: f, raw: r[f.key] }))
-              .filter(x => {
-                if (x.raw === null || x.raw === undefined || x.raw === "") return false;
-                if (x.def.type === "checkbox") {
-                  return x.raw === true || x.raw === "true" || x.raw === 1 || x.raw === "1";
-                }
-                return true;
-              });
+          // Group by date within month
+          const totalForShift = calculateRecordTotal(r, defs);
+          const filledCustom = defs
+            .filter(f => f && f.key)
+            .map(f => ({ def: f, raw: r[f.key] }))
+            .filter(x => {
+              if (x.raw === null || x.raw === undefined || x.raw === "") return false;
+              if (x.def.type === "checkbox") {
+                return x.raw === true || x.raw === "true" || x.raw === 1 || x.raw === "1";
+              }
+              return true;
+            });
 
-            const filledMoney = filledCustom.filter(x => x.def.type === 'money');
-            const filledNonMoney = filledCustom.filter(x => x.def.type !== 'money');
-            const displayCustom = [...filledMoney, ...filledNonMoney].slice(0, 3);
-            return `
+          const filledMoney = filledCustom.filter(x => x.def.type === 'money');
+          const filledNonMoney = filledCustom.filter(x => x.def.type !== 'money');
+          const displayCustom = [...filledMoney, ...filledNonMoney].slice(0, 3);
+          return `
             <div class="bg-gray-800 rounded p-3 mb-2 flex justify-between items-start border border-gray-700/60" style="${getLocationTintStyle(r.location)}">
               <div class="flex-1">
                 <div class="text-xs text-gray-500 mb-1">${formatDate(r.date)}</div>
@@ -2060,42 +2068,42 @@ function renderHistory() {
               </div>
               <div class="ml-2 flex flex-col items-end gap-2">
                 <div class="flex gap-2">
-                  ${showDeletedRecords 
-                    ? `<button onclick="restoreRecord('${r.id}')" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
-                    : `<button onclick="editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
+                  ${showDeletedRecords
+              ? `<button onclick="restoreRecord('${r.id}')" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
+              : `<button onclick="editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
                        <button onclick="deleteRecord('${r.id}')" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
-                  }
+            }
                 </div>
                 ${!showDeletedRecords && displayCustom.length ? `
                   <div class="flex flex-col items-end gap-1">
                     ${displayCustom.map(({ def, raw }) => {
-                      const label = def.label || 'Field';
-                      if (def.type === 'money') {
-                        const v = parseFloat(raw);
-                        const mode = def.addToTotal || 'none';
-                        const color = mode === 'add' ? 'text-green-300/80' : (mode === 'subtract' ? 'text-red-300/80' : 'text-gray-300/70');
-                        const prefix = mode === 'add' ? '+' : (mode === 'subtract' ? '-' : '');
-                        const abs = Number.isFinite(v) ? Math.abs(v) : 0;
-                        return `<div class="text-[11px] ${color} text-right whitespace-nowrap">${label}: ${prefix}${money(abs)}</div>`;
-                      }
-                      if (def.type === 'checkbox') {
-                        const checked = raw === true || raw === 'true' || raw === '1' || raw === 1;
-                        if (!checked) return '';
-                        return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}</div>`;
-                      }
-                      if (def.type === 'date') {
-                        return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${raw}</div>`;
-                      }
-                      if (def.type === 'number') {
-                        const v = parseFloat(raw);
-                        const out = Number.isFinite(v) ? v : raw;
-                        return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${out}</div>`;
-                      }
-                      // text/default
-                      const str = String(raw);
-                      const clipped = str.length > 18 ? (str.slice(0, 18) + '…') : str;
-                      return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${clipped}</div>`;
-                    }).filter(Boolean).join('')}
+              const label = def.label || 'Field';
+              if (def.type === 'money') {
+                const v = parseFloat(raw);
+                const mode = def.addToTotal || 'none';
+                const color = mode === 'add' ? 'text-green-300/80' : (mode === 'subtract' ? 'text-red-300/80' : 'text-gray-300/70');
+                const prefix = mode === 'add' ? '+' : (mode === 'subtract' ? '-' : '');
+                const abs = Number.isFinite(v) ? Math.abs(v) : 0;
+                return `<div class="text-[11px] ${color} text-right whitespace-nowrap">${label}: ${prefix}${money(abs)}</div>`;
+              }
+              if (def.type === 'checkbox') {
+                const checked = raw === true || raw === 'true' || raw === '1' || raw === 1;
+                if (!checked) return '';
+                return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}</div>`;
+              }
+              if (def.type === 'date') {
+                return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${raw}</div>`;
+              }
+              if (def.type === 'number') {
+                const v = parseFloat(raw);
+                const out = Number.isFinite(v) ? v : raw;
+                return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${out}</div>`;
+              }
+              // text/default
+              const str = String(raw);
+              const clipped = str.length > 18 ? (str.slice(0, 18) + '…') : str;
+              return `<div class="text-[11px] text-gray-300/60 text-right whitespace-nowrap">${label}: ${clipped}</div>`;
+            }).filter(Boolean).join('')}
                   </div>
                 ` : ''}
               </div>
@@ -2111,136 +2119,136 @@ function renderHistory() {
       ` : ''}
     </div>
   `;
-  
-  // Setup infinite scroll observer (only if not filtered)
-  if (!isFiltered) {
-    setupInfiniteScroll(months, monthTotals);
-  }
-  
-  // Update banner with visible month
-  updateBannerForVisibleMonth();
-}
 
-function setupInfiniteScroll(months, monthTotals) {
-  // Remove any existing scroll listeners first
-  window.removeEventListener('scroll', handleHistoryScroll);
-  
-  // Use simple scroll event instead of IntersectionObserver
-  window.addEventListener('scroll', handleHistoryScroll);
-}
+      // Setup infinite scroll observer (only if not filtered)
+      if (!isFiltered) {
+        setupInfiniteScroll(months, monthTotals);
+      }
 
-function handleHistoryScroll() {
-  // Only run if we're on history tab
-  if (activeTab !== 'history') return;
-  
-  const scrollTop = window.scrollY || document.documentElement.scrollTop;
-  const scrollHeight = document.documentElement.scrollHeight;
-  const clientHeight = document.documentElement.clientHeight;
-  
-  console.log('Scroll check:', { scrollTop, clientHeight, scrollHeight, loadedMonths });
-  
-  // When user scrolls within 150px of bottom
-  if (scrollTop + clientHeight >= scrollHeight - 150) {
-    // Get months from data
-    const allData = loadData();
-    let records = showDeletedRecords 
-      ? allData.records.filter(r => r.deleted)
-      : allData.records.filter(r => !r.deleted);
-    records.sort((a, b) => b.date.localeCompare(a.date));
-    
-    const byMonth = {};
-    records.forEach(r => {
-      const monthKey = r.date.substring(0, 7);
-      if (!byMonth[monthKey]) byMonth[monthKey] = [];
-      byMonth[monthKey].push(r);
-    });
-    const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
-    
-    console.log('Loaded months:', loadedMonths, 'Total months:', months.length);
-    
-    if (loadedMonths < months.length) {
-      isScrollLoad = true;
-      loadedMonths++;
-      console.log('Loading more months:', loadedMonths);
-      renderHistory();
+      // Update banner with visible month
+      updateBannerForVisibleMonth();
     }
-  }
-}
 
-function updateBannerForVisibleMonth() {
-  const months = document.querySelectorAll('.month-group');
-  if (months.length === 0) return;
-  
-  const observer = new IntersectionObserver((entries) => {
-    let maxVisibleMonth = null;
-    let maxVisibleRatio = 0;
-    
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const ratio = entry.intersectionRatio;
-        if (ratio > maxVisibleRatio) {
-          maxVisibleRatio = ratio;
-          maxVisibleMonth = entry.target;
+    function setupInfiniteScroll(months, monthTotals) {
+      // Remove any existing scroll listeners first
+      window.removeEventListener('scroll', handleHistoryScroll);
+
+      // Use simple scroll event instead of IntersectionObserver
+      window.addEventListener('scroll', handleHistoryScroll);
+    }
+
+    function handleHistoryScroll() {
+      // Only run if we're on history tab
+      if (activeTab !== 'history') return;
+
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+      const clientHeight = document.documentElement.clientHeight;
+
+      console.log('Scroll check:', { scrollTop, clientHeight, scrollHeight, loadedMonths });
+
+      // When user scrolls within 150px of bottom
+      if (scrollTop + clientHeight >= scrollHeight - 150) {
+        // Get months from data
+        const allData = loadData();
+        let records = showDeletedRecords
+          ? allData.records.filter(r => r.deleted)
+          : allData.records.filter(r => !r.deleted);
+        records.sort((a, b) => b.date.localeCompare(a.date));
+
+        const byMonth = {};
+        records.forEach(r => {
+          const monthKey = r.date.substring(0, 7);
+          if (!byMonth[monthKey]) byMonth[monthKey] = [];
+          byMonth[monthKey].push(r);
+        });
+        const months = Object.keys(byMonth).sort((a, b) => b.localeCompare(a));
+
+        console.log('Loaded months:', loadedMonths, 'Total months:', months.length);
+
+        if (loadedMonths < months.length) {
+          isScrollLoad = true;
+          loadedMonths++;
+          console.log('Loading more months:', loadedMonths);
+          renderHistory();
         }
       }
-    });
-    
-    if (maxVisibleMonth) {
-      const total = maxVisibleMonth.dataset.total;
-      const month = maxVisibleMonth.dataset.month;
-      const [year, mon] = month.split('-');
-      const date = new Date(year, mon - 1, 1);
-      const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      
-      $("monthlyBannerValue").textContent = money(parseFloat(total));
-      $("dateFilterLabel").textContent = monthName;
     }
-  }, { threshold: 0.1 });
-  
-  months.forEach(m => observer.observe(m));
-}
 
-function updateMonthlyTotal(records) {
-  const defs = getCustomFieldDefs();
-  const total = records.reduce((s,r)=>s + calculateRecordTotal(r, defs), 0);
-  $("monthlyBannerValue").textContent = money(total);
-  
-  // Update the label and indicator
-  const labelEl = $("dateFilterLabel");
-  const indicatorEl = $("filterIndicator");
-  if (labelEl) {
-    labelEl.textContent = dateFilter.label;
-  }
-  if (indicatorEl) {
-    if (dateFilter.type === 'all') {
-      indicatorEl.textContent = '∞';
-    } else if (dateFilter.type === 'ytd') {
-      indicatorEl.textContent = '📅';
-    } else if (dateFilter.type === 'month') {
-      indicatorEl.textContent = '📆';
-    } else if (dateFilter.type === 'past3months') {
-      indicatorEl.textContent = '3';
-    } else if (dateFilter.type === 'range') {
-      indicatorEl.textContent = '📋';
+    function updateBannerForVisibleMonth() {
+      const months = document.querySelectorAll('.month-group');
+      if (months.length === 0) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        let maxVisibleMonth = null;
+        let maxVisibleRatio = 0;
+
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const ratio = entry.intersectionRatio;
+            if (ratio > maxVisibleRatio) {
+              maxVisibleRatio = ratio;
+              maxVisibleMonth = entry.target;
+            }
+          }
+        });
+
+        if (maxVisibleMonth) {
+          const total = maxVisibleMonth.dataset.total;
+          const month = maxVisibleMonth.dataset.month;
+          const [year, mon] = month.split('-');
+          const date = new Date(year, mon - 1, 1);
+          const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+          $("monthlyBannerValue").textContent = money(parseFloat(total));
+          $("dateFilterLabel").textContent = monthName;
+        }
+      }, { threshold: 0.1 });
+
+      months.forEach(m => observer.observe(m));
     }
-  }
-}
 
-/* ================================
-   SETTINGS + IMPORT + LOCATIONS
-================================= */
-function renderSettings() {
-  const data = loadData();
-  const locations = Object.keys(data.locations || {});
-  const customFields = data.customFields || [];
-  
-  const penIcon = `
+    function updateMonthlyTotal(records) {
+      const defs = getCustomFieldDefs();
+      const total = records.reduce((s, r) => s + calculateRecordTotal(r, defs), 0);
+      $("monthlyBannerValue").textContent = money(total);
+
+      // Update the label and indicator
+      const labelEl = $("dateFilterLabel");
+      const indicatorEl = $("filterIndicator");
+      if (labelEl) {
+        labelEl.textContent = dateFilter.label;
+      }
+      if (indicatorEl) {
+        if (dateFilter.type === 'all') {
+          indicatorEl.textContent = '∞';
+        } else if (dateFilter.type === 'ytd') {
+          indicatorEl.textContent = '📅';
+        } else if (dateFilter.type === 'month') {
+          indicatorEl.textContent = '📆';
+        } else if (dateFilter.type === 'past3months') {
+          indicatorEl.textContent = '3';
+        } else if (dateFilter.type === 'range') {
+          indicatorEl.textContent = '📋';
+        }
+      }
+    }
+
+    /* ================================
+       SETTINGS + IMPORT + LOCATIONS
+    ================================= */
+    function renderSettings() {
+      const data = loadData();
+      const locations = Object.keys(data.locations || {});
+      const customFields = data.customFields || [];
+
+      const penIcon = `
     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M12 20h9"/>
       <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
     </svg>
   `;
-  const trashIcon = `
+      const trashIcon = `
     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M3 6h18"/>
       <path d="M8 6V4h8v2"/>
@@ -2250,12 +2258,12 @@ function renderSettings() {
     </svg>
   `;
 
-  const locationsList = locations.map(loc => {
-    const meta = data.locations?.[loc] || {};
-    const rate = meta.lastRate ?? 0;
-    const color = normalizeHexColor(meta.preferredColor);
-    const dot = color ? `<span class="w-2.5 h-2.5 rounded-full ring-2 ring-white/10" style="background:${color}"></span>` : `<span class="w-2.5 h-2.5 rounded-full bg-gray-600/60 ring-2 ring-white/5"></span>`;
-    return `
+      const locationsList = locations.map(loc => {
+        const meta = data.locations?.[loc] || {};
+        const rate = meta.lastRate ?? 0;
+        const color = normalizeHexColor(meta.preferredColor);
+        const dot = color ? `<span class="w-2.5 h-2.5 rounded-full ring-2 ring-white/10" style="background:${color}"></span>` : `<span class="w-2.5 h-2.5 rounded-full bg-gray-600/60 ring-2 ring-white/5"></span>`;
+        return `
       <div class="flex items-center justify-between gap-3 bg-gray-800/70 hover:bg-gray-800 rounded-lg px-3 py-2 border border-gray-700/60">
         <div class="min-w-0 flex items-center gap-2">
           ${dot}
@@ -2271,17 +2279,17 @@ function renderSettings() {
         </div>
       </div>
     `;
-  }).join("");
+      }).join("");
 
-  const typeLabel = t => {
-    if (t === "money") return "Money";
-    if (t === "number") return "Number";
-    if (t === "date") return "Date";
-    if (t === "checkbox") return "Checkbox";
-    return "Text";
-  };
+      const typeLabel = t => {
+        if (t === "money") return "Money";
+        if (t === "number") return "Number";
+        if (t === "date") return "Date";
+        if (t === "checkbox") return "Checkbox";
+        return "Text";
+      };
 
-  const customFieldsList = customFields.map((field, index) => `
+      const customFieldsList = customFields.map((field, index) => `
     <div class="flex items-center justify-between gap-3 bg-gray-800/70 hover:bg-gray-800 rounded-lg px-3 py-2 border border-gray-700/60">
       <div class="min-w-0">
         <div class="text-sm text-gray-100 truncate">${field.label}</div>
@@ -2301,7 +2309,7 @@ function renderSettings() {
     </div>
   `).join("");
 
-  $("app").innerHTML = `
+      $("app").innerHTML = `
   <div class="p-4 space-y-4 pb-24">
     <div class="flex items-center justify-between">
       <div class="text-xl font-bold">Settings</div>
@@ -2385,24 +2393,24 @@ function renderSettings() {
     </div>
   </div>
   `;
-}
+    }
 
-function openLocationEditMenu(oldName) {
-  const data = loadData();
-  const meta = data.locations?.[oldName] || {};
-  const currentColor = normalizeHexColor(meta.preferredColor);
-  const palette = [
-    { name: "None", value: "" },
-    { name: "Indigo", value: "#6366f1" },
-    { name: "Violet", value: "#8b5cf6" },
-    { name: "Emerald", value: "#10b981" },
-    { name: "Amber", value: "#f59e0b" },
-    { name: "Rose", value: "#f43f5e" },
-    { name: "Cyan", value: "#06b6d4" },
-    { name: "Pink", value: "#ec4899" }
-  ];
+    function openLocationEditMenu(oldName) {
+      const data = loadData();
+      const meta = data.locations?.[oldName] || {};
+      const currentColor = normalizeHexColor(meta.preferredColor);
+      const palette = [
+        { name: "None", value: "" },
+        { name: "Indigo", value: "#6366f1" },
+        { name: "Violet", value: "#8b5cf6" },
+        { name: "Emerald", value: "#10b981" },
+        { name: "Amber", value: "#f59e0b" },
+        { name: "Rose", value: "#f43f5e" },
+        { name: "Cyan", value: "#06b6d4" },
+        { name: "Pink", value: "#ec4899" }
+      ];
 
-  const sheet = `
+      const sheet = `
     <div id="locEditOverlay" class="fixed inset-0 bg-black/50 z-40 transition-opacity" onclick="closeLocationEditMenu()"></div>
     <div id="locEditSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="flex items-center justify-between mb-3">
@@ -2423,9 +2431,9 @@ function openLocationEditMenu(oldName) {
           <div class="text-xs text-gray-300">Preferred chart color</div>
           <div class="grid grid-cols-4 gap-2">
             ${palette.map(p => {
-              const isNone = !p.value;
-              const selected = (isNone && !currentColor) || (!!p.value && p.value.toLowerCase() === (currentColor || "").toLowerCase());
-              return `
+        const isNone = !p.value;
+        const selected = (isNone && !currentColor) || (!!p.value && p.value.toLowerCase() === (currentColor || "").toLowerCase());
+        return `
                 <label class="relative rounded-lg border ${selected ? 'border-indigo-500' : 'border-gray-700'} bg-gray-900/40 p-2 cursor-pointer">
                   <input type="radio" name="locColor" value="${p.value}" ${selected ? 'checked' : ''} class="sr-only">
                   <div class="flex items-center gap-2">
@@ -2434,7 +2442,7 @@ function openLocationEditMenu(oldName) {
                   </div>
                 </label>
               `;
-            }).join("")}
+      }).join("")}
           </div>
           <div class="text-[11px] text-gray-500">Used in charts and as a subtle tint in History.</div>
         </div>
@@ -2445,79 +2453,79 @@ function openLocationEditMenu(oldName) {
     </div>
   `;
 
-  const existing = $("locEditSheet");
-  if (existing) existing.remove();
-  document.body.insertAdjacentHTML("beforeend", sheet);
-  requestAnimationFrame(() => {
-    const s = $("locEditSheet");
-    const o = $("locEditOverlay");
-    if (s) s.classList.remove("translate-y-full");
-    if (o) o.classList.remove("opacity-0");
-  });
-}
-
-function closeLocationEditMenu() {
-  const sheet = $("locEditSheet");
-  const overlay = $("locEditOverlay");
-  if (sheet) sheet.classList.add("translate-y-full");
-  if (overlay) overlay.classList.add("opacity-0");
-  setTimeout(() => {
-    if (overlay) overlay.remove();
-    if (sheet) sheet.remove();
-  }, 250);
-}
-
-function saveLocationEdit(oldName) {
-  const newName = $("locEditName")?.value?.trim();
-  const chosen = document.querySelector('input[name="locColor"]:checked')?.value || "";
-  const preferredColor = normalizeHexColor(chosen);
-
-  if (!newName) {
-    showToast("Location name is required", 2000);
-    return;
-  }
-
-  const data = loadData();
-  if (!data.locations || !data.locations[oldName]) {
-    showToast("Location not found", 2000);
-    closeLocationEditMenu();
-    return;
-  }
-
-  const oldMeta = data.locations[oldName] || {};
-  const nextMeta = { ...oldMeta, preferredColor: preferredColor };
-
-  if (newName !== oldName) {
-    if (data.locations[newName]) {
-      showToast("That name already exists", 2200);
-      return;
+      const existing = $("locEditSheet");
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML("beforeend", sheet);
+      requestAnimationFrame(() => {
+        const s = $("locEditSheet");
+        const o = $("locEditOverlay");
+        if (s) s.classList.remove("translate-y-full");
+        if (o) o.classList.remove("opacity-0");
+      });
     }
-    data.locations[newName] = nextMeta;
-    delete data.locations[oldName];
-    data.records.forEach(r => {
-      if (r.location === oldName) {
-        r.location = newName;
-        r.updatedAt = Date.now();
+
+    function closeLocationEditMenu() {
+      const sheet = $("locEditSheet");
+      const overlay = $("locEditOverlay");
+      if (sheet) sheet.classList.add("translate-y-full");
+      if (overlay) overlay.classList.add("opacity-0");
+      setTimeout(() => {
+        if (overlay) overlay.remove();
+        if (sheet) sheet.remove();
+      }, 250);
+    }
+
+    function saveLocationEdit(oldName) {
+      const newName = $("locEditName")?.value?.trim();
+      const chosen = document.querySelector('input[name="locColor"]:checked')?.value || "";
+      const preferredColor = normalizeHexColor(chosen);
+
+      if (!newName) {
+        showToast("Location name is required", 2000);
+        return;
       }
-    });
-  } else {
-    data.locations[oldName] = nextMeta;
-  }
 
-  saveData(data);
-  closeLocationEditMenu();
-  showToast("Location updated", 1500);
-  renderSettings();
-  try { renderHistory(); } catch {}
-  try { renderAllCharts(); } catch {}
-}
+      const data = loadData();
+      if (!data.locations || !data.locations[oldName]) {
+        showToast("Location not found", 2000);
+        closeLocationEditMenu();
+        return;
+      }
 
-function showEditCustomFieldMenu(index) {
-  const data = loadData();
-  const field = (data.customFields || [])[index];
-  if (!field) return;
+      const oldMeta = data.locations[oldName] || {};
+      const nextMeta = { ...oldMeta, preferredColor: preferredColor };
 
-  const menu = `
+      if (newName !== oldName) {
+        if (data.locations[newName]) {
+          showToast("That name already exists", 2200);
+          return;
+        }
+        data.locations[newName] = nextMeta;
+        delete data.locations[oldName];
+        data.records.forEach(r => {
+          if (r.location === oldName) {
+            r.location = newName;
+            r.updatedAt = Date.now();
+          }
+        });
+      } else {
+        data.locations[oldName] = nextMeta;
+      }
+
+      saveData(data);
+      closeLocationEditMenu();
+      showToast("Location updated", 1500);
+      renderSettings();
+      try { renderHistory(); } catch { }
+      try { renderAllCharts(); } catch { }
+    }
+
+    function showEditCustomFieldMenu(index) {
+      const data = loadData();
+      const field = (data.customFields || [])[index];
+      if (!field) return;
+
+      const menu = `
     <div id="customFieldOverlay" class="fixed inset-0 bg-black/50 z-40" onclick="closeCustomFieldMenu()"></div>
     <div id="customFieldSheet" class="fixed bottom-20 inset-x-0 bg-gray-900 rounded-t-xl p-4 z-50 transform transition-transform duration-300 translate-y-full">
       <div class="text-lg font-bold mb-4">Edit Custom Field</div>
@@ -2557,246 +2565,247 @@ function showEditCustomFieldMenu(index) {
     </div>
   `;
 
-  const existing = $("customFieldSheet");
-  if (existing) existing.remove();
-  document.body.insertAdjacentHTML("beforeend", menu);
-  requestAnimationFrame(() => {
-    const sheet = $("customFieldSheet");
-    const overlay = $("customFieldOverlay");
-    if (sheet) sheet.classList.remove("translate-y-full");
-    if (overlay) overlay.classList.remove("opacity-0");
-    toggleMoneyFieldOptions();
-  });
-}
-
-function saveEditedCustomField(index) {
-  const name = $("customFieldName")?.value?.trim();
-  const type = $("customFieldType")?.value;
-  if (!name) {
-    showToast("Please enter a field name", 2000);
-    return;
-  }
-
-  const data = loadData();
-  const fields = data.customFields || [];
-  const prev = fields[index];
-  if (!prev) return;
-
-  const addToTotal = type === "money"
-    ? (document.querySelector('input[name="moneyAddToTotal"]:checked')?.value || "none")
-    : undefined;
-
-  fields[index] = {
-    ...prev,
-    label: name,
-    type: type,
-    ...(type === "money" ? { addToTotal } : {})
-  };
-  if (type !== "money") delete fields[index].addToTotal;
-
-  data.customFields = fields;
-  saveData(data);
-  closeCustomFieldMenu();
-  showToast("Custom field updated", 1500);
-
-  if (activeTab === "settings") renderSettings();
-  if (activeTab === "add") renderAdd(editModeRecord || savedFormData);
-  if (activeTab === "history") renderHistory();
-  try { renderAllCharts(); } catch {}
-}
-
-function renameLocation(oldName) {
-  const newName = prompt("Enter new name for '" + oldName + "':");
-  if (newName && newName !== oldName) {
-    const data = loadData();
-    // Update location rate
-    const rate = data.locations[oldName].lastRate;
-    const preferredColor = normalizeHexColor(data.locations[oldName].preferredColor);
-    data.locations[newName] = { lastRate: rate, preferredColor: preferredColor };
-    delete data.locations[oldName];
-    
-    // Update all records with this location
-    data.records.forEach(r => {
-      if (r.location === oldName) {
-        r.location = newName;
-        r.updatedAt = Date.now();
-      }
-    });
-    
-    saveData(data);
-    showToast("Location renamed!", 2000);
-    renderSettings();
-  }
-}
-
-function showMergeLocations() {
-  const data = loadData();
-  const locations = Object.keys(data.locations || {});
-  
-  if (locations.length < 2) {
-    showToast("Need at least 2 locations to merge", 2000);
-    return;
-  }
-  
-  const from = prompt("Enter source location to merge FROM:");
-  const to = prompt("Enter destination location to merge TO:");
-  
-  if (from && to && from !== to && data.locations[from] && data.locations[to]) {
-    // Merge: update all records from 'from' to 'to'
-    let count = 0;
-    data.records.forEach(r => {
-      if (r.location === from) {
-        r.location = to;
-        r.updatedAt = Date.now();
-        count++;
-      }
-    });
-    
-    // Delete the source location
-    delete data.locations[from];
-    
-    saveData(data);
-    showToast(`Merged ${count} records to "${to}"`, 3000);
-    renderSettings();
-  } else {
-    showToast("Invalid location names", 2000);
-  }
-}
-
-function exportData() {
-  const data = loadData();
-  
-  // Ask user which format
-  const format = prompt('Export as JSON or CSV? (type: json or csv)', 'json');
-  
-  if (format && format.toLowerCase() === 'csv') {
-    exportAsCSV(data);
-  } else {
-    // Original JSON export
-    const text = JSON.stringify(data, null, 2);
-    if (navigator.share) {
-      navigator.share({ text: text }).then(() => {
-        showToast("Shared!", 2000);
-      }).catch(err => {
-        console.log("Share cancelled or failed", err);
-        copyToClipboard(text);
+      const existing = $("customFieldSheet");
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML("beforeend", menu);
+      requestAnimationFrame(() => {
+        const sheet = $("customFieldSheet");
+        const overlay = $("customFieldOverlay");
+        if (sheet) sheet.classList.remove("translate-y-full");
+        if (overlay) overlay.classList.remove("opacity-0");
+        toggleMoneyFieldOptions();
       });
-    } else {
-      copyToClipboard(text);
-    }
-  }
-}
-
-function exportAsCSV(data) {
-  const records = data.records.filter(r => !r.deleted);
-  const defs = data.customFields || [];
-  
-  // CSV header
-  let csv = 'Date,Hours,Rate,PayType,Location,Tips,Total\n';
-  
-  // Add rows
-  records.forEach(r => {
-    const total = calculateRecordTotal(r, defs);
-    csv += `${r.date},${r.hours},${r.rate},${r.payType || 'hourly'},"${r.location}",${r.tips},${total.toFixed(2)}\n`;
-  });
-  
-  // Add summary at end
-  const totalHours = records.reduce((s, r) => s + r.hours, 0);
-  const totalTips = records.reduce((s, r) => s + r.tips, 0);
-  const totalIncome = records.reduce((s, r) => s + calculateRecordTotal(r, defs), 0);
-  
-  csv += `\nSummary\n`;
-  csv += `Total Hours,${totalHours.toFixed(2)}\n`;
-  csv += `Total Tips,${totalTips.toFixed(2)}\n`;
-  csv += `Total Income,${totalIncome.toFixed(2)}\n`;
-  
-  if (navigator.share) {
-    navigator.share({ text: csv }).then(() => {
-      showToast("Shared CSV!", 2000);
-    }).catch(err => {
-      copyToClipboard(csv);
-    });
-  } else {
-    copyToClipboard(csv);
-  }
-}
-
-function copyToClipboard(text) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(() => {
-      showToast("Copied to clipboard!", 2000);
-    }).catch(() => {
-      prompt("Copy this JSON:", text);
-    });
-  } else {
-    prompt("Copy this JSON:", text);
-  }
-}
-
-function importData() {
-  try {
-    const raw = $("importArea").value;
-    const parsed = JSON.parse(raw);
-
-    if (!parsed.records || !Array.isArray(parsed.records)) {
-      alert("Invalid format.");
-      return;
     }
 
-    saveData(parsed);
-    alert("Import successful.");
-    switchTab("history");
-  } catch (e) {
-    alert("Invalid JSON.");
-  }
-}
+    function saveEditedCustomField(index) {
+      const name = $("customFieldName")?.value?.trim();
+      const type = $("customFieldType")?.value;
+      if (!name) {
+        showToast("Please enter a field name", 2000);
+        return;
+      }
 
-/* Delete a custom field */
-function deleteCustomField(index) {
-  if (confirm("Delete this custom field? It will be removed from all records.")) {
-    const data = loadData();
-    data.customFields.splice(index, 1);
-    saveData(data);
-    showToast("Custom field deleted", 2000);
-    renderSettings();
-  }
-}
+      const data = loadData();
+      const fields = data.customFields || [];
+      const prev = fields[index];
+      if (!prev) return;
 
-function clearAllData() {
-  if (confirm("⚠️ ARE YOU SURE? This will delete ALL income records and locations. This cannot be undone!")) {
-    if (confirm("Really? All data will be lost forever!")) {
-      localStorage.setItem(DATA_KEY, JSON.stringify({
-        records: [],
-        locations: {}
-      }));
-      localStorage.setItem(META_KEY, JSON.stringify({
-        userId: "user1",
-        nextId: 1
-      }));
-      showToast("All data cleared!", 3000);
-      switchTab("history");
+      const addToTotal = type === "money"
+        ? (document.querySelector('input[name="moneyAddToTotal"]:checked')?.value || "none")
+        : undefined;
+
+      fields[index] = {
+        ...prev,
+        label: name,
+        type: type,
+        ...(type === "money" ? { addToTotal } : {})
+      };
+      if (type !== "money") delete fields[index].addToTotal;
+
+      data.customFields = fields;
+      saveData(data);
+      closeCustomFieldMenu();
+      showToast("Custom field updated", 1500);
+
+      if (activeTab === "settings") renderSettings();
+      if (activeTab === "add") renderAdd(editModeRecord || savedFormData);
+      if (activeTab === "history") renderHistory();
+      try { renderAllCharts(); } catch { }
     }
-  }
-}
 
-let devModeButtonClicked = 0
-function devModeEntryButtonClick() {
-  devModeButtonClicked++;
-  showToast(`Button clicked ${devModeButtonClicked} times`, 500);
-  if (devModeButtonClicked > 5) {
-    isDevMode = true;
-    showToast("Dev mode activated", 2000);
-  }
-}
+    function renameLocation(oldName) {
+      const newName = prompt("Enter new name for '" + oldName + "':");
+      if (newName && newName !== oldName) {
+        const data = loadData();
+        // Update location rate
+        const rate = data.locations[oldName].lastRate;
+        const preferredColor = normalizeHexColor(data.locations[oldName].preferredColor);
+        data.locations[newName] = { lastRate: rate, preferredColor: preferredColor };
+        delete data.locations[oldName];
 
-/* ================================
-   START
-================================= */
-switchTab("dashboard");
+        // Update all records with this location
+        data.records.forEach(r => {
+          if (r.location === oldName) {
+            r.location = newName;
+            r.updatedAt = Date.now();
+          }
+        });
 
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
+        saveData(data);
+        showToast("Location renamed!", 2000);
+        renderSettings();
+      }
+    }
+
+    function showMergeLocations() {
+      const data = loadData();
+      const locations = Object.keys(data.locations || {});
+
+      if (locations.length < 2) {
+        showToast("Need at least 2 locations to merge", 2000);
+        return;
+      }
+
+      const from = prompt("Enter source location to merge FROM:");
+      const to = prompt("Enter destination location to merge TO:");
+
+      if (from && to && from !== to && data.locations[from] && data.locations[to]) {
+        // Merge: update all records from 'from' to 'to'
+        let count = 0;
+        data.records.forEach(r => {
+          if (r.location === from) {
+            r.location = to;
+            r.updatedAt = Date.now();
+            count++;
+          }
+        });
+
+        // Delete the source location
+        delete data.locations[from];
+
+        saveData(data);
+        showToast(`Merged ${count} records to "${to}"`, 3000);
+        renderSettings();
+      } else {
+        showToast("Invalid location names", 2000);
+      }
+    }
+
+    function exportData() {
+      const data = loadData();
+
+      // Ask user which format
+      const format = prompt('Export as JSON or CSV? (type: json or csv)', 'json');
+
+      if (format && format.toLowerCase() === 'csv') {
+        exportAsCSV(data);
+      } else {
+        // Original JSON export
+        const text = JSON.stringify(data, null, 2);
+        if (navigator.share) {
+          navigator.share({ text: text }).then(() => {
+            showToast("Shared!", 2000);
+          }).catch(err => {
+            console.log("Share cancelled or failed", err);
+            copyToClipboard(text);
+          });
+        } else {
+          copyToClipboard(text);
+        }
+      }
+    }
+
+    function exportAsCSV(data) {
+      const records = data.records.filter(r => !r.deleted);
+      const defs = data.customFields || [];
+
+      // CSV header
+      let csv = 'Date,Hours,Rate,PayType,Location,Tips,Total\n';
+
+      // Add rows
+      records.forEach(r => {
+        const total = calculateRecordTotal(r, defs);
+        csv += `${r.date},${r.hours},${r.rate},${r.payType || 'hourly'},"${r.location}",${r.tips},${total.toFixed(2)}\n`;
+      });
+
+      // Add summary at end
+      const totalHours = records.reduce((s, r) => s + r.hours, 0);
+      const totalTips = records.reduce((s, r) => s + r.tips, 0);
+      const totalIncome = records.reduce((s, r) => s + calculateRecordTotal(r, defs), 0);
+
+      csv += `\nSummary\n`;
+      csv += `Total Hours,${totalHours.toFixed(2)}\n`;
+      csv += `Total Tips,${totalTips.toFixed(2)}\n`;
+      csv += `Total Income,${totalIncome.toFixed(2)}\n`;
+
+      if (navigator.share) {
+        navigator.share({ text: csv }).then(() => {
+          showToast("Shared CSV!", 2000);
+        }).catch(err => {
+          copyToClipboard(csv);
+        });
+      } else {
+        copyToClipboard(csv);
+      }
+    }
+
+    function copyToClipboard(text) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast("Copied to clipboard!", 2000);
+        }).catch(() => {
+          prompt("Copy this JSON:", text);
+        });
+      } else {
+        prompt("Copy this JSON:", text);
+      }
+    }
+
+    function importData() {
+      try {
+        const raw = $("importArea").value;
+        const parsed = JSON.parse(raw);
+
+        if (!parsed.records || !Array.isArray(parsed.records)) {
+          alert("Invalid format.");
+          return;
+        }
+
+        saveData(parsed);
+        alert("Import successful.");
+        switchTab("history");
+      } catch (e) {
+        alert("Invalid JSON.");
+      }
+    }
+
+    /* Delete a custom field */
+    function deleteCustomField(index) {
+      if (confirm("Delete this custom field? It will be removed from all records.")) {
+        const data = loadData();
+        data.customFields.splice(index, 1);
+        saveData(data);
+        showToast("Custom field deleted", 2000);
+        renderSettings();
+      }
+    }
+
+    function clearAllData() {
+      if (confirm("⚠️ ARE YOU SURE? This will delete ALL income records and locations. This cannot be undone!")) {
+        if (confirm("Really? All data will be lost forever!")) {
+          localStorage.setItem(DATA_KEY, JSON.stringify({
+            records: [],
+            locations: {}
+          }));
+          localStorage.setItem(META_KEY, JSON.stringify({
+            userId: "user1",
+            nextId: 1
+          }));
+          showToast("All data cleared!", 3000);
+          switchTab("history");
+        }
+      }
+    }
+
+    let devModeButtonClicked = 0
+    function devModeEntryButtonClick() {
+      devModeButtonClicked++;
+      showToast(`Button clicked ${devModeButtonClicked} times`, 500);
+      if (devModeButtonClicked > 5) {
+        isDevMode = true;
+        showToast("Dev mode activated", 2000);
+      }
+    }
+
+    /* ================================
+       START
+    ================================= */
+    switchTab("dashboard");
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
 </body>
+
 </html>
