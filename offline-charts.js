@@ -9,6 +9,7 @@ function renderOfflineCharts() {
   try {
     var data = loadData();
     var records = data.records.filter(r => !r.deleted);
+    var defs = data.customFields || [];
     
     // Apply date filter (same logic as getFilteredRecords in index.html)
     if (typeof dateFilter !== 'undefined') {
@@ -58,6 +59,29 @@ function renderOfflineCharts() {
   }
   
   const colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899'];
+
+  function normalizeHexColor(hex) {
+    if (!hex) return null;
+    const s = String(hex).trim();
+    if (!s || s === "none") return null;
+    const withHash = s.startsWith("#") ? s : `#${s}`;
+    const m = withHash.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/);
+    if (!m) return null;
+    let h = m[0].toLowerCase();
+    if (h.length === 4) {
+      h = `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
+    }
+    return h;
+  }
+
+  function getPreferredLocationColor(label) {
+    const hex = normalizeHexColor(data?.locations?.[label]?.preferredColor);
+    return hex || null;
+  }
+
+  function getLocationColor(label, index) {
+    return getPreferredLocationColor(label) || colors[index % colors.length];
+  }
   
   let html = '';
   
@@ -65,10 +89,7 @@ function renderOfflineCharts() {
     // Income by location
     const locationData = {};
     records.forEach(r => {
-      const hours = parseFloat(r.hours) || 0;
-      const rate = parseFloat(r.rate) || 0;
-      const tips = parseFloat(r.tips) || 0;
-      const total = (hours * rate) + tips;
+      const total = calculateRecordTotal(r, defs);
       if (total > 0) {
         locationData[r.location] = (locationData[r.location] || 0) + total;
       }
@@ -82,6 +103,7 @@ function renderOfflineCharts() {
     sorted.forEach(([label, value], i) => {
       const pct = ((value / total) * 100).toFixed(0);
       const barWidth = (value / total) * 100;
+      const color = getLocationColor(label, i);
       html += `
         <div class="mb-3">
           <div class="flex justify-between text-sm mb-1">
@@ -89,7 +111,7 @@ function renderOfflineCharts() {
             <span class="text-gray-400">$${value.toFixed(0)} (${pct}%)</span>
           </div>
           <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
-            <div class="h-full rounded-full" style="width: ${barWidth}%; background: ${colors[i % colors.length]}"></div>
+            <div class="h-full rounded-full" style="width: ${barWidth}%; background: ${color}"></div>
           </div>
         </div>
       `;
@@ -98,7 +120,7 @@ function renderOfflineCharts() {
   
   else if (view === 'bar') {
     // Tips vs Hourly
-    const hourlyTotal = records.reduce((s, r) => s + (parseFloat(r.hours) || 0) * (parseFloat(r.rate) || 0), 0);
+    const hourlyTotal = records.reduce((s, r) => s + calculateBasePay(r), 0);
     const tipsTotal = records.reduce((s, r) => s + (parseFloat(r.tips) || 0), 0);
     const max = Math.max(hourlyTotal, tipsTotal) || 1;
     
@@ -128,10 +150,7 @@ function renderOfflineCharts() {
     // Daily chart - last 7 days as bar
     const dailyData = {};
     records.forEach(r => {
-      const hours = parseFloat(r.hours) || 0;
-      const rate = parseFloat(r.rate) || 0;
-      const tips = parseFloat(r.tips) || 0;
-      const total = (hours * rate) + tips;
+      const total = calculateRecordTotal(r, defs);
       if (total > 0 && r.date) {
         dailyData[r.date] = (dailyData[r.date] || 0) + total;
       }
@@ -171,6 +190,7 @@ function renderOfflineCharts() {
     
     sorted.forEach(([label, value], i) => {
       const barWidth = (value / max) * 100;
+      const color = getLocationColor(label, i);
       html += `
         <div class="mb-3">
           <div class="flex justify-between text-sm mb-1">
@@ -178,7 +198,7 @@ function renderOfflineCharts() {
             <span class="text-gray-400">${value.toFixed(1)} hrs</span>
           </div>
           <div class="h-4 bg-gray-700 rounded-full overflow-hidden">
-            <div class="h-full rounded-full" style="width: ${barWidth}%; background: ${colors[i % colors.length]}"></div>
+            <div class="h-full rounded-full" style="width: ${barWidth}%; background: ${color}"></div>
           </div>
         </div>
       `;
