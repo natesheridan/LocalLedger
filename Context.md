@@ -459,3 +459,79 @@ manifest.json — referenced by index.html <link rel="manifest">
 8. **Duplicate ID safety** — `editRecord`, `deleteRecord`, `restoreRecord`, and `showShiftDetail` all accept an optional `createdAt` tiebreak. History card buttons pass `r.createdAt` to guarantee the correct record is targeted even if two records share an ID.
 9. **Import advances nextId** — `importData()` computes the highest ID suffix in the imported records and advances `income_meta.nextId` to one above it. This prevents new records from colliding with imported IDs after a clear-then-import cycle.
 10. **Data Health scan** — Settings → Clean Data runs `detectDataIssues()` to surface duplicate IDs and invalid field values. Both batch and per-record fix paths are available. The feature never deletes records without explicit user action.
+
+---
+
+## Suite Launcher
+
+The suite launcher is an animated slot-machine header and panel that lets the user switch between the six LocaLedger modules.
+
+### SUITE_MODULES Array
+
+`SUITE_MODULES` is an array of objects defined at the top of the script block. Each entry describes one module:
+
+```js
+{
+  id: 'labor',           // Short key used in IDs, localStorage, and routing
+  label: 'Labor',        // Short name shown in the drum face
+  name: 'LocaLabor',     // Full display name
+  color: '#6366F1',      // Brand hex color applied to drum face and icon background
+  live: true,            // true = loads the module; false = shows preview page
+  icon: '...',           // SVG path data string for the module icon
+  tagline: '...',        // One-line description shown in the launcher panel
+}
+```
+
+There are 7 entries in the drum face array (6 modules + 1 duplicate of Labor at index 6) so the slot-machine can wrap smoothly.
+
+### Drum Animation
+
+The drum is a `<div id="suiteDrum">` containing 7 `.suite-face` spans stacked vertically. Each face is exactly `DRUM_FACE_H = 44px` tall. The drum advances by translating Y by `-44px` per step.
+
+- `_drumStep` tracks the current raw step count (increments forever, never resets)
+- `_drumIdx` tracks which face (0–5) is currently visible (`_drumIdx = _drumStep % 6`)
+- `_settleDrum()` snaps to the nearest face so the drum is never mid-transition when stopped
+- The CSS transition `transform 0.52s cubic-bezier(0.4, 0, 0.2, 1)` drives the smooth scroll
+- On init, `drum.style.transition = 'none'` is set to prevent an animation flash; a `requestAnimationFrame` restores the transition immediately after
+
+### Key Functions
+
+| Function | What It Does |
+|----------|-------------|
+| `initSuiteDrum()` | Applies per-face colors, resets drum to Labor (face 0), attaches hover and touch event listeners |
+| `toggleSuiteLauncher()` | Opens or closes the suite launcher panel; starts/stops the drum animation; manages the outside-click listener |
+| `closeSuiteLauncher()` | Hides the panel, resets chevron rotation, stops drum, settles to current face, clears hover state |
+| `switchSuiteModule(id)` | If `id === 'labor'`, restores the full app UI (nav, banner, re-renders dashboard); otherwise calls `renderModulePreview(id)` to show a feature preview page |
+| `_applyFaceColors()` | Iterates `.suite-face` elements and sets each one's color to the corresponding module's brand color |
+| `_settleDrum()` | Clears the transition briefly, snaps the drum to `translateY(-drumIdx * 44)`, then restores the transition |
+| `_startDrum()` | Starts `_drumInterval` calling `_drumAdvance` every 3200ms (if not already running) |
+| `_stopDrum()` | Clears `_drumInterval` |
+| `_drumAdvance()` | Increments `_drumStep` and `_drumIdx`, translates the drum by `-44px` more, wraps at step 6 (duplicate face) back to step 0 with no visible jump |
+
+### Module State Variables
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `_activeModule` | `'labor'` | ID of the currently active module |
+| `_drumStep` | `0` | Raw advance count; used to compute translateY |
+| `_drumIdx` | `0` | Current face index (0–5); which module name is showing |
+| `_launcherOpen` | `false` | Whether the suite launcher panel is currently open |
+| `_drumHovering` | `false` | Whether the mouse is currently over the logo button |
+| `_drumInterval` | `null` | setInterval handle for the auto-advance ticker |
+
+### Preview Pages
+
+When the user selects a planned (non-live) module from the suite launcher, `renderModulePreview(id)` is called. It:
+1. Hides the bottom navigation bar (`nav.fixed.bottom-0` → `display:none`)
+2. Replaces `#app` innerHTML with `_buildPreviewPage(module)` output
+3. The preview page shows the module name, tagline, planned features list, proposed data structure, and a "Back to LocaLabor" button that calls `switchSuiteModule('labor')`
+
+`_buildPreviewPage(module)` generates the full HTML string for a preview page, including the module's brand color, feature list from `module.features`, data structure JSON snippet, and integration notes.
+
+### Sort Indicator
+
+`#sortIndicator` is an amber pill element in the history banner. It is:
+- **Hidden** (`display:none` or `hidden` class) when `historySort` is at its default (`{ type:'date', direction:'desc' }`)
+- **Visible** when any non-default sort is active, showing a human-readable label (e.g., "Total ↓", "Custom Field ↑")
+
+`updateMonthlyTotal()` (called during `renderHistory()` banner updates) checks `historySort` and sets the indicator's visibility and text accordingly.

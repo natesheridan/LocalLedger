@@ -1893,3 +1893,106 @@ test('REC-11: scrollToRecurringTemplate navigates to template month and applies 
   // Glow animation class must be applied
   await expect(templateCard).toHaveClass(/_rec-glow/);
 });
+
+test('SUITE-01: Logo drum shows "Labor" by default on fresh load', async ({ page }) => {
+  await loadApp(page);
+  // The first visible suite-face should contain "Labor"
+  const face = page.locator('.suite-face').first();
+  await expect(face).toContainText('Labor');
+  // Drum should be at translateY(0) — Labor face visible
+  const transform = await page.evaluate(() => {
+    const d = document.getElementById('suiteDrum');
+    return d ? d.style.transform : '';
+  });
+  expect(transform).toBe('translateY(0px)');
+});
+
+test('SUITE-02: Clicking header logo opens suite launcher panel', async ({ page }) => {
+  await loadApp(page);
+  await expect(page.locator('#suiteLauncher')).toBeHidden();
+  await page.click('#suiteLaunchBtn');
+  await page.waitForTimeout(200);
+  await expect(page.locator('#suiteLauncher')).toBeVisible();
+});
+
+test('SUITE-03: Selecting LocaLoss from suite shows preview page', async ({ page }) => {
+  await loadApp(page);
+  await page.click('#suiteLaunchBtn');
+  await page.waitForTimeout(200);
+  await page.click('#suiteBtn-loss');
+  await page.waitForTimeout(400);
+  // Preview page should mention LocaLoss
+  await expect(page.locator('#app')).toContainText('LocaLoss');
+  // Bottom nav should be hidden
+  const navDisplay = await page.evaluate(() => {
+    const nav = document.querySelector('nav.fixed.bottom-0');
+    return nav ? nav.style.display : 'block';
+  });
+  expect(navDisplay).toBe('none');
+});
+
+test('SUITE-04: Selecting LocaLabor from preview restores full app UI', async ({ page }) => {
+  await loadApp(page);
+  // First go to a preview
+  await page.click('#suiteLaunchBtn');
+  await page.waitForTimeout(200);
+  await page.click('#suiteBtn-loss');
+  await page.waitForTimeout(400);
+  // Now click Back to LocaLabor
+  await page.click('button[onclick*="switchSuiteModule(\'labor\')"]');
+  await page.waitForTimeout(400);
+  // Bottom nav should be visible again
+  const navDisplay = await page.evaluate(() => {
+    const nav = document.querySelector('nav.fixed.bottom-0');
+    return nav ? nav.style.display : '';
+  });
+  expect(navDisplay).toBe('');
+});
+
+test('SUITE-05: Sort indicator is hidden by default, shown when non-default sort active', async ({ page }) => {
+  await loadApp(page);
+  await goToTab(page, 'history');
+  await page.waitForTimeout(300);
+  // Default sort = date desc → indicator hidden
+  await expect(page.locator('#sortIndicator')).toBeHidden();
+  // Change sort to total desc
+  await page.evaluate(() => {
+    window.historySort = { type: 'total', key: null, direction: 'desc' };
+    window.renderHistory();
+  });
+  await page.waitForTimeout(300);
+  // Indicator should now be visible with sort info
+  await expect(page.locator('#sortIndicator')).toBeVisible();
+  await expect(page.locator('#sortIndicator')).toContainText('Total');
+});
+
+test('SUITE-06: Checkbox custom field saves and loads as unchecked correctly', async ({ page }) => {
+  await loadApp(page);
+  // Add a checkbox custom field
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('income_data'));
+    data.customFields = [{ key: 'CustomField_Test_Check', label: 'Test Check', type: 'checkbox' }];
+    localStorage.setItem('income_data', JSON.stringify(data));
+  });
+  await goToTab(page, 'add');
+  // The checkbox should be unchecked by default
+  const cb = page.locator('input[type="checkbox"][name="custom_0"]');
+  await expect(cb).not.toBeChecked();
+  // Fill form and save with checkbox unchecked
+  await page.fill('#dateInput', '2026-03-01');
+  await page.fill('#locationInput', 'Check Test');
+  await page.fill('#hoursInput', '1');
+  await page.fill('#rateInput', '50');
+  await submitForm(page);
+  // Edit the record — checkbox should still appear unchecked
+  await goToTab(page, 'history');
+  await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('income_data'));
+    const rec = data.records.find(r => r.location === 'Check Test');
+    if (rec) window.editRecord(rec.id, rec.createdAt);
+  });
+  await page.waitForTimeout(300);
+  const cbEdit = page.locator('input[type="checkbox"][name="custom_0"]');
+  await expect(cbEdit).not.toBeChecked();
+});

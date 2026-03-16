@@ -27,6 +27,119 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── Suite Drum Slot-machine ───────────────────────────────────── */
+.suite-drum-wrap {
+  height: 44px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+  mask-image:         linear-gradient(to bottom, transparent 0%, #000 22%, #000 78%, transparent 100%);
+}
+.suite-drum {
+  position: relative;
+  transition: transform 0.52s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.suite-face {
+  display: block;
+  height: 44px;
+  line-height: 44px;
+  white-space: nowrap;
+  font-family: 'Space Mono', 'Courier New', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: #6366F1;
+}
+/* ── Suite Launcher Panel ──────────────────────────────────────── */
+#suiteLauncher {
+  background: rgba(15,17,26,0.97);
+  border-bottom: 1px solid rgba(99,102,241,0.18);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+.suite-module-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.03);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: left;
+  width: 100%;
+}
+.suite-module-btn:active { transform: scale(0.97); }
+.suite-module-btn.active {
+  background: rgba(99,102,241,0.14);
+  border-color: rgba(99,102,241,0.38);
+}
+.suite-module-btn:not(.active):hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.08);
+}
+.suite-module-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+/* ── Preview Page ──────────────────────────────────────────────── */
+.preview-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@keyframes previewPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.preview-pulse { animation: previewPulse 2.4s ease-in-out infinite; }
+.preview-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 13px;
+  color: #d1d5db;
+}
+.preview-feature-item:last-child { border-bottom: none; }
+.preview-json {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: #94a3b8;
+  overflow-x: auto;
+  line-height: 1.6;
+  white-space: pre;
+}
+.preview-flow-arrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 5px 0;
+}
+</style>
 <link rel="manifest" href="manifest.json" />
 <meta name="theme-color" content="#111827" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -35,54 +148,141 @@
 
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="font-family: 'Space Mono', monospace; touch-action: manipulation; overscroll-behavior: none;">
 
-<header class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 pt-14 flex justify-between items-center">
-<div class="flex items-center">
-  <svg width="228" height="39" viewBox="0 0 130 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LocaLedger">
-    <defs>
-      <filter id="hgG" x="-100%" y="-100%" width="300%" height="300%">
-        <feGaussianBlur stdDeviation="1.5" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="hgY" x="-100%" y="-100%" width="300%" height="300%">
-        <feGaussianBlur stdDeviation="1.5" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <filter id="hgI" x="-100%" y="-100%" width="300%" height="300%">
-        <feGaussianBlur stdDeviation="1.5" result="b"/>
-        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-      <linearGradient id="hAccent" x1="22" y1="0" x2="128" y2="0" gradientUnits="userSpaceOnUse">
-        <stop offset="0%"   stop-color="#6366F1" stop-opacity="0.85"/>
-        <stop offset="65%"  stop-color="#6366F1" stop-opacity="0.15"/>
-        <stop offset="100%" stop-color="#22C55E"  stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <!-- Connector spine -->
-    <line x1="4" y1="7.5" x2="4" y2="10"  stroke="#334155" stroke-width="1.5"/>
-    <line x1="4" y1="12"  x2="4" y2="14.5" stroke="#334155" stroke-width="1.5"/>
-    <!-- Row 1 — green -->
-    <circle cx="4" cy="4"  r="2.5" fill="#22C55E" filter="url(#hgG)"/>
-    <rect x="8.5" y="2.75" width="9"  height="2.5" rx="1.25" fill="#334155"/>
-    <!-- Row 2 — amber -->
-    <circle cx="4" cy="11" r="2.5" fill="#EAB308" filter="url(#hgY)"/>
-    <rect x="8.5" y="9.75" width="12" height="2.5" rx="1.25" fill="#334155"/>
-    <!-- Row 3 — indigo -->
-    <circle cx="4" cy="18" r="2.5" fill="#6366F1" filter="url(#hgI)"/>
-    <rect x="8.5" y="16.75" width="7"  height="2.5" rx="1.25" fill="#334155"/>
+<header class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-20 pt-14 flex justify-between items-center relative">
+
+  <!-- Suite Launch Button (logo) -->
+  <button id="suiteLaunchBtn" onclick="toggleSuiteLauncher()" class="flex items-center gap-0 cursor-pointer select-none" style="background:none;border:none;padding:0" aria-label="Open LocaLedger Suite">
+    <!-- Ledger icon marks (preserved from original) -->
+    <svg width="40" height="44" viewBox="0 0 20 22" fill="none" style="flex-shrink:0;margin-right:8px">
+      <defs>
+        <filter id="hgG2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="hgY2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="hgI2" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="1.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <line x1="4" y1="7.5" x2="4" y2="10"  stroke="#334155" stroke-width="1.5"/>
+      <line x1="4" y1="12"  x2="4" y2="14.5" stroke="#334155" stroke-width="1.5"/>
+      <circle cx="4" cy="4"  r="2.5" fill="#22C55E" filter="url(#hgG2)"/>
+      <rect x="8.5" y="2.75" width="9"  height="2.5" rx="1.25" fill="#334155"/>
+      <circle cx="4" cy="11" r="2.5" fill="#EAB308" filter="url(#hgY2)"/>
+      <rect x="8.5" y="9.75" width="12" height="2.5" rx="1.25" fill="#334155"/>
+      <circle cx="4" cy="18" r="2.5" fill="#6366F1" filter="url(#hgI2)"/>
+      <rect x="8.5" y="16.75" width="7" height="2.5" rx="1.25" fill="#334155"/>
+    </svg>
+
     <!-- Wordmark -->
-    <text font-family="'Space Mono','Courier New',monospace" font-size="14" font-weight="700">
-      <tspan x="22" y="17" fill="#F8FAFC">Loca</tspan><tspan fill="#6366F1">Ledger</tspan>
-    </text>
-    <!-- Accent underline -->
-    <rect x="22" y="20.5" width="106" height="0.75" rx="0.375" fill="url(#hAccent)"/>
-  </svg>
-</div>
-<button data-tab="settings" class="tab p-2 text-gray-400">
-  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-</button>
+    <span style="font-family:'Space Mono','Courier New',monospace;font-size:28px;font-weight:700;color:#F8FAFC;line-height:1">Loca</span>
+
+    <!-- Drum: slot-machine animated module suffix -->
+    <div class="suite-drum-wrap">
+      <div id="suiteDrum" class="suite-drum">
+        <span class="suite-face">Labor</span>
+        <span class="suite-face">Loss</span>
+        <span class="suite-face">Limit</span>
+        <span class="suite-face">Loan</span>
+        <span class="suite-face">Legacy</span>
+        <span class="suite-face">Liquid</span>
+        <span class="suite-face">Labor</span><!-- duplicate for seamless wrap -->
+      </div>
+    </div>
+
+    <!-- Chevron -->
+    <svg id="suiteChevron" width="12" height="12" viewBox="0 0 12 12" fill="none" style="margin-left:2px;transition:transform 0.25s;flex-shrink:0">
+      <path d="M2.5 4.5L6 8l3.5-3.5" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- Suite Launcher Panel (slides down from header) -->
+  <div id="suiteLauncher" class="hidden absolute top-full left-0 right-0 z-50" style="border-top:1px solid rgba(99,102,241,0.12)">
+    <div class="px-4 pt-3 pb-4">
+      <div class="flex items-center justify-between mb-3">
+        <span style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#475569;letter-spacing:0.1em;text-transform:uppercase">LocaLedger Suite</span>
+        <button onclick="closeSuiteLauncher()" style="color:#475569;font-size:18px;line-height:1;background:none;border:none;cursor:pointer;padding:2px 6px">×</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+
+        <!-- LocaLabor (LIVE) -->
+        <button id="suiteBtn-labor" class="suite-module-btn active" onclick="switchSuiteModule('labor')">
+          <div class="suite-module-icon" style="background:rgba(99,102,241,0.18);border:1px solid rgba(99,102,241,0.35)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLabor</div>
+            <div style="font-size:10px;color:#818cf8;margin-top:1px">Income Tracking</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:#6366F1;color:#fff;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">LIVE</span>
+        </button>
+
+        <!-- LocaLoss -->
+        <button id="suiteBtn-loss" class="suite-module-btn" onclick="switchSuiteModule('loss')">
+          <div class="suite-module-icon" style="background:rgba(244,63,94,0.12);border:1px solid rgba(244,63,94,0.25)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLoss</div>
+            <div style="font-size:10px;color:#f87171;margin-top:1px">Spending Tracker</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:rgba(244,63,94,0.2);color:#fda4af;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">SOON</span>
+        </button>
+
+        <!-- LocaLimit -->
+        <button id="suiteBtn-limit" class="suite-module-btn" onclick="switchSuiteModule('limit')">
+          <div class="suite-module-icon" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.25)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLimit</div>
+            <div style="font-size:10px;color:#fbbf24;margin-top:1px">Budget Intel</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:rgba(245,158,11,0.2);color:#fcd34d;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">SOON</span>
+        </button>
+
+        <!-- LocaLoan -->
+        <button id="suiteBtn-loan" class="suite-module-btn" onclick="switchSuiteModule('loan')">
+          <div class="suite-module-icon" style="background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.25)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLoan</div>
+            <div style="font-size:10px;color:#fb923c;margin-top:1px">Loan Optimizer</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:rgba(249,115,22,0.2);color:#fdba74;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">SOON</span>
+        </button>
+
+        <!-- LocaLegacy -->
+        <button id="suiteBtn-legacy" class="suite-module-btn" onclick="switchSuiteModule('legacy')">
+          <div class="suite-module-icon" style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLegacy</div>
+            <div style="font-size:10px;color:#34d399;margin-top:1px">Investment Tracker</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:rgba(16,185,129,0.2);color:#6ee7b7;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">SOON</span>
+        </button>
+
+        <!-- LocaLiquid -->
+        <button id="suiteBtn-liquid" class="suite-module-btn" onclick="switchSuiteModule('liquid')">
+          <div class="suite-module-icon" style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25)">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="2"><path d="M12 2c0 0-8 6.5-8 12a8 8 0 0016 0c0-5.5-8-12-8-12z"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:#f1f5f9;font-family:'Space Mono',monospace">LocaLiquid</div>
+            <div style="font-size:10px;color:#22d3ee;margin-top:1px">Net Worth Engine</div>
+          </div>
+          <span style="font-size:9px;font-weight:700;background:rgba(6,182,212,0.2);color:#67e8f9;padding:2px 6px;border-radius:999px;letter-spacing:0.06em;flex-shrink:0">SOON</span>
+        </button>
+
+      </div><!-- /grid -->
+    </div>
+  </div><!-- /suiteLauncher -->
+
+  <!-- Settings (kept) -->
+  <button data-tab="settings" class="tab p-2 text-gray-400">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
 </header>
 
 <main id="app" class="flex-1 overflow-y-auto pb-40"></main>
@@ -91,9 +291,10 @@
 <div id="monthlyBanner" class="fixed bottom-16 inset-x-0 bg-gray-900 border-t border-gray-800 px-4 py-3">
 <button id="monthlyBannerButton" class="w-full flex justify-between items-center" onclick="showDateFilterMenu()">
 <div class="text-center flex-1">
-  <div class="flex items-center justify-center gap-2">
+  <div class="flex items-center justify-center gap-2 flex-wrap">
     <span id="filterIndicator" class="text-xs text-indigo-400">∞</span>
     <span id="dateFilterLabel" class="text-xs text-gray-400 uppercase">All Time</span>
+    <span id="sortIndicator" class="hidden text-xs px-1.5 py-0.5 rounded bg-amber-900/40 text-amber-400 border border-amber-700/40"></span>
   </div>
   <div id="monthlyBannerValue" class="text-xl font-bold pb-3">$0.00</div>
 </div>
@@ -1864,7 +2065,7 @@ function setupCustomFields() {
     if (field.type === 'checkbox') {
       return `
         <div class="flex items-center gap-2">
-          <input type="checkbox" name="${fieldId}" id="${fieldId}" ${existingValue ? 'checked' : ''} class="w-5 h-5 accent-indigo-500 bg-gray-800 rounded border border-gray-600" onchange="updateCustomFieldLabel('${fieldId}')">
+          <input type="checkbox" name="${fieldId}" id="${fieldId}" ${existingValue === 'true' ? 'checked' : ''} class="w-5 h-5 accent-indigo-500 bg-gray-800 rounded border border-gray-600" onchange="updateCustomFieldLabel('${fieldId}')">
           <label for="${fieldId}" class="text-gray-300 select-none">${field.label}</label>
         </div>
       `;
@@ -2207,10 +2408,16 @@ function saveIncome(form, existing) {
     const inputId = `custom_${index}`;
     let value = form.get(inputId);
 
-    // Handle checkbox
     const input = document.getElementById(inputId);
-    if (field.type === 'checkbox' && input) {
-      value = input.checked ? 'true' : 'false';
+
+    // Checkboxes: store 'true' when checked, remove the key when unchecked
+    if (field.type === 'checkbox') {
+      if (input && input.checked) {
+        customFieldData[field.key] = 'true';
+      } else {
+        clearedCustomKeys.push(field.key);
+      }
+      return; // forEach continue
     }
 
     if (value !== null && value !== "") {
@@ -3075,6 +3282,23 @@ function updateMonthlyTotal(records) {
       indicatorEl.textContent = '3';
     } else if (dateFilter.type === 'range') {
       indicatorEl.textContent = '📋';
+    }
+  }
+
+  // Sort indicator — show amber pill when sort is not the default (date desc)
+  const sortEl = $("sortIndicator");
+  if (sortEl) {
+    const isDefault = historySort.type === 'date' && historySort.direction === 'desc';
+    if (isDefault) {
+      sortEl.classList.add('hidden');
+    } else {
+      const arrow = historySort.direction === 'asc' ? '↑' : '↓';
+      let label;
+      if (historySort.type === 'date')  label = `Date ${arrow}`;
+      else if (historySort.type === 'total') label = `Total ${arrow}`;
+      else label = `${historySort.key ? historySort.key.replace(/CustomField_/,'').replace(/_/g,' ') : 'Custom'} ${arrow}`;
+      sortEl.textContent = `⇅ ${label}`;
+      sortEl.classList.remove('hidden');
     }
   }
 }
@@ -4156,9 +4380,544 @@ function showUpdateBanner() {
 })();
 
 /* ================================
+   SUITE LAUNCHER & DRUM
+================================= */
+
+const SUITE_MODULES = [
+  { id: 'labor',  label: 'Labor',  color: '#6366F1', desc: 'Income Tracking' },
+  { id: 'loss',   label: 'Loss',   color: '#F43F5E', desc: 'Spending Tracker' },
+  { id: 'limit',  label: 'Limit',  color: '#F59E0B', desc: 'Budget Intelligence' },
+  { id: 'loan',   label: 'Loan',   color: '#F97316', desc: 'Loan Optimizer' },
+  { id: 'legacy', label: 'Legacy', color: '#10B981', desc: 'Investment Tracker' },
+  { id: 'liquid', label: 'Liquid', color: '#06B6D4', desc: 'Net Worth Engine' },
+];
+
+let _drumIdx = 0;          // logical face index (0-5)
+let _drumStep = 0;         // CSS position counter (resets after wrap)
+let _drumInterval = null;  // auto-rotate interval (hover/open only)
+let _drumResetTimer = null;// pending wrap-reset timer
+let _drumHovering = false; // is the button being hovered
+let _launcherOpen = false; // is the suite panel open
+let _activeModule = 'labor';
+const DRUM_FACE_H = 44;
+
+function _drumAdvance() {
+  if (_drumResetTimer) { clearTimeout(_drumResetTimer); _drumResetTimer = null; }
+  const drum = document.getElementById('suiteDrum');
+  if (!drum) return;
+  _drumStep++;
+  _drumIdx = _drumStep % 6;
+  drum.style.transform = `translateY(-${_drumStep * DRUM_FACE_H}px)`;
+  if (_drumStep >= 6) {
+    _drumResetTimer = setTimeout(() => {
+      _drumResetTimer = null;
+      const d = document.getElementById('suiteDrum');
+      if (!d) return;
+      d.style.transition = 'none';
+      _drumStep = _drumStep % 6;
+      _drumIdx = _drumStep;
+      d.style.transform = `translateY(-${_drumStep * DRUM_FACE_H}px)`;
+      requestAnimationFrame(() => { if (d) d.style.transition = ''; });
+    }, 560);
+  }
+}
+
+function _startDrum() {
+  if (_drumInterval) return;
+  _drumInterval = setInterval(_drumAdvance, 3200);
+}
+
+function _stopDrum() {
+  if (_drumInterval) { clearInterval(_drumInterval); _drumInterval = null; }
+}
+
+function _quickSpin() {
+  let count = 0;
+  const spin = setInterval(() => {
+    _drumAdvance();
+    if (++count >= 6) clearInterval(spin);
+  }, 75);
+}
+
+// Smoothly settle the drum back to the active module's face
+function _settleDrum() {
+  if (_drumResetTimer) { clearTimeout(_drumResetTimer); _drumResetTimer = null; }
+  const faceIdx = SUITE_MODULES.findIndex(m => m.id === _activeModule);
+  if (faceIdx < 0) return;
+  const drum = document.getElementById('suiteDrum');
+  if (!drum) return;
+  // Find shortest forward path to target from current position
+  const cur = _drumStep % 6;
+  const stepsForward = faceIdx >= cur ? (faceIdx - cur) : (6 - cur + faceIdx);
+  if (stepsForward === 0) return; // already there
+  drum.style.transition = 'transform 0.42s cubic-bezier(0.4,0,0.2,1)';
+  _drumStep += stepsForward;
+  _drumIdx = faceIdx;
+  drum.style.transform = `translateY(-${_drumStep * DRUM_FACE_H}px)`;
+  // Clean up the step counter after the transition
+  setTimeout(() => {
+    const d = document.getElementById('suiteDrum');
+    if (!d) return;
+    d.style.transition = 'none';
+    _drumStep = faceIdx;
+    d.style.transform = `translateY(-${faceIdx * DRUM_FACE_H}px)`;
+    requestAnimationFrame(() => { if (d) d.style.transition = ''; });
+  }, 450);
+}
+
+// Assign each face its own module color (face 6 = duplicate of face 0)
+function _applyFaceColors() {
+  document.querySelectorAll('.suite-face').forEach((el, i) => {
+    el.style.color = SUITE_MODULES[i % 6].color;
+  });
+}
+
+function toggleSuiteLauncher() {
+  if (_launcherOpen) { closeSuiteLauncher(); return; }
+  const panel = document.getElementById('suiteLauncher');
+  const chevron = document.getElementById('suiteChevron');
+  if (!panel) return;
+  panel.classList.remove('hidden');
+  _launcherOpen = true;
+  if (chevron) chevron.style.transform = 'rotate(180deg)';
+  _startDrum();
+  setTimeout(() => {
+    document.addEventListener('click', _suiteLauncherOutsideClick, { once: true });
+  }, 0);
+}
+
+function closeSuiteLauncher() {
+  const panel = document.getElementById('suiteLauncher');
+  const chevron = document.getElementById('suiteChevron');
+  if (panel) panel.classList.add('hidden');
+  if (chevron) chevron.style.transform = '';
+  _launcherOpen = false;
+  document.removeEventListener('click', _suiteLauncherOutsideClick);
+  // Stop rotation and settle back to active module
+  _stopDrum();
+  _settleDrum();
+}
+
+function _suiteLauncherOutsideClick(e) {
+  const panel = document.getElementById('suiteLauncher');
+  const btn = document.getElementById('suiteLaunchBtn');
+  if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+    closeSuiteLauncher();
+  }
+}
+
+function switchSuiteModule(id) {
+  closeSuiteLauncher();
+  _activeModule = id;
+
+  // Update suite button active states
+  SUITE_MODULES.forEach(m => {
+    const btn = document.getElementById(`suiteBtn-${m.id}`);
+    if (btn) btn.classList.toggle('active', m.id === id);
+  });
+
+  // Colors are permanently per-face; nothing to update here
+
+  // Snap drum to this module's face immediately (no hover running)
+  const faceIdx = SUITE_MODULES.findIndex(m => m.id === id);
+  if (faceIdx >= 0) {
+    const drum = document.getElementById('suiteDrum');
+    if (drum) {
+      drum.style.transition = 'transform 0.4s cubic-bezier(0.4,0,0.2,1)';
+      _drumStep = faceIdx;
+      _drumIdx = faceIdx;
+      drum.style.transform = `translateY(-${faceIdx * DRUM_FACE_H}px)`;
+      setTimeout(() => { if (drum) { drum.style.transition = 'none'; requestAnimationFrame(() => { if(drum) drum.style.transition=''; }); } }, 420);
+    }
+  }
+
+  if (id === 'labor') {
+    _showLaborUI();
+    switchTab('dashboard');
+  } else {
+    _showModulePreview(id);
+  }
+}
+
+function _showLaborUI() {
+  const nav = document.querySelector('nav.fixed.bottom-0');
+  const banner = document.getElementById('monthlyBanner');
+  if (nav) nav.style.display = '';
+  if (banner) banner.style.display = '';
+}
+
+function _hideForPreview() {
+  const nav = document.querySelector('nav.fixed.bottom-0');
+  const banner = document.getElementById('monthlyBanner');
+  if (nav) nav.style.display = 'none';
+  if (banner) banner.style.display = 'none';
+}
+
+function _showModulePreview(id) {
+  _hideForPreview();
+  const app = document.getElementById('app');
+  if (!app) return;
+  app.style.opacity = '0';
+  app.style.transform = 'translateY(10px)';
+  app.style.transition = 'opacity 0.2s, transform 0.2s';
+  setTimeout(() => {
+    app.innerHTML = _buildPreviewPage(id);
+    app.style.opacity = '1';
+    app.style.transform = 'translateY(0)';
+  }, 120);
+}
+
+function _buildPreviewPage(id) {
+  const pages = {
+    loss: {
+      color: '#F43F5E', colorMuted: 'rgba(244,63,94,0.12)', colorBorder: 'rgba(244,63,94,0.25)',
+      colorText: '#fda4af', colorLabel: 'rose',
+      title: 'LocaLoss', subtitle: 'Spending Tracker',
+      icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`,
+      tagline: 'Know where every dollar goes — before it goes missing.',
+      features: [
+        ['Daily Spending Capture', 'Log any purchase in seconds — one-tap entry with smart categories.'],
+        ['Recurring Bills & Subscriptions', 'Track rent, utilities, streaming, and any fixed monthly cost automatically.'],
+        ['Category Intelligence', 'Auto-tag expenses into Food, Transport, Housing, Entertainment, and custom tags.'],
+        ['Fuel & Small Purchases', 'Quick-add mode for everyday micro-transactions without friction.'],
+        ['Expense Tagging & Notes', 'Attach receipts, notes, or tags to any transaction for tax and review.'],
+        ['Spending Trends', 'Visual breakdowns showing spend velocity by day, week, and month.'],
+        ['Budget Threshold Alerts', 'Get notified when a category approaches its monthly limit.'],
+      ],
+      json: `{
+  "expenses": [
+    {
+      "id": "exp_...",
+      "date": "2026-03-14",
+      "amount": 42.50,
+      "category": "food",
+      "merchant": "Whole Foods",
+      "tags": ["groceries"],
+      "recurring": false,
+      "notes": ""
+    }
+  ],
+  "categories": [
+    { "key": "food", "label": "Food & Dining", "color": "#F43F5E", "budget": 400 }
+  ],
+  "recurringBills": [
+    { "id": "bill_...", "label": "Rent", "amount": 1500, "dueDay": 1, "category": "housing" }
+  ]
+}`,
+      flows: [
+        { from: 'LocaLoss', to: 'LocaLimit', desc: 'Feeds monthly spending totals into budget analysis' },
+        { from: 'LocaLoss', to: 'LocaLoan', desc: 'Surfaces recurring payments for debt payoff modeling' },
+        { from: 'LocaLoss', to: 'LocaLiquid', desc: 'Contributes outflow data to net worth projections' },
+      ],
+      extras: [
+        'Offline-first — all data lives in your browser, never a server.',
+        'Import from CSV (bank exports) with smart column mapping.',
+        'Split-expense support for shared bills with partners.',
+        'End-of-month spending report exportable to PDF.',
+      ],
+    },
+
+    limit: {
+      color: '#F59E0B', colorMuted: 'rgba(245,158,11,0.12)', colorBorder: 'rgba(245,158,11,0.25)',
+      colorText: '#fcd34d', colorLabel: 'amber',
+      title: 'LocaLimit', subtitle: 'Budget Intelligence',
+      icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.8"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>`,
+      tagline: 'See the full financial picture — income vs. spending, in real time.',
+      features: [
+        ['Income vs. Spending Dashboard', 'Side-by-side comparison of LocaLabor income and LocaLoss expenses.'],
+        ['Budget Envelope System', 'Allocate income into virtual envelopes by category each month.'],
+        ['Savings Rate Tracker', 'Automatically calculates your personal savings rate over any time window.'],
+        ['Estimated Tax Modeling', 'Self-employment tax estimates based on income type and jurisdiction.'],
+        ['Net Income After Tax', 'Real take-home projection after estimated deductions and quarterly tax.'],
+        ['Predictive Budget Scenarios', 'Model "what if I earned 20% more" or "what if rent goes up $200".'],
+        ['Category Spending Breakdowns', 'Treemap and bar charts showing spend distribution at a glance.'],
+      ],
+      json: `{
+  "budgets": [
+    { "category": "food",      "limit": 400, "period": "monthly" },
+    { "category": "transport", "limit": 200, "period": "monthly" }
+  ],
+  "taxSettings": {
+    "selfEmploymentRate": 0.153,
+    "estimatedFederalRate": 0.22,
+    "stateRate": 0.05,
+    "quarterlyDueDates": ["04-15","06-15","09-15","01-15"]
+  }
+}`,
+      flows: [
+        { from: 'LocaLabor', to: 'LocaLimit', desc: 'Pulls all income records for income-side analysis' },
+        { from: 'LocaLoss', to: 'LocaLimit', desc: 'Pulls all expense records for spend-side analysis' },
+        { from: 'LocaLimit', to: 'LocaLoan', desc: 'Exports monthly surplus for loan payoff capacity' },
+        { from: 'LocaLimit', to: 'LocaLiquid', desc: 'Feeds net cash flow into net worth projections' },
+      ],
+      extras: [
+        'Multi-period comparison: compare any two months or quarters.',
+        'Gig-worker tax wizard — quarterly estimated payment calculator.',
+        'Goal tracker: emergency fund, vacation, down payment targets.',
+        'Alerts when spending exceeds income in any rolling 30-day window.',
+      ],
+    },
+
+    loan: {
+      color: '#F97316', colorMuted: 'rgba(249,115,22,0.12)', colorBorder: 'rgba(249,115,22,0.25)',
+      colorText: '#fdba74', colorLabel: 'orange',
+      title: 'LocaLoan', subtitle: 'Loan Payoff Optimizer',
+      icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>`,
+      tagline: 'Model every loan, crush debt faster, and watch interest evaporate.',
+      features: [
+        ['Multi-Loan Tracking', 'Track credit cards, auto loans, student debt, personal loans simultaneously.'],
+        ['APR Modeling', 'Model standard and promotional APR periods including 0% deferred periods.'],
+        ['Promo APR Countdown', 'Alerts when a 0% promotional period is about to expire — avoid the trap.'],
+        ['Snowball Strategy', 'Pay minimums on all, attack smallest balance first — fastest motivation.'],
+        ['Avalanche Strategy', 'Pay minimums on all, attack highest APR first — least interest paid.'],
+        ['Custom Payoff Scenarios', 'Set any extra monthly payment and see the payoff date and interest saved.'],
+        ['Amortization Tables', 'Full month-by-month breakdown of principal vs. interest for any loan.'],
+      ],
+      json: `{
+  "loans": [
+    {
+      "id": "loan_...",
+      "label": "Chase Sapphire",
+      "type": "credit_card",
+      "balance": 4200.00,
+      "apr": 0.2499,
+      "promoApr": 0.0,
+      "promoAprEnds": "2026-09-01",
+      "minimumPayment": 85,
+      "openedDate": "2024-01-15"
+    }
+  ],
+  "strategies": { "active": "avalanche", "extraMonthly": 200 }
+}`,
+      flows: [
+        { from: 'LocaLimit', to: 'LocaLoan', desc: 'Imports monthly budget surplus as available extra payment' },
+        { from: 'LocaLoss', to: 'LocaLoan', desc: 'Identifies recurring minimum payments already in spend data' },
+        { from: 'LocaLoan', to: 'LocaLiquid', desc: 'Feeds debt balance and payoff timeline into net worth model' },
+      ],
+      extras: [
+        'Interest savings comparison: snowball vs. avalanche side-by-side.',
+        'Debt-free date countdown with progress rings.',
+        'Refi analyzer — model a new rate and see the break-even point.',
+        'Minimum-payment-only simulation to illustrate the true cost of inaction.',
+      ],
+    },
+
+    legacy: {
+      color: '#10B981', colorMuted: 'rgba(16,185,129,0.12)', colorBorder: 'rgba(16,185,129,0.25)',
+      colorText: '#6ee7b7', colorLabel: 'emerald',
+      title: 'LocaLegacy', subtitle: 'Investment Tracker',
+      icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+      tagline: 'Track every asset you own — from AAPL to rare sneakers.',
+      features: [
+        ['Stock & ETF Portfolio', 'Manual or API-synced positions with cost basis and current market value.'],
+        ['Crypto Assets', 'Track BTC, ETH, and any token with purchase price, quantity, and current value.'],
+        ['Commodities', 'Gold, silver, oil futures — priced manually or via market feed.'],
+        ['Alternative Assets', 'Art, collectibles, vehicles, domains, IP — anything with a value.'],
+        ['Asset Class Diversification', 'Visual breakdown of portfolio allocation across all asset classes.'],
+        ['Year-over-Year Growth', 'Calculated CAGR per position and for the total portfolio.'],
+        ['Unrealized Gain / Loss', 'Real-time P&L on all holdings with cost basis tracking.'],
+      ],
+      json: `{
+  "assets": [
+    {
+      "id": "asset_...",
+      "symbol": "AAPL",
+      "class": "stock",
+      "shares": 15,
+      "costBasis": 148.50,
+      "currentPrice": 212.40,
+      "lastUpdated": "2026-03-14"
+    },
+    {
+      "id": "asset_...",
+      "label": "1965 Ford Mustang",
+      "class": "vehicle",
+      "purchasePrice": 28000,
+      "estimatedValue": 41000,
+      "lastUpdated": "2026-01-01"
+    }
+  ],
+  "assetClasses": ["stock","crypto","commodity","real_estate","vehicle","art","other"]
+}`,
+      flows: [
+        { from: 'LocaLegacy', to: 'LocaLiquid', desc: 'Asset values feed the total net worth dashboard' },
+        { from: 'LocaLegacy', to: 'LocaLiquid', desc: 'Illiquid asset classification informs liquidity view' },
+      ],
+      extras: [
+        'Price history charts with cost basis overlay.',
+        'Dividend and distribution tracker per holding.',
+        'Tax lot tracking for short vs. long-term capital gains planning.',
+        'Watchlist for assets you want to buy — set price alerts.',
+      ],
+    },
+
+    liquid: {
+      color: '#06B6D4', colorMuted: 'rgba(6,182,212,0.12)', colorBorder: 'rgba(6,182,212,0.25)',
+      colorText: '#67e8f9', colorLabel: 'cyan',
+      title: 'LocaLiquid', subtitle: 'Net Worth Engine',
+      icon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="1.8"><path d="M12 2c0 0-8 6.5-8 12a8 8 0 0016 0c0-5.5-8-12-8-12z"/></svg>`,
+      tagline: 'Your entire financial life distilled into a single living number.',
+      features: [
+        ['Real-Time Net Worth', 'Assets minus liabilities, updated every time any connected module changes.'],
+        ['Liquid vs. Illiquid Breakdown', 'Separate view of immediately accessible cash vs. locked-up assets.'],
+        ['Net Worth Over Time', 'Historical chart showing your net worth trajectory month by month.'],
+        ['Future Wealth Projections', 'Model your net worth 5, 10, 25 years out given current income and savings rate.'],
+        ['Income Trajectory Modeling', 'Layer in income growth assumptions (3% raise, new gig) and see the compounding.'],
+        ['Retirement Readiness Score', 'Benchmark your projected wealth against common retirement targets.'],
+        ['Milestone Alerts', 'Notifications when you hit $10k, $50k, $100k, and every milestone thereafter.'],
+      ],
+      json: `{
+  "snapshot": {
+    "date": "2026-03-16",
+    "totalAssets": 142500,
+    "totalLiabilities": 28400,
+    "netWorth": 114100,
+    "liquidAssets": 22000,
+    "illiquidAssets": 120500
+  },
+  "projections": {
+    "annualSavingsRate": 0.22,
+    "expectedReturnRate": 0.07,
+    "targetRetirementAge": 55
+  }
+}`,
+      flows: [
+        { from: 'LocaLabor',  to: 'LocaLiquid', desc: 'Income history powers the earnings trajectory model' },
+        { from: 'LocaLoss',   to: 'LocaLiquid', desc: 'Spending data sets the net cash flow baseline' },
+        { from: 'LocaLegacy', to: 'LocaLiquid', desc: 'Asset values form the assets side of net worth' },
+        { from: 'LocaLoan',   to: 'LocaLiquid', desc: 'Debt balances form the liabilities side' },
+        { from: 'LocaLimit',  to: 'LocaLiquid', desc: 'Monthly surplus drives the compounding projection' },
+      ],
+      extras: [
+        'Inflation-adjusted projection mode — real vs. nominal wealth.',
+        'Scenario builder: early retirement, sabbatical, major purchase.',
+        'Partner/household mode — combine two people\'s full financial picture.',
+        'Exportable financial snapshot for mortgage applications or advisors.',
+      ],
+    },
+  };
+
+  const p = pages[id];
+  if (!p) return '<div class="p-8 text-center text-gray-500">Module not found.</div>';
+
+  const featuresHtml = p.features.map(([title, desc]) => `
+    <div class="preview-feature-item">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+        <circle cx="8" cy="8" r="7" stroke="${p.color}" stroke-width="1.2" opacity="0.5"/>
+        <path d="M5 8l2.2 2.2L11 5.5" stroke="${p.color}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <span style="color:#f1f5f9;font-weight:600">${title}</span>
+        <span style="color:#94a3b8"> — ${desc}</span>
+      </div>
+    </div>`).join('');
+
+  const flowsHtml = p.flows.map(f => `
+    <div class="preview-flow-arrow">
+      <span style="font-family:'Space Mono',monospace;font-size:11px;color:${p.color};font-weight:700">${f.from}</span>
+      <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 5h12M9 1l4 4-4 4" stroke="${p.color}" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/></svg>
+      <span style="font-family:'Space Mono',monospace;font-size:11px;color:${p.color};font-weight:700">${f.to}</span>
+      <span style="font-size:11px;color:#64748b">— ${f.desc}</span>
+    </div>`).join('');
+
+  const extrasHtml = p.extras.map(e => `
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:12px;color:#94a3b8;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <span style="color:${p.color};margin-top:1px;flex-shrink:0">✦</span>${e}
+    </div>`).join('');
+
+  return `
+  <div style="padding:16px 16px 80px">
+
+    <!-- Module hero -->
+    <div style="text-align:center;padding:28px 0 20px">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:16px;background:${p.colorMuted};border:1px solid ${p.colorBorder};margin-bottom:12px">
+        ${p.icon}
+      </div>
+      <div>
+        <h1 style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#f8fafc;margin:0">${p.title}</h1>
+        <p style="color:#64748b;font-size:13px;margin:4px 0 0">${p.subtitle}</p>
+      </div>
+      <div style="margin-top:12px">
+        <span class="preview-badge preview-pulse" style="background:${p.colorMuted};color:${p.colorText};border:1px solid ${p.colorBorder}">
+          <span style="width:5px;height:5px;border-radius:50%;background:${p.color};display:inline-block"></span>
+          Coming Soon
+        </span>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;margin:16px auto 0;max-width:300px;line-height:1.6;font-style:italic">"${p.tagline}"</p>
+    </div>
+
+    <!-- Core Features -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#475569;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Core Features</div>
+      ${featuresHtml}
+    </div>
+
+    <!-- Data Structure -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#475569;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Proposed Data Structure</div>
+      <div class="preview-json">${p.json}</div>
+    </div>
+
+    <!-- Suite Integration -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:#475569;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Suite Data Connections</div>
+      ${flowsHtml}
+    </div>
+
+    <!-- Additional Ideas -->
+    <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px;margin-bottom:20px">
+      <div style="font-size:10px;font-weight:700;color:#475569;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">Additional Ideas</div>
+      ${extrasHtml}
+    </div>
+
+    <!-- Storage key note -->
+    <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:10px;padding:12px;margin-bottom:20px;font-size:11px;color:#818cf8;font-family:'Space Mono',monospace">
+      localStorage key: <strong style="color:#a5b4fc">${id === 'loss' ? 'locaLossData' : id === 'limit' ? 'locaLimitData' : id === 'loan' ? 'locaLoanData' : id === 'legacy' ? 'locaLegacyData' : 'locaLiquidData'}</strong>
+    </div>
+
+    <!-- Back to LocaLabor -->
+    <button onclick="switchSuiteModule('labor')" style="width:100%;padding:14px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.25);border-radius:12px;color:#818cf8;font-size:13px;font-family:'Space Mono',monospace;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="#818cf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to LocaLabor
+    </button>
+
+  </div>`;
+}
+
+function initSuiteDrum() {
+  // Assign per-face colors and hard-reset to Labor (face 0)
+  _applyFaceColors();
+  const drum = document.getElementById('suiteDrum');
+  if (drum) {
+    drum.style.transition = 'none';
+    drum.style.transform = 'translateY(0)';
+    _drumStep = 0;
+    _drumIdx = 0;
+    requestAnimationFrame(() => { if (drum) drum.style.transition = ''; });
+  }
+
+  // Hover: start spinning; mouse-leave: stop and settle back
+  const btn = document.getElementById('suiteLaunchBtn');
+  if (btn) {
+    btn.addEventListener('mouseenter', () => {
+      _drumHovering = true;
+      if (!_launcherOpen) { _startDrum(); }
+    });
+    btn.addEventListener('mouseleave', () => {
+      _drumHovering = false;
+      if (!_launcherOpen) { _stopDrum(); _settleDrum(); }
+    });
+    btn.addEventListener('touchstart', () => {
+      // handled by onclick -> toggleSuiteLauncher
+    }, { passive: true });
+  }
+}
+
+/* ================================
    START
 ================================= */
 switchTab("dashboard");
+initSuiteDrum();
 initServiceWorker();
 </script>
 

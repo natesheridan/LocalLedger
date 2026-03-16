@@ -1035,3 +1035,113 @@ This format gives a fixing agent:
 - `#recurringPanel` is not attached to DOM.
 - Recurring toggle button shows inactive (`bg-gray-700`) state.
 - `_recurringEnabled` global is `false`.
+
+---
+
+## REC-11: scrollToRecurringTemplate navigates to template month and applies glow
+
+**Setup:** Recurring template seeded with date 2026-01-10, freq=30d.
+
+**Steps:**
+1. Navigate to History filtered to March 2026.
+2. Click the Source button on a virtual recurring card.
+
+**Expected Result:**
+- The template card (in January 2026) is scrolled into view and highlighted with a glow animation class.
+
+---
+
+## SUITE Use Cases
+
+```
+SUITE-01: Logo drum shows "Labor" by default on fresh load
+SUITE-02: Clicking header logo opens suite launcher panel
+SUITE-03: Selecting LocaLoss from suite shows preview page with correct content
+SUITE-04: Selecting LocaLabor from preview restores full app UI (nav, banner)
+SUITE-05: Sort indicator is hidden by default, visible when non-default sort active
+SUITE-06: Checkbox custom field saves and loads as unchecked correctly
+```
+
+---
+
+## SUITE-01: Logo Drum Shows "Labor" by Default on Fresh Load
+
+**Setup:** Fresh app, no data.
+
+**Steps:**
+1. Open the app.
+
+**Expected Result:**
+- The first `.suite-face` element contains "Labor".
+- `#suiteDrum` has `style.transform = 'translateY(0px)'`.
+
+---
+
+## SUITE-02: Clicking Header Logo Opens Suite Launcher Panel
+
+**Setup:** Fresh app.
+
+**Steps:**
+1. Verify `#suiteLauncher` is not visible.
+2. Click `#suiteLaunchBtn`.
+
+**Expected Result:**
+- `#suiteLauncher` becomes visible within 200ms.
+
+---
+
+## SUITE-03: Selecting LocaLoss from Suite Shows Preview Page
+
+**Setup:** Fresh app.
+
+**Steps:**
+1. Click `#suiteLaunchBtn` to open the launcher.
+2. Click `#suiteBtn-loss`.
+
+**Expected Result:**
+- `#app` contains the text "LocaLoss".
+- The bottom navigation (`nav.fixed.bottom-0`) has `display: none`.
+
+---
+
+## SUITE-04: Selecting LocaLabor from Preview Restores Full App UI
+
+**Setup:** App is on the LocaLoss preview page (from SUITE-03).
+
+**Steps:**
+1. Click the "Back to LocaLabor" button (`button[onclick*="switchSuiteModule('labor')"]`).
+
+**Expected Result:**
+- The bottom navigation (`nav.fixed.bottom-0`) is visible again (`display: ''`).
+
+---
+
+## SUITE-05: Sort Indicator Hidden by Default, Visible for Non-Default Sort
+
+**Setup:** Fresh app.
+
+**Steps:**
+1. Navigate to History tab.
+2. Verify `#sortIndicator` is hidden.
+3. Set `historySort = { type: 'total', key: null, direction: 'desc' }` and call `renderHistory()`.
+
+**Expected Result:**
+- After step 2: `#sortIndicator` is not visible.
+- After step 3: `#sortIndicator` is visible and contains "Total".
+
+---
+
+## SUITE-06: Checkbox Custom Field Saves and Loads as Unchecked Correctly
+
+**Setup:** Fresh app with a checkbox custom field definition.
+
+**Steps:**
+1. Add a record with the checkbox left unchecked.
+2. Edit the record.
+
+**Expected Result:**
+- The checkbox input (`input[type="checkbox"][name="custom_0"]`) is unchecked both in the add form and in the edit form.
+
+**What Could Go Wrong:**
+- Unchecked checkbox saved as `undefined` instead of `false`, causing it to render as checked on edit.
+- Checkbox value not read from record on `renderAdd(existing)`.
