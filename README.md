@@ -4,7 +4,7 @@
 
 **Your income. Your device. Nobody else's business.**
 
-** (i'll admit it's a bit crazy to not be tracked) **
+(i'll admit it's a bit crazy to own your own data)
 
 Track every shift, gig, or cash job — works offline, installs like an app, zero accounts required.
 
