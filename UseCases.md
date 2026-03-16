@@ -896,3 +896,142 @@ This format gives a fixing agent:
 - The exact data state at failure time
 - The function(s) most likely responsible
 - No ambiguity about what "wrong" means
+
+---
+
+## REC-01: Recurring Toggle Visible on Add Tab
+
+**Setup:** Fresh app, no data.
+
+**Steps:**
+1. Open Add tab.
+
+**Expected Result:**
+- A "Recurring" row (`#recurringRow`) is visible below the custom fields area.
+- A toggle switch button is visible.
+
+---
+
+## REC-02: Enabling Recurring Toggle Shows Frequency Panel
+
+**Setup:** Fresh app, Add tab open.
+
+**Steps:**
+1. Click the recurring toggle button.
+
+**Expected Result:**
+- `#recurringPanel` becomes visible.
+- Frequency preset buttons are visible (1 day, 1 week, 2 weeks, 1 month, quarter, custom).
+- Start date badge area is shown.
+- Submit button text changes to "Save Recurring Entry".
+
+---
+
+## REC-03: Frequency Preset Updates Highlighted Button
+
+**Setup:** Recurring toggle enabled on Add tab.
+
+**Steps:**
+1. Click "2 weeks" frequency button (`setRecurringFreq(14)`).
+
+**Expected Result:**
+- The "2 weeks" button has `bg-indigo-600` class (highlighted).
+- Other preset buttons have `bg-gray-700` class.
+- `_recurringFreq` global is `14`.
+
+---
+
+## REC-04: Saving a Recurring Entry Stores Template in localStorage
+
+**Setup:** Fresh app.
+
+**Steps:**
+1. Go to Add tab.
+2. Enable recurring toggle.
+3. Fill form with date=2026-01-01, location=Weekly Gig, payType=flat, rate=500.
+4. Submit.
+
+**Expected Result:**
+- One record saved with `type: "recurring"`, `recurringFreq: 7`, `recurringEnd` set ~2 years out.
+- Redirected to History tab.
+- Recurring toggle resets to disabled.
+
+---
+
+## REC-05: Recurring Template Expands to Multiple Virtual Instances in History
+
+**Setup:** Seed one recurring record starting 14 days ago, every 7 days.
+
+**Steps:**
+1. Go to History tab (All Time filter or filtered to include past 14 days).
+
+**Expected Result:**
+- At least 2 cards appear showing "↻ recurring" badge.
+- Dates match the expansion: 14 days ago, 7 days ago, today (3 total).
+
+---
+
+## REC-06: Virtual Instance Dates Are Different From Template Start Date
+
+**Setup:** Same recurring seed as REC-05.
+
+**Steps:**
+1. Open History with All Time filter.
+
+**Expected Result:**
+- Each ↻ recurring card shows its own date (not all showing template's start date).
+
+---
+
+## REC-07: Dashboard All-Time Total Includes Recurring Virtual Entries
+
+**Setup:** Recurring seed (3 expansions × $100 flat = $300 total expected).
+
+**Steps:**
+1. Go to Dashboard.
+
+**Expected Result:**
+- All-time total is not $0.00.
+- Total reflects the sum of all virtual instances (≥ $100).
+
+---
+
+## REC-08: Deleting a Recurring Template Removes All Virtual Instances
+
+**Setup:** Recurring seed with multiple virtual instances visible.
+
+**Steps:**
+1. On History tab, click the Delete (✕) button on any ↻ recurring card.
+
+**Expected Result:**
+- All ↻ recurring badges disappear from History immediately.
+- The template record is marked deleted in localStorage.
+
+---
+
+## REC-09: Custom Frequency Slider Works Correctly
+
+**Setup:** Recurring toggle enabled, custom frequency button clicked.
+
+**Steps:**
+1. Slider appears in `#customFreqSliderRow`.
+2. Drag slider to value 10.
+
+**Expected Result:**
+- `#sliderVal` shows "10d".
+- `_recurringFreq` is set to 10.
+- Slider value is retained.
+
+---
+
+## REC-10: Recurring Toggle Resets to Disabled After Successful Save
+
+**Setup:** Recurring toggle enabled, form filled and submitted.
+
+**Steps:**
+1. After redirect to History, navigate back to Add tab.
+
+**Expected Result:**
+- `#recurringPanel` is not attached to DOM.
+- Recurring toggle button shows inactive (`bg-gray-700`) state.
+- `_recurringEnabled` global is `false`.

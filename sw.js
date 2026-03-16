@@ -1,4 +1,4 @@
-const CACHE = "localedger-v7";
+const CACHE = "localedger-v8";
 const ASSETS = [
   "./",
   "./index.html",

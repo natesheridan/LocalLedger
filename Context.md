@@ -58,8 +58,8 @@ test-results/
 ```js
 {
   id: "income_user1_1",      // Generated: "income_" + userId + "_" + nextId
-  date: "2026-03-15",        // ISO date (YYYY-MM-DD)
-  hours: 6.5,                // Hours worked (used when payType = "hourly")
+  date: "2026-03-15",        // ISO date (YYYY-MM-DD) — for recurring, this is the START date
+  hours: 6.5,                // Hours worked (used when payType = "hourly"); 0 for flat recurring
   rate: 25,                  // Hourly or flat rate
   tips: 45.50,               // Tips earned
   location: "Downtown Bar",  // Free-text location name
@@ -68,9 +68,16 @@ test-results/
   createdAt: 1710525600000,  // Unix ms timestamp
   updatedAt: 1710525600000,
   // ...custom field values keyed by field.key, e.g.:
-  "CustomField_Company": "Acme"
+  "CustomField_Company": "Acme",
+
+  // ── Recurring fields (only present when type = "recurring") ──────────────
+  type: "recurring",         // Optional — if set, this is a recurring template
+  recurringFreq: 7,          // Days between occurrences (1, 7, 14, 30, 91, or 1–30 custom)
+  recurringEnd: "2028-03-15" // ISO date — last possible occurrence (defaults to start + 2 years)
 }
 ```
+
+**Note on recurring records:** Only the template is stored. `expandRecurringEntries(records)` generates virtual instances at render time. Virtual instances carry `_isVirtual: true`, `_originalId`, `_originalCreatedAt`, and `_virtualDate`. They are not persisted. Editing or deleting a virtual instance targets the template.
 
 #### Location Config
 ```js
@@ -122,6 +129,9 @@ These live in the top-level script scope in `index.html`:
 | `historySort` | `{type:"date", direction:"desc"}` | Active sort on History tab |
 | `dashboardFilters` | `{custom:{}}` | Active custom-field filters on Dashboard tab |
 | `devMode` | `false` | Enables developer tools in Settings |
+| `_recurringEnabled` | `false` | Whether recurring toggle is active on Add form |
+| `_recurringFreq` | `7` | Days between recurring occurrences (Add form state) |
+| `_recurringEnd` | `""` | ISO date for recurring end, or `""` for auto (start + 2 years) |
 
 ---
 
@@ -301,10 +311,22 @@ Custom Money Contributions:
 |----------|-------------|
 | `devModeTap()` | Increments a counter; 5 taps on the app title enables dev mode |
 | `devExitMode()` | Disables dev mode |
-| `devAddTestEntries()` | Generates 50 sample records |
-| `devSeedLocations()` | Creates 7 locations with preset colors |
-| `devSeedCustomFields()` | Adds 7 custom field definitions |
-| `devSeedEntriesWithFields()` | Generates 15 records with custom field values populated |
+| `devSetupDemoWorkspace()` | One-shot: sets 8 versatile custom fields, creates 6 gig persona locations, seeds 22 realistic entries (rideshare, Turo, freelance dev, RE photography, valet, serving) |
+| `devAddTestEntries()` | Alias for `devSetupDemoWorkspace()` |
+| `devSeedLocations()` | Creates 7 bar/restaurant locations with preset colors (legacy) |
+| `devSeedCustomFields()` | Adds 7 legacy test custom field definitions |
+| `devSeedEntriesWithFields()` | Generates 15 records with legacy custom field values populated |
+
+### Recurring Transaction Helpers
+
+| Function | What It Does |
+|----------|-------------|
+| `expandRecurringEntries(records)` | Takes non-deleted records, expands `type:"recurring"` templates into virtual instances up to today. Returns normal records + virtual entries interleaved. |
+| `toggleRecurring()` | Flips `_recurringEnabled`, re-renders Add form |
+| `setRecurringFreq(days)` | Updates `_recurringFreq`, refreshes frequency button highlight |
+| `toggleCustomFreqSlider()` | Shows/hides the custom frequency range slider |
+| `clearRecurringStartDate()` | Clears the date input and start badge |
+| `_updateRecurStartBadge(isoDate)` | Updates `#recurStartBadge` with a human-readable date string |
 
 ---
 
