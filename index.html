@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>LocaLedger</title>
 
 <!-- Pre-initialize Tailwind config before the CDN loads so the JIT
@@ -144,7 +144,7 @@
 const DATA_KEY    = "income_data";
 const META_KEY    = "income_meta";
 const DEV_MODE_KEY = "ll_dev_mode";
-const APP_VERSION = "1.2.1"; // bump this with every deploy (must match version.json)
+const APP_VERSION = "1.2.1.1"; // bump this with every deploy (must match version.json)
 
 let devMode = localStorage.getItem(DEV_MODE_KEY) === "1";
 let devTapCount = 0;
@@ -3596,6 +3596,40 @@ function showUpdateBanner() {
     </div>
   `);
 }
+
+/* ================================
+   ZOOM LOCK (iOS Safari)
+================================= */
+// Strategy: no user-scalable=no (that triggers Safari nav bar in PWA mode).
+// Instead:
+//   1. Block pinch-zoom via gesture events (iOS proprietary, safe to cancel).
+//   2. Temporarily add maximum-scale=1 only while an input/textarea/select is
+//      focused — this stops iOS auto-zooming on focus (triggered when
+//      font-size < 16px) without permanently restricting the viewport.
+//   3. touch-action: manipulation on <body> already kills double-tap zoom.
+
+(function () {
+  const _vp  = document.querySelector('meta[name="viewport"]');
+  const _base = _vp.getAttribute('content');
+  const _locked = _base + ', maximum-scale=1';
+
+  // Block pinch-zoom gestures entirely
+  document.addEventListener('gesturestart',  e => e.preventDefault(), { passive: false });
+  document.addEventListener('gesturechange', e => e.preventDefault(), { passive: false });
+  document.addEventListener('gestureend',    e => e.preventDefault(), { passive: false });
+
+  // Lock viewport scale only while an input is focused (prevents focus-zoom)
+  document.addEventListener('focusin', e => {
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) {
+      _vp.setAttribute('content', _locked);
+    }
+  });
+  document.addEventListener('focusout', e => {
+    if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) {
+      _vp.setAttribute('content', _base);
+    }
+  });
+})();
 
 /* ================================
    START
