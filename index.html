@@ -1458,6 +1458,14 @@ function renderAdd(existing = null) {
     isEditMode = true;
     editModeRecord = existing;
     r = existing;
+    // Load recurring state from the record so the edit form reflects current settings
+    if (existing.type === "recurring") {
+      _recurringEnabled = true;
+      _recurringFreq    = existing.recurringFreq || 7;
+      _recurringEnd     = existing.recurringEnd  || "";
+    } else {
+      _recurringEnabled = false;
+    }
   } else if (savedFormData) {
     // Restoring saved form data when switching back to add tab
     r = { date: savedFormData.date || todayISO(), hours: savedFormData.hours || "", rate: savedFormData.rate || "", tips: savedFormData.tips || "", location: savedFormData.location || "", payType: savedFormData.payType || "hourly" };
@@ -1472,13 +1480,32 @@ function renderAdd(existing = null) {
   updateBottomNavForEditMode(isEditMode);
 
   const recurFreqLabel = _recurringFreq === 1 ? '1d' : _recurringFreq === 7 ? '7d' : _recurringFreq === 14 ? '14d' : _recurringFreq === 30 ? '30d' : _recurringFreq === 91 ? '91d' : (_recurringFreq + 'd');
-  const buttonHtml = isEditMode ? '' : `
+  const recSvg = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>`;
+
+  // Edit-mode header: for recurring templates, show the current schedule + edit button
+  const editRecurBanner = (isEditMode && r.type === "recurring") ? `
+    <div id="editRecurBanner" class="bg-purple-900/25 border border-purple-700/50 rounded-lg p-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-purple-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+        <div>
+          <div class="text-xs font-semibold text-purple-200">Recurring · every ${recurFreqLabel}</div>
+          <div class="text-[11px] text-purple-400/80">Ends: ${_recurringEnd || 'auto (2 yrs from start)'}</div>
+        </div>
+      </div>
+      <button type="button" onclick="openRecurringPopup()"
+        class="text-xs bg-purple-700/60 hover:bg-purple-700 text-purple-100 px-2.5 py-1.5 rounded-lg shrink-0">
+        Edit schedule
+      </button>
+    </div>
+  ` : '';
+
+  const buttonHtml = isEditMode ? editRecurBanner : `
     <div class="flex gap-2 flex-wrap">
       <button type="button" onclick="clearForm()" class="text-xs bg-gray-700 px-2 py-1 rounded">Clear</button>
       <button type="button" id="recurToggleBtn"
         onclick="${_recurringEnabled ? 'disableRecurring()' : 'openRecurringPopup()'}"
         class="text-xs px-2 py-1 rounded flex items-center gap-1 ${_recurringEnabled ? 'bg-purple-600 text-white' : 'bg-gray-700 text-gray-300'}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+        ${recSvg}
         ${_recurringEnabled ? (recurFreqLabel + ' ×') : 'Recurring'}
       </button>
       ${devMode ? `<button type="button" onclick="devSetupDemoWorkspace()" class="text-xs bg-purple-600 px-2 py-1 rounded">Demo Workspace</button>` : ''}
@@ -1645,8 +1672,20 @@ function closeRecurringPopup() {
   } else {
     overlay?.remove();
   }
-  // Update the toggle button in-place without re-rendering the whole form
-  updateRecurToggleBtn();
+  // Update toggle button (new entry) or edit-mode banner (recurring template edit)
+  if (document.getElementById('editRecurBanner')) {
+    _updateEditRecurBanner();
+  } else {
+    updateRecurToggleBtn();
+  }
+}
+
+function _updateEditRecurBanner() {
+  const banner = document.getElementById('editRecurBanner');
+  if (!banner) return;
+  const recurFreqLabel = _recurringFreq === 1 ? '1d' : _recurringFreq === 7 ? '7d' : _recurringFreq === 14 ? '14d' : _recurringFreq === 30 ? '30d' : _recurringFreq === 91 ? '91d' : (_recurringFreq + 'd');
+  banner.querySelector('.text-xs.font-semibold').textContent = 'Recurring · every ' + recurFreqLabel;
+  banner.querySelector('.text-\\[11px\\]').textContent = 'Ends: ' + (_recurringEnd || 'auto (2 yrs from start)');
 }
 
 function disableRecurring() {
@@ -2174,7 +2213,7 @@ function saveIncome(form, existing) {
     debug(`Updating record at index: ${recordIndex}, id: ${existing.id}`);
     
     if (recordIndex >= 0) {
-      data.records[recordIndex] = {
+      const updated = {
         ...data.records[recordIndex],
         date: form.get("date"),
         hours: hours,
@@ -2185,6 +2224,13 @@ function saveIncome(form, existing) {
         ...customFieldData,
         updatedAt: now
       };
+      // Preserve / update recurring schedule if editing a recurring template
+      if (data.records[recordIndex].type === "recurring") {
+        updated.type         = "recurring";
+        updated.recurringFreq = _recurringFreq || data.records[recordIndex].recurringFreq;
+        updated.recurringEnd  = _recurringEnd  || data.records[recordIndex].recurringEnd;
+      }
+      data.records[recordIndex] = updated;
     }
   } else {
     const newRec = {
@@ -2666,13 +2712,15 @@ function renderHistory() {
                     ? `<button onclick="event.stopPropagation();restoreRecord('${r.id}',${r.createdAt})" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
                     : r._isVirtual
                       ? `<button onclick="event.stopPropagation();scrollToRecurringTemplate('${r._originalId}',${r._originalCreatedAt})"
-                           class="text-xs bg-gray-700/80 px-2 py-1 rounded flex items-center gap-1 text-purple-300"
-                           title="Go to original">
-                           ${recIconSvg} origin
+                           class="text-xs bg-gray-700/80 px-2 py-1 rounded flex items-center gap-1.5 text-purple-300">
+                           ${recIconSvg}<span>Source</span>
                          </button>
                          <button onclick="event.stopPropagation();deleteRecord('${r._originalId}',${r._originalCreatedAt})" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
-                      : `<button onclick="event.stopPropagation();editRecord('${r.id}',${r.createdAt})" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
-                         <button onclick="event.stopPropagation();deleteRecord('${r.id}',${r.createdAt})" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
+                      : isTemplate
+                        ? `<button onclick="event.stopPropagation();editRecord('${r.id}',${r.createdAt})" class="text-xs bg-gray-700 px-2 py-1 rounded flex items-center gap-1.5 text-purple-300">${recIconSvg}<span>Edit</span></button>
+                           <button onclick="event.stopPropagation();deleteRecord('${r.id}',${r.createdAt})" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
+                        : `<button onclick="event.stopPropagation();editRecord('${r.id}',${r.createdAt})" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
+                           <button onclick="event.stopPropagation();deleteRecord('${r.id}',${r.createdAt})" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
                   }
                 </div>
                 ${!showDeletedRecords && (displayCustom.length || filledLongText.length) ? `
