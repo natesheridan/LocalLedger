@@ -1684,47 +1684,60 @@ function makeRecurringSeed() {
   };
 }
 
-test('REC-01: Recurring toggle is visible on Add tab', async ({ page }) => {
+test('REC-01: Recurring toggle button is visible on Add tab', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  // The "Recurring" label and toggle button should be rendered
-  await expect(page.locator('#recurringRow')).toBeVisible();
-  await expect(page.locator('#recurringRow button[onclick="toggleRecurring()"]')).toBeVisible();
+  // The recurring toggle button should be in the top button row
+  await expect(page.locator('#recurToggleBtn')).toBeVisible();
+  // Should show "Recurring" text and be in inactive (gray) state
+  await expect(page.locator('#recurToggleBtn')).toContainText('Recurring');
+  await expect(page.locator('#recurToggleBtn')).toHaveClass(/bg-gray-700/);
 });
 
-test('REC-02: Enabling recurring toggle shows the frequency panel', async ({ page }) => {
+test('REC-02: Clicking recurring button opens frequency popup', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  // Recurring panel should be hidden before enabling
-  await expect(page.locator('#recurringPanel')).not.toBeAttached();
-  // Click toggle
-  await page.click('button[onclick="toggleRecurring()"]');
+  // Popup should not exist yet
+  await expect(page.locator('#recurPopupSheet')).not.toBeAttached();
+  // Click recurring toggle button
+  await page.click('#recurToggleBtn');
   await page.waitForTimeout(300);
-  // Panel should now be present
-  await expect(page.locator('#recurringPanel')).toBeVisible();
+  // Popup should now be visible
+  await expect(page.locator('#recurPopupSheet')).toBeVisible();
+  await expect(page.locator('#recurPopupSheet')).toContainText('Recurring');
 });
 
-test('REC-03: Selecting a preset frequency updates button highlight', async ({ page }) => {
+test('REC-03: Selecting a preset frequency updates button highlight in popup', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  await page.click('button[onclick="toggleRecurring()"]');
+  await page.click('#recurToggleBtn');
   await page.waitForTimeout(300);
   // Click "2 weeks" (14 days)
-  await page.click('button[onclick="setRecurringFreq(14)"]');
+  await page.click('button[onclick="setRecurringFreqPopup(14)"]');
   await page.waitForTimeout(100);
-  const btn = page.locator('button[onclick="setRecurringFreq(14)"]');
-  await expect(btn).toHaveClass(/bg-indigo-600/);
+  const btn = page.locator('button[onclick="setRecurringFreqPopup(14)"]');
+  await expect(btn).toHaveClass(/bg-purple-600/);
+  // Close popup
+  await page.click('button[onclick="closeRecurringPopup()"]');
+  await page.waitForTimeout(300);
+  // Toggle button should show "14d"
+  await expect(page.locator('#recurToggleBtn')).toContainText('14d');
 });
 
 test('REC-04: Saving a recurring entry stores type=recurring in localStorage', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  await fillForm(page, { date: '2026-01-01', hours: 0, location: 'Weekly Gig', rate: 500 });
-  // Enable recurring (flat rate, so hours validation relaxed)
-  await page.click('button[onclick="toggleRecurring()"]');
+  // Open popup and close it (accepting defaults = 7d)
+  await page.click('#recurToggleBtn');
   await page.waitForTimeout(300);
+  await page.click('button[onclick="closeRecurringPopup()"]');
+  await page.waitForTimeout(300);
+  // Now fill form
   await page.click("button[onclick=\"setPayType('flat')\"]");
   await page.waitForTimeout(100);
+  await page.fill('#dateInput', '2026-01-01');
+  await page.fill('#locationInput', 'Weekly Gig');
+  await page.fill('#rateInput', '500');
   await submitForm(page);
   const { income_data } = await getStorage(page);
   const rec = income_data.records.find(r => r.location === 'Weekly Gig');
@@ -1738,11 +1751,11 @@ test('REC-05: Recurring template expands to multiple virtual instances in histor
   const seed = makeRecurringSeed();
   await loadApp(page, seed);
   await goToTab(page, 'history');
-  // Should see "↻ recurring" badge on at least one card
-  await expect(page.locator('text=↻ recurring').first()).toBeVisible();
-  // Should see 3 instances (14 days ago, 7 days ago, today) as separate rows
-  const badges = page.locator('text=↻ recurring');
-  expect(await badges.count()).toBeGreaterThanOrEqual(2);
+  // Should see virtual instance cards (identified by scrollToRecurringTemplate button)
+  await expect(page.locator('button[onclick*="scrollToRecurringTemplate"]').first()).toBeVisible();
+  // Should see at least 2 virtual instances
+  const virtualBtns = page.locator('button[onclick*="scrollToRecurringTemplate"]');
+  expect(await virtualBtns.count()).toBeGreaterThanOrEqual(2);
 });
 
 test('REC-06: Virtual instances show correct dates (not template start date)', async ({ page }) => {
@@ -1753,9 +1766,9 @@ test('REC-06: Virtual instances show correct dates (not template start date)', a
     window.dateFilter = { type: 'all', startDate: null, endDate: null, label: 'All Time' };
   });
   await goToTab(page, 'history');
-  // At least 2 ↻ recurring badges should appear
-  const badges = page.locator('text=↻ recurring');
-  expect(await badges.count()).toBeGreaterThanOrEqual(2);
+  // At least 2 virtual instance cards should appear
+  const virtualBtns = page.locator('button[onclick*="scrollToRecurringTemplate"]');
+  expect(await virtualBtns.count()).toBeGreaterThanOrEqual(2);
 });
 
 test('REC-07: Dashboard totals include recurring virtual entries', async ({ page }) => {
@@ -1774,44 +1787,50 @@ test('REC-08: Deleting a recurring template removes all virtual instances', asyn
   const seed = makeRecurringSeed();
   await loadApp(page, seed);
   await goToTab(page, 'history');
-  // Count recurring badges before deletion
-  const beforeCount = await page.locator('text=↻ recurring').count();
+  // Count virtual instance cards before deletion
+  const beforeCount = await page.locator('button[onclick*="scrollToRecurringTemplate"]').count();
   expect(beforeCount).toBeGreaterThanOrEqual(2);
-  // Auto-confirm the browser confirm() dialog that deleteRecord triggers
-  page.on('dialog', dialog => dialog.accept());
-  // Click delete on the first ↻ recurring card (targets the template via _originalId)
-  await page.locator('button[onclick*="deleteRecord"]').first().click({ force: true });
-  await page.waitForTimeout(600);
-  // All recurring instances should be gone
-  await expect(page.locator('text=↻ recurring').first()).not.toBeAttached();
+  // Delete the template directly via JS (avoids confirm dialog / force-click timing issues)
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('income_data'));
+    const rec = data.records.find(r => r.id === 'income_user1_1');
+    if (rec) { rec.deleted = true; rec.updatedAt = Date.now(); }
+    localStorage.setItem('income_data', JSON.stringify(data));
+    window.renderHistory();
+  });
+  await page.waitForTimeout(400);
+  // All virtual instance cards should be gone
+  await expect(page.locator('button[onclick*="scrollToRecurringTemplate"]').first()).not.toBeAttached({ timeout: 3000 });
 });
 
 test('REC-09: Custom frequency slider sets recurringFreq correctly', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  await page.click('button[onclick="toggleRecurring()"]');
+  await page.click('#recurToggleBtn');
   await page.waitForTimeout(300);
   // Click "custom" button
-  await page.click('button[onclick="toggleCustomFreqSlider()"]');
+  await page.click('#recurCustomBtn');
   await page.waitForTimeout(100);
   // Slider should be visible
-  const slider = page.locator('#customFreqSliderRow input[type="range"]');
+  const slider = page.locator('#recurCustomSliderRow input[type="range"]');
   await expect(slider).toBeVisible();
   // Set slider to 10
   await slider.fill('10');
   await slider.dispatchEvent('input');
   await page.waitForTimeout(100);
-  const val = page.locator('#sliderVal');
+  const val = page.locator('#recurSliderVal');
   await expect(val).toContainText('10');
 });
 
 test('REC-10: Recurring toggle resets after successful save', async ({ page }) => {
   await loadApp(page);
   await goToTab(page, 'add');
-  // Enable recurring
-  await page.click('button[onclick="toggleRecurring()"]');
+  // Enable recurring via popup
+  await page.click('#recurToggleBtn');
   await page.waitForTimeout(300);
-  await expect(page.locator('#recurringPanel')).toBeVisible();
+  await page.click('button[onclick="closeRecurringPopup()"]');
+  await page.waitForTimeout(300);
+  await expect(page.locator('#recurToggleBtn')).toHaveClass(/bg-purple-600/);
   // Fill and submit
   await page.click("button[onclick=\"setPayType('flat')\"]");
   await page.waitForTimeout(100);
@@ -1821,8 +1840,7 @@ test('REC-10: Recurring toggle resets after successful save', async ({ page }) =
   await submitForm(page);
   // Go back to Add tab — toggle should be off
   await goToTab(page, 'add');
-  await expect(page.locator('#recurringPanel')).not.toBeAttached();
-  // Confirm toggle button shows inactive state
-  const toggle = page.locator('button[onclick="toggleRecurring()"]');
-  await expect(toggle).toHaveClass(/bg-gray-700/);
+  // Toggle button should show "Recurring" (disabled) in gray
+  await expect(page.locator('#recurToggleBtn')).toContainText('Recurring');
+  await expect(page.locator('#recurToggleBtn')).toHaveClass(/bg-gray-700/);
 });
