@@ -1,8 +1,9 @@
-const CACHE = "localedger-v6";
+const CACHE = "localedger-v7";
 const ASSETS = [
   "./",
   "./index.html",
-  "./offline-charts.js"
+  "./offline-charts.js",
+  "./onboarding.js"
 ];
 
 self.addEventListener("install", e => {
