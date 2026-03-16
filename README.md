@@ -3,7 +3,7 @@
 <img src="https://raw.githubusercontent.com/natesheridan/LocalLedger/main/assets/logo.svg" alt="LocaLedger" width="260" /><br/>
 
 **Your income. Your device. Nobody else's business.**
-*** (i'll admit it's a bit crazy to not be tracked) ***
+** (i'll admit it's a bit crazy to not be tracked) **
 
 Track every shift, gig, or cash job — works offline, installs like an app, zero accounts required.
 
