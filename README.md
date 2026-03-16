@@ -32,9 +32,6 @@ Perfect if you:
 
 ## Screenshots
 
-> **📸 To fill in these screenshots:** take them on your device at `https://natesheridan.github.io/LocaLedger/`, upload them to `assets/readme/` in this repo, then replace each placeholder URL below with the raw GitHub URL.
-> Raw URL pattern: `https://raw.githubusercontent.com/natesheridan/LocaLedger/main/assets/readme/YOUR-FILE.png`
-
 <div align="center">
 <table>
 <tr>
