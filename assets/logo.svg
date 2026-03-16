@@ -1,0 +1,49 @@
+<svg width="200" height="44" viewBox="0 0 200 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-g" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-y" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-i" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="accentLine" x1="40" y1="0" x2="200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"  stop-color="#6366F1" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#6366F1" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#22C55E" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Vertical connector spine -->
+  <line x1="8" y1="14" x2="8" y2="19" stroke="#334155" stroke-width="2"/>
+  <line x1="8" y1="25" x2="8" y2="30" stroke="#334155" stroke-width="2"/>
+
+  <!-- Row 1 — green -->
+  <circle cx="8" cy="10" r="5"  fill="#22C55E" filter="url(#glow-g)"/>
+  <rect x="17" y="8"  width="18" height="3.5" rx="1.75" fill="#334155"/>
+
+  <!-- Row 2 — amber -->
+  <circle cx="8" cy="22" r="5"  fill="#EAB308" filter="url(#glow-y)"/>
+  <rect x="17" y="20" width="23" height="3.5" rx="1.75" fill="#334155"/>
+
+  <!-- Row 3 — indigo -->
+  <circle cx="8" cy="34" r="5"  fill="#6366F1" filter="url(#glow-i)"/>
+  <rect x="17" y="32" width="13" height="3.5" rx="1.75" fill="#334155"/>
+
+  <!-- Wordmark — "Loca" white, "Ledger" indigo, joined seamlessly -->
+  <text
+    font-family="'Space Mono', 'Courier New', monospace"
+    font-size="22"
+    font-weight="700"
+    fill="#F8FAFC">
+    <tspan x="40" y="30">Loca</tspan><tspan fill="#6366F1">Ledger</tspan>
+  </text>
+
+  <!-- Accent underline -->
+  <rect x="40" y="36" width="157" height="1.5" rx="0.75" fill="url(#accentLine)"/>
+</svg>

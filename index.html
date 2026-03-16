@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>LocalLedger</title>
+<title>LocaLedger</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,8 +18,46 @@
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col" style="font-family: 'Space Mono', monospace;">
 
 <header class="px-4 py-4 border-b border-gray-800 sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 pt-12 flex justify-between items-center">
-<div class="flex-1 text-center">
-  <span class="text-xl font-bold tracking-wider">LocalLedger</span>
+<div class="flex-1 flex justify-center items-center">
+  <svg width="130" height="22" viewBox="0 0 130 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="LocaLedger">
+    <defs>
+      <filter id="hgG" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="1.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="hgY" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="1.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="hgI" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="1.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="hAccent" x1="22" y1="0" x2="128" y2="0" gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#6366F1" stop-opacity="0.85"/>
+        <stop offset="65%"  stop-color="#6366F1" stop-opacity="0.15"/>
+        <stop offset="100%" stop-color="#22C55E"  stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- Connector spine -->
+    <line x1="4" y1="7.5" x2="4" y2="10"  stroke="#334155" stroke-width="1.5"/>
+    <line x1="4" y1="12"  x2="4" y2="14.5" stroke="#334155" stroke-width="1.5"/>
+    <!-- Row 1 — green -->
+    <circle cx="4" cy="4"  r="2.5" fill="#22C55E" filter="url(#hgG)"/>
+    <rect x="8.5" y="2.75" width="9"  height="2.5" rx="1.25" fill="#334155"/>
+    <!-- Row 2 — amber -->
+    <circle cx="4" cy="11" r="2.5" fill="#EAB308" filter="url(#hgY)"/>
+    <rect x="8.5" y="9.75" width="12" height="2.5" rx="1.25" fill="#334155"/>
+    <!-- Row 3 — indigo -->
+    <circle cx="4" cy="18" r="2.5" fill="#6366F1" filter="url(#hgI)"/>
+    <rect x="8.5" y="16.75" width="7"  height="2.5" rx="1.25" fill="#334155"/>
+    <!-- Wordmark -->
+    <text font-family="'Space Mono','Courier New',monospace" font-size="14" font-weight="700">
+      <tspan x="22" y="17" fill="#F8FAFC">Loca</tspan><tspan fill="#6366F1">Ledger</tspan>
+    </text>
+    <!-- Accent underline -->
+    <rect x="22" y="20.5" width="106" height="0.75" rx="0.375" fill="url(#hAccent)"/>
+  </svg>
 </div>
 <button data-tab="settings" class="tab p-2 text-gray-400">
   <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

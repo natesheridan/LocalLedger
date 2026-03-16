@@ -1,6 +1,6 @@
 {
-  "name": "LocalLedger",
-  "short_name": "Localedger",
+  "name": "LocaLedger",
+  "short_name": "LocaLedger",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0f172a",

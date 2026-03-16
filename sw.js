@@ -1,4 +1,4 @@
-const CACHE = "income-tracker-v5";
+const CACHE = "localedger-v6";
 const ASSETS = [
   "./",
   "./index.html",

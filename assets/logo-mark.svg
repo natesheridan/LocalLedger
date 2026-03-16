@@ -1,0 +1,32 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="glow-g" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-y" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-i" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Vertical connector spine -->
+  <line x1="8" y1="13" x2="8" y2="18" stroke="#334155" stroke-width="1.5"/>
+  <line x1="8" y1="22" x2="8" y2="27" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Row 1 — green -->
+  <circle cx="8" cy="9"  r="4.5" fill="#22C55E" filter="url(#glow-g)"/>
+  <rect x="16" y="7.5" width="16" height="3" rx="1.5" fill="#334155"/>
+
+  <!-- Row 2 — amber -->
+  <circle cx="8" cy="20" r="4.5" fill="#EAB308" filter="url(#glow-y)"/>
+  <rect x="16" y="18.5" width="21" height="3" rx="1.5" fill="#334155"/>
+
+  <!-- Row 3 — indigo -->
+  <circle cx="8" cy="31" r="4.5" fill="#6366F1" filter="url(#glow-i)"/>
+  <rect x="16" y="29.5" width="11" height="3" rx="1.5" fill="#334155"/>
+</svg>
