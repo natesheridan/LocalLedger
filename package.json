@@ -2,6 +2,12 @@
   "name": "localledger",
   "version": "1.0.0",
   "scripts": {
-    "dev": "live-server . --port=8080"
+    "dev": "live-server . --port=8080",
+    "test": "./run-tests.sh",
+    "test:headed": "./run-tests.sh --headed",
+    "test:uc": "./run-tests.sh --grep"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }

@@ -1776,8 +1776,11 @@ function saveIncome(form, existing) {
   });
 
   if (existing) {
-    // Find the record in the current data by ID
-    const recordIndex = data.records.findIndex(r => r.id === existing.id);
+    // Use both id AND createdAt to find the exact record — prevents matching
+    // a duplicate-ID record that was created before a meta reset.
+    const recordIndex = existing.createdAt
+      ? data.records.findIndex(r => r.id === existing.id && r.createdAt === existing.createdAt)
+      : data.records.findIndex(r => r.id === existing.id);
     debug(`Updating record at index: ${recordIndex}, id: ${existing.id}`);
     
     if (recordIndex >= 0) {
@@ -1833,9 +1836,11 @@ function saveIncome(form, existing) {
 }
 
 /* Delete a record (soft delete) with confirmation */
-function deleteRecord(id) {
+function deleteRecord(id, createdAt) {
   const data = loadData();
-  const record = data.records.find(r => r.id === id);
+  const record = createdAt
+    ? data.records.find(r => r.id === id && r.createdAt === createdAt)
+    : data.records.find(r => r.id === id);
   if (!record) return;
   
   // Show confirmation
@@ -1849,9 +1854,11 @@ function deleteRecord(id) {
 }
 
 /* Restore a deleted record */
-function restoreRecord(id) {
+function restoreRecord(id, createdAt) {
   const data = loadData();
-  const record = data.records.find(r => r.id === id);
+  const record = createdAt
+    ? data.records.find(r => r.id === id && r.createdAt === createdAt)
+    : data.records.find(r => r.id === id);
   if (record) {
     record.deleted = false;
     record.updatedAt = Date.now();
@@ -1868,10 +1875,12 @@ function toggleDeletedRecords() {
 }
 
 /* Edit a record */
-function editRecord(id) {
+function editRecord(id, createdAt) {
   debug("Editing record: " + id);
   const data = loadData();
-  const record = data.records.find(r => r.id === id);
+  const record = createdAt
+    ? data.records.find(r => r.id === id && r.createdAt === createdAt)
+    : data.records.find(r => r.id === id);
   if (record) {
     switchTab("add");
     // Need to render add form with existing data
@@ -2194,7 +2203,7 @@ function renderHistory() {
             const filledNonMoney = filledCustom.filter(x => x.def.type !== 'money' && x.def.type !== 'longtext');
             const displayCustom = [...filledMoney, ...filledNonMoney].slice(0, 3);
             return `
-            <div class="bg-gray-800 rounded p-3 mb-2 flex justify-between items-start border border-gray-700/60 cursor-pointer" onclick="showShiftDetail('${r.id}')" style="${getLocationTintStyle(r.location)}">
+            <div class="bg-gray-800 rounded p-3 mb-2 flex justify-between items-start border border-gray-700/60 cursor-pointer" onclick="showShiftDetail('${r.id}',${r.createdAt})" style="${getLocationTintStyle(r.location)}">
               <div class="flex-1">
                 <div class="text-xs text-gray-500 mb-1">${formatDate(r.date)}</div>
                 <div class="font-semibold text-lg">
@@ -2208,9 +2217,9 @@ function renderHistory() {
               <div class="ml-2 flex flex-col items-end gap-2">
                 <div class="flex gap-2">
                   ${showDeletedRecords
-                    ? `<button onclick="event.stopPropagation();restoreRecord('${r.id}')" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
-                    : `<button onclick="event.stopPropagation();editRecord('${r.id}')" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
-                       <button onclick="event.stopPropagation();deleteRecord('${r.id}')" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
+                    ? `<button onclick="event.stopPropagation();restoreRecord('${r.id}',${r.createdAt})" class="text-xs bg-green-700 px-2 py-1 rounded">Restore</button>`
+                    : `<button onclick="event.stopPropagation();editRecord('${r.id}',${r.createdAt})" class="text-xs bg-gray-700 px-2 py-1 rounded">Edit</button>
+                       <button onclick="event.stopPropagation();deleteRecord('${r.id}',${r.createdAt})" class="text-xs bg-red-900 px-2 py-1 rounded">✕</button>`
                   }
                 </div>
                 ${!showDeletedRecords && (displayCustom.length || filledLongText.length) ? `
@@ -2269,10 +2278,12 @@ function renderHistory() {
   updateBannerForVisibleMonth();
 }
 
-function showShiftDetail(id) {
+function showShiftDetail(id, createdAt) {
   const data = loadData();
   const defs = getCustomFieldDefs();
-  const r = data.records?.find(rec => rec.id === id);
+  const r = createdAt
+    ? data.records?.find(rec => rec.id === id && rec.createdAt === createdAt)
+    : data.records?.find(rec => rec.id === id);
   if (!r) return;
 
   const formatDate = (isoDate) => {
@@ -2624,6 +2635,19 @@ function renderSettings() {
       <button onclick="exportData()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl font-semibold">Export</button>
       <textarea id="importArea" placeholder="Paste JSON here" class="w-full h-32 bg-gray-950/50 border border-gray-700/60 p-3 rounded-xl text-xs"></textarea>
       <button onclick="importData()" class="w-full bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl font-semibold">Import JSON</button>
+    </div>
+
+    <div class="bg-gray-900/40 border border-gray-700/60 rounded-xl p-4 space-y-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gray-800 border border-gray-700/60 flex items-center justify-center">
+          <svg class="w-4 h-4 text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/></svg>
+        </div>
+        <div>
+          <div class="text-base font-bold">Data Health</div>
+          <div class="text-[11px] text-gray-400">Scan for and fix data integrity issues</div>
+        </div>
+      </div>
+      <button onclick="showDataCleanup()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl font-semibold">Clean Data</button>
     </div>
 
     <div class="bg-red-900/10 border border-red-700/30 rounded-xl p-4 space-y-3">
@@ -3041,6 +3065,19 @@ function importData() {
     }
 
     saveData(parsed);
+
+    // After import, advance income_meta.nextId past the highest existing ID
+    // so newly-created records never collide with imported ones.
+    const meta = loadMeta();
+    const maxSuffix = parsed.records.reduce((max, r) => {
+      const m = r.id && r.id.match(/_(\d+)$/);
+      return m ? Math.max(max, parseInt(m[1], 10)) : max;
+    }, 0);
+    if (maxSuffix >= meta.nextId) {
+      meta.nextId = maxSuffix + 1;
+      saveMeta(meta);
+    }
+
     alert("Import successful.");
     switchTab("history");
   } catch (e) {
@@ -3073,6 +3110,252 @@ function clearAllData() {
       showToast("All data cleared!", 3000);
       switchTab("history");
     }
+  }
+}
+
+/* ================================
+   DATA CLEANUP / HEALTH CHECK
+   ================================ */
+
+function detectDataIssues(data) {
+  // Find duplicate IDs
+  const idCount = {};
+  for (const r of data.records) {
+    if (!r.id) continue;
+    idCount[r.id] = (idCount[r.id] || 0) + 1;
+  }
+  const dups = {};
+  for (const r of data.records) {
+    if (r.id && idCount[r.id] > 1) {
+      if (!dups[r.id]) dups[r.id] = [];
+      dups[r.id].push(r);
+    }
+  }
+  // Find other issues
+  const other = [];
+  for (const r of data.records) {
+    const problems = [];
+    if (!r.payType) problems.push('Missing pay type');
+    if (r.createdAt == null) problems.push('Missing creation timestamp');
+    if (r.hours != null && isNaN(parseFloat(r.hours))) problems.push('Invalid hours value');
+    if (r.rate != null && isNaN(parseFloat(r.rate))) problems.push('Invalid rate value');
+    if (r.tips != null && isNaN(parseFloat(r.tips))) problems.push('Invalid tips value');
+    if (problems.length) other.push({ record: r, problems });
+  }
+  return { duplicateIds: dups, otherIssues: other };
+}
+
+function showDataCleanup() {
+  ['cleanDataSheet', 'cleanDataOverlay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="cleanDataOverlay" class="fixed inset-0 bg-black/60 z-40" onclick="closeCleanDataMenu()"></div>
+    <div id="cleanDataSheet" class="fixed bottom-0 inset-x-0 bg-gray-900 rounded-t-2xl z-50 max-h-[90vh] overflow-y-auto transform transition-transform duration-300 translate-y-full">
+      <div class="w-10 h-1 bg-gray-700 rounded-full mx-auto mt-3 mb-1"></div>
+      <div id="cleanDataContent" class="p-4 space-y-4 pb-10"></div>
+    </div>
+  `);
+  requestAnimationFrame(() => {
+    const s = document.getElementById('cleanDataSheet');
+    if (s) s.classList.remove('translate-y-full');
+    const data = loadData();
+    const issues = detectDataIssues(data);
+    if (Object.keys(issues.duplicateIds).length > 0) {
+      _renderCleanScreen1(issues);
+    } else if (issues.otherIssues.length > 0) {
+      _renderCleanScreen2(issues, 0);
+    } else {
+      _renderCleanDone(0, 0);
+    }
+  });
+}
+
+function _renderCleanScreen1(issues) {
+  const groups = Object.entries(issues.duplicateIds);
+  let rows = '';
+  for (const [id, recs] of groups) {
+    const recItems = recs.map(r => {
+      const amt = r.amount != null ? `$${parseFloat(r.amount).toFixed(2)}` : '—';
+      const status = r.deleted
+        ? '<span class="text-red-400">deleted</span>'
+        : '<span class="text-emerald-400">active</span>';
+      return `<div class="flex items-center justify-between text-xs text-gray-300 bg-gray-900/50 rounded-lg px-3 py-2">
+        <span>${r.date || '—'} · ${r.location || '—'} · ${amt}</span>
+        ${status}
+      </div>`;
+    }).join('');
+    rows += `<div class="bg-gray-800/60 border border-gray-700/40 rounded-xl p-3 space-y-2">
+      <div class="text-xs font-mono text-amber-400 truncate">${id}</div>
+      ${recItems}
+    </div>`;
+  }
+  document.getElementById('cleanDataContent').innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="text-lg font-bold">Duplicate Record IDs</div>
+      <button onclick="closeCleanDataMenu()" class="text-xs text-gray-400 py-1 px-2">Close</button>
+    </div>
+    <div class="text-sm text-gray-400">${groups.length} ID${groups.length !== 1 ? 's' : ''} shared by multiple records. This can cause edits and deletes to target the wrong record.</div>
+    <div class="space-y-3">${rows}</div>
+    <button onclick="_cleanAutoFixDups()" class="w-full bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl font-semibold">Fix All Automatically</button>
+    <button onclick="_cleanSkipDups()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl text-gray-300">Skip</button>
+  `;
+}
+
+function _cleanAutoFixDups() {
+  const data = loadData();
+  // Track which IDs we've seen — reassign all but first occurrence
+  const seen = {};
+  let fixed = 0;
+  for (const r of data.records) {
+    if (!r.id) continue;
+    if (seen[r.id]) {
+      r.id = generateId();
+      fixed++;
+    } else {
+      seen[r.id] = true;
+    }
+  }
+  saveData(data);
+  const issues = detectDataIssues(data);
+  if (issues.otherIssues.length > 0) {
+    _renderCleanScreen2(issues, fixed);
+  } else {
+    _renderCleanDone(fixed, 0);
+  }
+}
+
+function _cleanSkipDups() {
+  const data = loadData();
+  const issues = detectDataIssues(data);
+  if (issues.otherIssues.length > 0) {
+    _renderCleanScreen2(issues, 0);
+  } else {
+    _renderCleanDone(0, 0);
+  }
+}
+
+function _renderCleanScreen2(issues, fixedDups) {
+  const items = issues.otherIssues;
+  let cards = '';
+  for (const { record: r, problems } of items) {
+    const amt = r.amount != null ? `$${parseFloat(r.amount).toFixed(2)}` : '—';
+    const idEsc = (r.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    const cAt = r.createdAt || 0;
+    const problemList = problems.map(p => `<div class="text-amber-400">• ${p}</div>`).join('');
+    cards += `
+      <div class="bg-gray-800/60 border border-gray-700/40 rounded-xl p-3 space-y-2">
+        <div class="flex items-center justify-between text-xs text-gray-300">
+          <span>${r.date || '—'} · ${r.location || '—'} · ${amt}</span>
+          ${r.deleted ? '<span class="text-red-400 text-[10px]">deleted</span>' : ''}
+        </div>
+        <div class="text-[11px] space-y-0.5">${problemList}</div>
+        <div class="flex gap-2 pt-1">
+          <button onclick="_cleanFixRecord('${idEsc}',${cAt},${fixedDups})" class="flex-1 bg-indigo-600/80 hover:bg-indigo-600 py-1.5 rounded-lg text-xs font-semibold">Fix</button>
+          <button onclick="_cleanDeleteRecord('${idEsc}',${cAt},${fixedDups})" class="flex-1 bg-red-700/60 hover:bg-red-700 py-1.5 rounded-lg text-xs text-red-200">Delete</button>
+        </div>
+      </div>`;
+  }
+  document.getElementById('cleanDataContent').innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="text-lg font-bold">Other Data Issues</div>
+      <button onclick="closeCleanDataMenu()" class="text-xs text-gray-400 py-1 px-2">Close</button>
+    </div>
+    <div class="text-sm text-gray-400">${items.length} record${items.length !== 1 ? 's' : ''} with data issues found.</div>
+    <button onclick="_cleanFixAllOther(${fixedDups})" class="w-full bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl font-semibold">Fix All Automatically</button>
+    <div class="space-y-3">${cards}</div>
+    <button onclick="_renderCleanDone(${fixedDups}, 0)" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl text-gray-400 text-sm">Done</button>
+  `;
+}
+
+function _cleanFixRecord(id, createdAt, fixedDups) {
+  const data = loadData();
+  const r = createdAt
+    ? data.records.find(rec => rec.id === id && rec.createdAt === createdAt)
+    : data.records.find(rec => rec.id === id);
+  if (!r) return;
+  if (!r.payType) r.payType = 'hourly';
+  if (r.createdAt == null) r.createdAt = Date.now();
+  if (r.hours != null && isNaN(parseFloat(r.hours))) r.hours = 0;
+  if (r.rate != null && isNaN(parseFloat(r.rate))) r.rate = 0;
+  if (r.tips != null && isNaN(parseFloat(r.tips))) r.tips = 0;
+  saveData(data);
+  const issues = detectDataIssues(data);
+  if (issues.otherIssues.length > 0) {
+    _renderCleanScreen2(issues, fixedDups);
+  } else {
+    _renderCleanDone(fixedDups, 0);
+  }
+}
+
+function _cleanDeleteRecord(id, createdAt, fixedDups) {
+  const data = loadData();
+  const idx = createdAt
+    ? data.records.findIndex(rec => rec.id === id && rec.createdAt === createdAt)
+    : data.records.findIndex(rec => rec.id === id);
+  if (idx === -1) return;
+  data.records.splice(idx, 1);
+  saveData(data);
+  const issues = detectDataIssues(data);
+  if (issues.otherIssues.length > 0) {
+    _renderCleanScreen2(issues, fixedDups);
+  } else {
+    _renderCleanDone(fixedDups, 0);
+  }
+}
+
+function _cleanFixAllOther(fixedDups) {
+  const data = loadData();
+  let fixed = 0;
+  for (const r of data.records) {
+    let changed = false;
+    if (!r.payType) { r.payType = 'hourly'; changed = true; }
+    if (r.createdAt == null) { r.createdAt = Date.now(); changed = true; }
+    if (r.hours != null && isNaN(parseFloat(r.hours))) { r.hours = 0; changed = true; }
+    if (r.rate != null && isNaN(parseFloat(r.rate))) { r.rate = 0; changed = true; }
+    if (r.tips != null && isNaN(parseFloat(r.tips))) { r.tips = 0; changed = true; }
+    if (changed) fixed++;
+  }
+  saveData(data);
+  _renderCleanDone(fixedDups, fixed);
+}
+
+function _renderCleanDone(fixedDups, fixedOther) {
+  const total = fixedDups + fixedOther;
+  const details = [
+    fixedDups > 0 ? `${fixedDups} duplicate ID${fixedDups !== 1 ? 's' : ''}` : '',
+    fixedOther > 0 ? `${fixedOther} field issue${fixedOther !== 1 ? 's' : ''}` : ''
+  ].filter(Boolean).join(', ');
+  document.getElementById('cleanDataContent').innerHTML = `
+    <div class="flex items-center justify-between">
+      <div class="text-lg font-bold">Data Health</div>
+      <button onclick="closeCleanDataMenu()" class="text-xs text-gray-400 py-1 px-2">Close</button>
+    </div>
+    <div class="flex flex-col items-center py-8 gap-4">
+      <div class="w-16 h-16 rounded-full bg-emerald-600/20 border border-emerald-500/40 flex items-center justify-center">
+        <svg class="w-8 h-8 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="text-base font-bold text-emerald-300">${total > 0 ? 'Data Cleaned' : 'Data is Healthy'}</div>
+      <div class="text-sm text-gray-400 text-center">
+        ${total > 0 ? `Fixed ${total} issue${total !== 1 ? 's' : ''}: ${details}.` : 'No data integrity issues found.'}
+      </div>
+    </div>
+    <button onclick="closeCleanDataMenu()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl font-semibold">Done</button>
+  `;
+}
+
+function closeCleanDataMenu() {
+  const sheet = document.getElementById('cleanDataSheet');
+  const overlay = document.getElementById('cleanDataOverlay');
+  if (sheet) {
+    sheet.classList.add('translate-y-full');
+    setTimeout(() => {
+      sheet.remove();
+      if (overlay) overlay.remove();
+    }, 300);
+  } else if (overlay) {
+    overlay.remove();
   }
 }
 
