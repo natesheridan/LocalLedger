@@ -1844,3 +1844,52 @@ test('REC-10: Recurring toggle resets after successful save', async ({ page }) =
   await expect(page.locator('#recurToggleBtn')).toContainText('Recurring');
   await expect(page.locator('#recurToggleBtn')).toHaveClass(/bg-gray-700/);
 });
+
+test('REC-11: scrollToRecurringTemplate navigates to template month and applies glow', async ({ page }) => {
+  await loadApp(page);
+
+  // Seed a recurring template dated 2026-01-10 (65 days before 2026-03-16).
+  // With freq=30d: virtual occurrences at 2026-02-09 and 2026-03-11 (visible in March).
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('income_data') || '{"records":[],"customFields":[],"version":1}');
+    data.records.push({
+      id: 'rec-tmpl-11',
+      date: '2026-01-10',
+      hours: 0,
+      rate: 0,
+      tips: 75,
+      location: 'Scroll Test Job',
+      payType: 'flat',
+      type: 'recurring',
+      recurringFreq: 30,
+      recurringEnd: '2027-01-01',
+      deleted: false,
+      createdAt: 1700000000000,
+      updatedAt: 1700000000000
+    });
+    localStorage.setItem('income_data', JSON.stringify(data));
+  });
+
+  // Navigate to history filtered to March 2026 so template (Jan) is hidden but virtuals visible
+  await goToTab(page, 'history');
+  await page.waitForTimeout(300);
+  await page.evaluate(() => {
+    setDateFilter('range', '2026-03-01', '2026-03-31', 'March 2026');
+  });
+  await page.waitForTimeout(400);
+
+  // Virtual on 2026-03-11 should be visible with a Source button
+  const sourceBtn = page.locator('button[onclick*="scrollToRecurringTemplate"]').first();
+  await expect(sourceBtn).toBeVisible();
+
+  // Click Source — navigates to January 2026 and highlights the template
+  await sourceBtn.click();
+  await page.waitForTimeout(500);
+
+  // Template card must be in the DOM (month filter switched to Jan 2026)
+  const templateCard = page.locator('[data-rec-template-id="rec-tmpl-11"]');
+  await expect(templateCard).toBeVisible();
+
+  // Glow animation class must be applied
+  await expect(templateCard).toHaveClass(/_rec-glow/);
+});
