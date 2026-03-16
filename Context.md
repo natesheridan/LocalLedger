@@ -1,19 +1,19 @@
-# LocalLedger — Application Context
+# LocaLedger — Application Context
 
 > A complete reference for developers and agents working on this codebase.
 
 ---
 
-## What Is LocalLedger?
+## What Is LocaLedger?
 
-LocalLedger is a **fully offline, single-page Progressive Web App (PWA)** for gig workers to track hourly shifts, flat-rate jobs, tips, and custom financial data. All data lives in the browser's `localStorage` — no backend, no accounts, no network requests for data.
+LocaLedger is a **fully offline, single-page Progressive Web App (PWA)** for gig workers to track hourly shifts, flat-rate jobs, tips, and custom financial data. All data lives in the browser's `localStorage` — no backend, no accounts, no network requests for data.
 
 ---
 
 ## Project Structure
 
 ```
-LocalLedger/
+LocaLedger/
 ├── index.html                  # Entire app: markup, styles (Tailwind), and all JS logic
 ├── offline-charts.js           # Pure CSS/HTML chart rendering, loaded separately
 ├── sw.js                       # Service Worker — caches app files for offline use
@@ -22,7 +22,7 @@ LocalLedger/
 ├── playwright.config.js        # Playwright configuration (headless, JSON reporter, artifacts)
 ├── run-tests.sh                # Test runner: installs deps, runs Playwright, generates failure-report.md
 ├── tests/
-│   └── localledger.spec.js     # Full Playwright E2E test suite (41 tests)
+│   └── LocaLedger.spec.js     # Full Playwright E2E test suite (41 tests)
 ├── Context.md                  # This file — developer reference
 ├── UseCases.md                 # Human-readable test scenarios
 ├── icon.svg                    # App icon

@@ -1,5 +1,5 @@
 {
-  "name": "localledger",
+  "name": "LocaLedger",
   "version": "1.0.0",
   "scripts": {
     "dev": "live-server . --port=8080",

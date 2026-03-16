@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# LocalLedger Test Runner
+# LocaLedger Test Runner
 #
 # Usage:
 #   ./run-tests.sh              — run all tests, headless
@@ -42,7 +42,7 @@ mkdir -p test-results test-results/ui-context test-results/playwright-artifacts
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  LocalLedger Test Suite"
+echo "  LocaLedger Test Suite"
 echo "  $(date '+%Y-%m-%d %H:%M:%S')"
 [ -n "$GREP_ARG" ] && echo "  Filter: $GREP_ARG"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -106,7 +106,7 @@ const total = passed.length + failed.length + skipped.length;
 const lines = [];
 const ts    = new Date().toISOString();
 
-lines.push('# LocalLedger Test Results');
+lines.push('# LocaLedger Test Results');
 lines.push(`> Generated: ${ts}`);
 lines.push('');
 lines.push(`| Passed | Failed | Skipped | Total |`);

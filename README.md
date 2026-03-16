@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/natesheridan/LocalLedger/main/assets/logo.svg" alt="LocaLedger" width="260" /><br/>
+<img src="https://raw.githubusercontent.com/natesheridan/LocaLedger/main/assets/logo.svg" alt="LocaLedger" width="260" /><br/>
 
 **Your income. Your device. Nobody else's business.**
 
@@ -8,11 +8,11 @@
 
 Track every shift, gig, or cash job — works offline, installs like an app, zero accounts required.
 
-[![Live App](https://img.shields.io/badge/Open%20App-LocaLedger-6366F1?style=for-the-badge&logo=pwa)](https://natesheridan.github.io/LocalLedger/)
+[![Live App](https://img.shields.io/badge/Open%20App-LocaLedger-6366F1?style=for-the-badge&logo=pwa)](https://natesheridan.github.io/LocaLedger/)
 &nbsp;
-[![PWA](https://img.shields.io/badge/PWA-Installable-22C55E?style=for-the-badge)](https://natesheridan.github.io/LocalLedger/)
+[![PWA](https://img.shields.io/badge/PWA-Installable-22C55E?style=for-the-badge)](https://natesheridan.github.io/LocaLedger/)
 &nbsp;
-[![Zero Cloud](https://img.shields.io/badge/Cloud%20Storage-None-EAB308?style=for-the-badge)](https://natesheridan.github.io/LocalLedger/)
+[![Zero Cloud](https://img.shields.io/badge/Cloud%20Storage-None-EAB308?style=for-the-badge)](https://natesheridan.github.io/LocaLedger/)
 
 </div>
 
@@ -32,8 +32,8 @@ Perfect if you:
 
 ## Screenshots
 
-> **📸 To fill in these screenshots:** take them on your device at `https://natesheridan.github.io/LocalLedger/`, upload them to `assets/readme/` in this repo, then replace each placeholder URL below with the raw GitHub URL.
-> Raw URL pattern: `https://raw.githubusercontent.com/natesheridan/LocalLedger/main/assets/readme/YOUR-FILE.png`
+> **📸 To fill in these screenshots:** take them on your device at `https://natesheridan.github.io/LocaLedger/`, upload them to `assets/readme/` in this repo, then replace each placeholder URL below with the raw GitHub URL.
+> Raw URL pattern: `https://raw.githubusercontent.com/natesheridan/LocaLedger/main/assets/readme/YOUR-FILE.png`
 
 <div align="center">
 <table>
@@ -100,7 +100,7 @@ This is how you get the real app experience — it opens full-screen with no bro
 <tr>
   <td align="center">
     <img src="assets/readme/ios-step-1-open-safari.png" alt="Step 1: Open in Safari" width="180" /><br/>
-    <sub><b>1.</b> Open Safari and go to<br/><code>natesheridan.github.io/LocalLedger</code></sub>
+    <sub><b>1.</b> Open Safari and go to<br/><code>natesheridan.github.io/LocaLedger</code></sub>
   </td>
   <td align="center">
     <img src="assets/readme/ios-step-2-share.png" alt="Step 2: Tap the share button" width="180" /><br/>
@@ -129,7 +129,7 @@ This is how you get the real app experience — it opens full-screen with no bro
 <tr>
   <td align="center">
     <img src="assets/readme/android-step-1-open.png" alt="Step 1: Open in Chrome" width="180" /><br/>
-    <sub><b>1.</b> Open Chrome and go to<br/><code>natesheridan.github.io/LocalLedger</code></sub>
+    <sub><b>1.</b> Open Chrome and go to<br/><code>natesheridan.github.io/LocaLedger</code></sub>
   </td>
   <td align="center">
     <img src="assets/readme/android-step-2-menu.png" alt="Step 2: Tap three dots" width="180" /><br/>
@@ -213,12 +213,12 @@ npx playwright install chromium
 npm test
 ```
 
-Tests live in `tests/localledger.spec.js` and cover all major flows: adding/editing/deleting records, custom fields, charts, data health cleanup, import/export, and the update mechanism.
+Tests live in `tests/LocaLedger.spec.js` and cover all major flows: adding/editing/deleting records, custom fields, charts, data health cleanup, import/export, and the update mechanism.
 
 ---
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/natesheridan/LocalLedger/main/icon.svg" alt="LocaLedger icon" width="64" /><br/><br/>
+<img src="https://raw.githubusercontent.com/natesheridan/LocaLedger/main/icon.svg" alt="LocaLedger icon" width="64" /><br/><br/>
 Built for people who just want to know how much they made.<br/>
-<a href="https://natesheridan.github.io/LocalLedger/">natesheridan.github.io/LocalLedger</a>
+<a href="https://natesheridan.github.io/LocaLedger/">natesheridan.github.io/LocaLedger</a>
 </div>

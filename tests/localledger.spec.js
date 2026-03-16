@@ -1,5 +1,5 @@
 /**
- * LocalLedger End-to-End Test Suite
+ * LocaLedger End-to-End Test Suite
  *
  * Maps to UseCases.md (UC-00 base UI render checks, UC-01 through UC-25 interactions).
  *

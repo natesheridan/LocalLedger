@@ -1,4 +1,4 @@
-# LocalLedger — Use Cases & Test Scenarios
+# LocaLedger — Use Cases & Test Scenarios
 
 > Human-readable test cases for every major user interaction. Intended to be the source of truth for automated testing and for explaining failures to a fixing agent.
 
@@ -647,7 +647,7 @@ These cases are ordered from foundational (storage, data) to composite (filter +
 
 ## BUG-01: Duplicate Record ID Bugs (Fixed)
 
-These two bugs were reproduced on real user data and fixed. The automated tests in `tests/localledger.spec.js` serve as regression guards.
+These two bugs were reproduced on real user data and fixed. The automated tests in `tests/LocaLedger.spec.js` serve as regression guards.
 
 ### BUG-01a: Import After Clear Resets `nextId` — Causes ID Collisions
 
