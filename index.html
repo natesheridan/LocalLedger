@@ -141,9 +141,10 @@
 /* ================================
    STORAGE STRUCTURE
 ================================= */
-const DATA_KEY = "income_data";
-const META_KEY = "income_meta";
+const DATA_KEY    = "income_data";
+const META_KEY    = "income_meta";
 const DEV_MODE_KEY = "ll_dev_mode";
+const APP_VERSION = "1.2.0"; // bump this with every deploy (must match version.json)
 
 let devMode = localStorage.getItem(DEV_MODE_KEY) === "1";
 let devTapCount = 0;
@@ -2708,6 +2709,68 @@ function renderSettings() {
       <button onclick="showDataCleanup()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl font-semibold">Clean Data</button>
     </div>
 
+    <div class="bg-gray-900/40 border border-gray-700/60 rounded-xl p-4 space-y-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600/15 border border-indigo-500/30 flex items-center justify-center">
+          <svg class="w-4 h-4 text-indigo-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        </div>
+        <div>
+          <div class="text-base font-bold">App Version</div>
+          <div class="text-[11px] text-gray-400">Check for updates from GitHub Pages</div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-gray-400 bg-gray-800/50 rounded-lg px-3 py-2">
+        <span>Installed</span>
+        <span class="font-mono text-gray-200">${APP_VERSION}</span>
+      </div>
+
+      ${_latestVersion && _latestVersion !== APP_VERSION ? `
+      <div class="flex items-center justify-between text-xs text-gray-400 bg-gray-800/50 rounded-lg px-3 py-2">
+        <span>Latest</span>
+        <span class="font-mono text-amber-300">${_latestVersion}</span>
+      </div>` : _latestVersion ? `
+      <div class="flex items-center justify-between text-xs text-gray-400 bg-gray-800/50 rounded-lg px-3 py-2">
+        <span>Latest</span>
+        <span class="font-mono text-green-400">${_latestVersion}</span>
+      </div>` : ''}
+
+      ${_updateState === 'idle' ? `
+        <button onclick="checkForAppUpdate()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl text-sm font-semibold">
+          Check for Updates
+        </button>
+      ` : _updateState === 'checking' ? `
+        <div class="w-full bg-gray-800/60 p-3 rounded-xl text-sm text-center text-gray-400 flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          Checking…
+        </div>
+      ` : _updateState === 'current' ? `
+        <div class="flex items-center gap-2 text-sm text-green-400 bg-green-900/15 border border-green-700/30 rounded-xl px-3 py-3">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          <span>You're on the latest version</span>
+        </div>
+        <button onclick="checkForAppUpdate()" class="w-full bg-gray-800 hover:bg-gray-700 p-2.5 rounded-xl text-xs text-gray-400 font-semibold">
+          Check Again
+        </button>
+      ` : _updateState === 'available' ? `
+        <div class="flex items-center gap-2 text-sm text-amber-300 bg-amber-900/15 border border-amber-700/30 rounded-xl px-3 py-2.5">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span>Update available</span>
+        </div>
+        <button onclick="applyAppUpdate()" class="w-full bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl text-sm font-semibold">
+          Update Now
+        </button>
+      ` : `
+        <div class="flex items-center gap-2 text-sm text-red-300 bg-red-900/10 border border-red-700/30 rounded-xl px-3 py-2.5">
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          <span>Couldn't reach update server</span>
+        </div>
+        <button onclick="checkForAppUpdate()" class="w-full bg-gray-800 hover:bg-gray-700 p-3 rounded-xl text-sm font-semibold">
+          Retry
+        </button>
+      `}
+    </div>
+
     <div class="bg-red-900/10 border border-red-700/30 rounded-xl p-4 space-y-3">
       <div class="flex items-start gap-2">
         <div class="w-8 h-8 rounded-lg bg-red-600/15 border border-red-500/30 flex items-center justify-center">
@@ -3418,13 +3481,127 @@ function closeCleanDataMenu() {
 }
 
 /* ================================
+   APP UPDATE / VERSION CHECKER
+================================= */
+
+let _swReg          = null;   // holds the SW registration once available
+let _updateState    = 'idle'; // 'idle' | 'checking' | 'current' | 'available' | 'error'
+let _latestVersion  = null;   // version string fetched from server
+
+/**
+ * Register the service worker and wire up update detection.
+ * Called once on startup.
+ */
+async function initServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    _swReg = await navigator.serviceWorker.register('sw.js');
+
+    // A new SW is already waiting (installed before this page load)
+    if (_swReg.waiting) {
+      _updateState = 'available';
+      renderSettingsIfActive();
+    }
+
+    // A new SW starts installing while the page is open
+    _swReg.addEventListener('updatefound', () => {
+      const installing = _swReg.installing;
+      installing.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          _updateState = 'available';
+          renderSettingsIfActive();
+          showUpdateBanner();
+        }
+      });
+    });
+
+    // After skipWaiting the controller changes — reload to run new code
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+  } catch (e) {
+    console.warn('SW registration failed:', e);
+  }
+}
+
+/** Re-renders settings only if the user is currently on that tab. */
+function renderSettingsIfActive() {
+  if (activeTab === 'settings') renderSettings();
+}
+
+/**
+ * Fetch version.json from the server (bypassing all caches) and compare
+ * with APP_VERSION.  Updates _updateState and _latestVersion.
+ */
+async function checkForAppUpdate() {
+  if (!navigator.onLine) {
+    showToast('No internet connection', 2500);
+    return;
+  }
+  _updateState = 'checking';
+  renderSettingsIfActive();
+
+  try {
+    // Trigger the SW's own update check in parallel
+    if (_swReg) _swReg.update().catch(() => {});
+
+    // Fetch the canary version file — sw.js never caches this
+    const res = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const { version } = await res.json();
+    _latestVersion = version;
+
+    if (_swReg?.waiting || version !== APP_VERSION) {
+      _updateState = 'available';
+    } else {
+      _updateState = 'current';
+    }
+  } catch (e) {
+    _updateState = 'error';
+  }
+  renderSettingsIfActive();
+}
+
+/**
+ * Tell the waiting SW to skip its waiting state, which will trigger
+ * controllerchange → window.location.reload().
+ * If there's no waiting SW but the server has a newer version, do a
+ * hard reload so the (already-active) new SW serves fresh files.
+ */
+function applyAppUpdate() {
+  if (_swReg?.waiting) {
+    // Standard path: new SW is waiting → tell it to activate
+    _swReg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    // controllerchange listener above will call reload()
+  } else {
+    // SW already activated (skipWaiting happened before this page loaded)
+    // or no SW at all — just reload to get fresh files from the server/SW
+    window.location.reload();
+  }
+}
+
+/** Non-intrusive sticky banner shown when an update becomes available mid-session. */
+function showUpdateBanner() {
+  if (document.getElementById('updateBanner')) return;
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="updateBanner"
+         class="fixed top-0 inset-x-0 z-[100] bg-indigo-600 text-white text-xs font-semibold
+                flex items-center justify-between px-4 py-2 safe-top"
+         style="padding-top: max(0.5rem, env(safe-area-inset-top))">
+      <span>New version available</span>
+      <div class="flex items-center gap-3">
+        <button onclick="applyAppUpdate()" class="underline underline-offset-2">Reload now</button>
+        <button onclick="document.getElementById('updateBanner').remove()" class="opacity-60">✕</button>
+      </div>
+    </div>
+  `);
+}
+
+/* ================================
    START
 ================================= */
 switchTab("dashboard");
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
+initServiceWorker();
 </script>
 </body>
 </html>
